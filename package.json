@@ -8,7 +8,7 @@
     "node": ">=24"
   },
   "scripts": {
-    "test": "node --test",
+    "test": "node --test \"test/**/*.test.js\"",
     "serve": "node scripts/serve.js",
     "direct": "node src/run.js direct --data ./data",
     "connections": "node src/run.js connections --data ./data"
