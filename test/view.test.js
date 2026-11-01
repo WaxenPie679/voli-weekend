@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { combine, groupByWeekend, applyFilters, freshness, bestPerDestination, stayHours, airlinesOf, legTimes, stayWindow } from '../web/view.js';
+import { combine, groupByWeekend, applyFilters, freshness, bestPerDestination, stayHours, airlinesOf, legTimes, stayWindow, notDeparted, romeNow } from '../web/view.js';
 
 const leg = (from, to, dep, arr, airline = 'Ryanair', hubs = []) => ({
   segments: hubs.length
@@ -77,4 +77,15 @@ test('stayWindow: posizione e durata del soggiorno su un asse ven 00:00 → lun 
   // arrivo ven 20:40 (20,67 h dall'inizio), ripartenza dom 18:00 (66 h) su 72 h
   assert.equal(Math.round(w.start * 1000), 287);
   assert.equal(Math.round(w.width * 1000), 630);
+});
+
+test('notDeparted toglie i voli con andata già partita rispetto all\'ora di Roma', () => {
+  const its = [it('a', { out: '2026-11-06T19:00' }), it('b', { out: '2026-11-07T09:00' })];
+  assert.deepEqual(notDeparted(its, '2026-11-06T19:30').map((x) => x.id), ['b']);
+  assert.equal(notDeparted(its, '2026-11-06T18:59').length, 2);
+});
+
+test('romeNow formatta l\'ora di Roma come stringa locale', () => {
+  assert.equal(romeNow(new Date('2026-11-06T18:30:00Z')), '2026-11-06T19:30');
+  assert.equal(romeNow(new Date('2026-07-03T16:05:00Z')), '2026-07-03T18:05');
 });

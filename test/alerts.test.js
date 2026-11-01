@@ -15,7 +15,9 @@ const it = (price, extra = {}) => ({
   price, currency: 'EUR', bookingUrl: 'https://wizzair.com/x', weekend: '2026-11-06', seenAt: '', ...extra,
 });
 
-test('sequenza: nuovo, uguale, sceso, risalito, risceso, soglia esatta', () => {
+const GROUP = 'BRI|BUD|2026-11-06';
+
+test('sequenza: si avvisa solo sotto il prezzo dell\'ultimo avviso, che non risale mai', () => {
   let state = {};
   const step = (price) => {
     const r = selectAlerts([it(price)], state, { now: NOW });
@@ -26,9 +28,16 @@ test('sequenza: nuovo, uguale, sceso, risalito, risceso, soglia esatta', () => {
   assert.equal(step(79), 0, 'stesso prezzo → no');
   assert.equal(step(70), 1, 'sceso a 70 → inviato');
   assert.equal(step(75), 0, 'risalito a 75 → no');
-  assert.equal(state[it(75).id].price, 75);
-  assert.equal(step(72), 1, 'risceso a 72 → inviato');
+  assert.equal(state[GROUP].price, 70, 'il riferimento resta l\'ultimo avviso');
+  assert.equal(step(72), 0, 'risceso a 72, ma sopra 70 → no');
+  assert.equal(step(69), 1, 'sotto l\'ultimo avviso → inviato');
   assert.equal(selectAlerts([it(80, { id: 'altro' })], {}, { now: NOW }).toSend.length, 0, '80 esatti → no');
+});
+
+test('stessa destinazione e weekend: un altro itinerario più caro dell\'ultimo avviso non riavvisa', () => {
+  const a = selectAlerts([it(60, { id: 'A' })], {}, { now: NOW });
+  const b = selectAlerts([it(65, { id: 'A' }), it(62, { id: 'B' })], a.nextState, { now: NOW });
+  assert.equal(b.toSend.length, 0);
 });
 
 test('le voci di weekend passati vengono rimosse dallo stato', () => {
@@ -86,11 +95,12 @@ test('processAlerts: invio fallito non registra l\'itinerario, invio riuscito s�
   const dir = await mkdtemp(join(tmpdir(), 'voli-'));
   const env = { TELEGRAM_BOT_TOKEN: 'T', TELEGRAM_CHAT_ID: '1' };
   const fail = async () => new Response('', { status: 500 });
-  assert.equal(await processAlerts(dir, [it(50)], env, NOW, { fetchImpl: fail, log: () => {} }), 0);
-  assert.deepEqual(JSON.parse(await readFile(join(dir, 'alerts_state.json'), 'utf8')), {});
+  const opts = { stateFile: 'alerts_state_direct.json', log: () => {} };
+  assert.equal(await processAlerts(dir, [it(50)], env, NOW, { ...opts, fetchImpl: fail }), 0);
+  assert.deepEqual(JSON.parse(await readFile(join(dir, 'alerts_state_direct.json'), 'utf8')), {});
   const ok = async () => new Response('{"ok":true}');
-  assert.equal(await processAlerts(dir, [it(50)], env, NOW, { fetchImpl: ok, log: () => {} }), 1);
-  assert.equal(JSON.parse(await readFile(join(dir, 'alerts_state.json'), 'utf8'))[it(50).id].price, 50);
+  assert.equal(await processAlerts(dir, [it(50)], env, NOW, { ...opts, fetchImpl: ok }), 1);
+  assert.equal(JSON.parse(await readFile(join(dir, 'alerts_state_direct.json'), 'utf8'))['BRI|BUD|2026-11-06'].price, 50);
 });
 
 test('processAlerts: tanti voli nuovi → un solo messaggio riepilogativo con gli 8 migliori, sotto i 4096 caratteri', async () => {

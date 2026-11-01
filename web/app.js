@@ -1,5 +1,5 @@
 import { DATA_BASE_URL, PAGE_SIZE, ALERT_THRESHOLD, MAX_PRICE, REFRESH_MS } from './config.js';
-import { combine, applyFilters, bestPerDestination, stayHours, stayWindow, airlinesOf, freshness, legTimes, isDirect } from './view.js';
+import { combine, applyFilters, bestPerDestination, stayHours, stayWindow, airlinesOf, freshness, legTimes, isDirect, notDeparted, romeNow } from './view.js';
 
 const $ = (id) => document.getElementById(id);
 const form = $('filters');
@@ -49,7 +49,8 @@ function emptyAdvice(f) {
   if (f.origin) tips.push('includere entrambi gli aeroporti');
   if (f.directOnly || f.stopsOnly) tips.push('mostrare tutti i voli');
   if (f.airline) tips.push('scegliere tutte le compagnie');
-  return tips.length ? `Prova a ${tips.join(', oppure ')}.` : 'Nessun volo soddisfa i criteri al momento.';
+  if (!tips.length) return 'Nessun volo soddisfa i criteri al momento.';
+  return `Prova ${/^[aeiou]/.test(tips[0]) ? 'ad' : 'a'} ${tips.join(', oppure ')}.`;
 }
 
 // --- Filtri ---
@@ -178,7 +179,7 @@ function render() {
     finding.textContent = !all.length
       ? 'Nessun volo disponibile al momento.'
       : cheapest && cheapest.price > f.maxPrice
-        ? `Nessun volo fino a ${f.maxPrice} €: il più economico con questi filtri costa ${fmtPrice(cheapest.price)} €.`
+        ? `Nessun volo fino a ${f.maxPrice} €: il più economico costa ${fmtPrice(cheapest.price)} €.`
         : 'Nessun volo con questa combinazione di filtri.';
   } else {
     const top = its[0];
@@ -246,7 +247,7 @@ async function load() {
     return;
   }
   files = { direct: d.value ?? files.direct, connections: c.value ?? files.connections };
-  all = combine(files.direct, files.connections).filter((it) => it.price <= MAX_PRICE);
+  all = notDeparted(combine(files.direct, files.connections), romeNow()).filter((it) => it.price <= MAX_PRICE);
   const weekends = [...new Set(all.map((it) => it.weekend))].sort();
   fillSelect($('weekend'), weekends, (w) => `Weekend ${fmtWeekend(w)}`);
   fillSelect($('airline'), airlinesOf(all), (a) => a);

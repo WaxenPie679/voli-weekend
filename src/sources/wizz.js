@@ -2,6 +2,7 @@ import { DateTime } from 'luxon';
 import { CONSTRAINTS } from '../filter.js';
 import { itineraryId } from '../model.js';
 import { fetchJson, jitter } from '../util.js';
+import { todayRome } from '../weekends.js';
 
 // Fusi orari dei paesi serviti fuori dall'ora dell'Europa centrale (default: Europe/Rome).
 const COUNTRY_ZONE = {
@@ -28,8 +29,8 @@ const curl = async (url) => {
 /** Versione corrente dell'API dalla home. La home rifiuta (405) il client HTTP di Node, non curl. */
 export async function wizzVersion({ fetchImpl = fetch, curlImpl = curl } = {}) {
   const home = 'https://wizzair.com/';
-  const res = await fetchImpl(home);
-  return parseWizzVersion(res.ok ? await res.text() : await curlImpl(home));
+  const res = await fetchImpl(home).catch(() => null);
+  return parseWizzVersion(res?.ok ? await res.text() : await curlImpl(home));
 }
 
 function km(a, b) {
@@ -64,11 +65,12 @@ export function parseWizzRoutes(mapJson, origins) {
  * Finestre di massimo 30 giorni (limite dell'API). Gruppi di 4 weekend (24 giorni),
  * così nessun weekend resta a cavallo di due finestre.
  */
-export function timetableWindows(weekends) {
+export function timetableWindows(weekends, today = '') {
   const out = [];
   for (let i = 0; i < weekends.length; i += 4) {
     const group = weekends.slice(i, i + 4);
-    out.push({ from: group[0].friday, to: group.at(-1).sunday });
+    const from = group[0].friday < today ? today : group[0].friday;
+    out.push({ from, to: group.at(-1).sunday });
   }
   return out;
 }
@@ -114,26 +116,34 @@ export function pairWizzFares(ttJson, route, weekends, seenAt) {
   return its;
 }
 
-export async function fetchWizz(weekends, { fetchImpl = fetch, pauseMs = 1500 } = {}) {
+export async function fetchWizz(weekends, { fetchImpl = fetch, pauseMs = 1500, log = console.log } = {}) {
   const seenAt = new Date().toISOString();
   const base = `https://be.wizzair.com/${await wizzVersion({ fetchImpl })}/Api`;
   const routes = parseWizzRoutes(await fetchJson(fetchImpl, `${base}/asset/map?languageCode=it-it`), CONSTRAINTS.origins);
   const all = [];
+  let failed = 0;
   for (const route of routes) {
-    for (const win of timetableWindows(weekends)) {
-      const body = {
-        flightList: [
-          { departureStation: route.origin, arrivalStation: route.code, from: win.from, to: win.to },
-          { departureStation: route.code, arrivalStation: route.origin, from: win.from, to: win.to },
-        ],
-        priceType: 'regular', adultCount: 1, childCount: 0, infantCount: 0,
-      };
-      const tt = await fetchJson(fetchImpl, `${base}/search/timetable`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
-      });
-      all.push(...pairWizzFares(tt, route, weekends, seenAt));
-      if (pauseMs) await jitter(pauseMs / 3, pauseMs);
+    // Un errore su una rotta (429, 5xx) salta solo quella rotta; la fonte fallisce se cade più di metà delle rotte
+    try {
+      for (const win of timetableWindows(weekends, todayRome())) {
+        const body = {
+          flightList: [
+            { departureStation: route.origin, arrivalStation: route.code, from: win.from, to: win.to },
+            { departureStation: route.code, arrivalStation: route.origin, from: win.from, to: win.to },
+          ],
+          priceType: 'regular', adultCount: 1, childCount: 0, infantCount: 0,
+        };
+        const tt = await fetchJson(fetchImpl, `${base}/search/timetable`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+        });
+        all.push(...pairWizzFares(tt, route, weekends, seenAt));
+        if (pauseMs) await jitter(pauseMs / 3, pauseMs);
+      }
+    } catch (err) {
+      failed++;
+      log(`wizz ${route.origin}→${route.code}: ${err.message}`);
     }
   }
+  if (failed > routes.length / 2) throw new Error(`Wizz: ${failed} rotte su ${routes.length} in errore`);
   return all;
 }

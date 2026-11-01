@@ -1,15 +1,17 @@
 import { CONSTRAINTS } from '../filter.js';
 import { itineraryId } from '../model.js';
 import { fetchJson, jitter } from '../util.js';
+import { todayRome } from '../weekends.js';
 
 const API = 'https://www.ryanair.com/api/farfnd/v4/roundTripFares';
 
-/** Una query per aeroporto × weekend × giorno di andata (venerdì sera / sabato). */
-export function buildRyanairQueries(weekends) {
+/** Una query per aeroporto × weekend × giorno di andata (venerdì sera / sabato), saltando i giorni già passati. */
+export function buildRyanairQueries(weekends, today = '') {
   const queries = [];
   for (const origin of CONSTRAINTS.origins) {
     for (const w of weekends) {
       for (const [day, from] of [[w.friday, CONSTRAINTS.fridayMinDeparture], [w.saturday, '00:00']]) {
+        if (day < today) continue;
         const p = new URLSearchParams({
           departureAirportIataCode: origin,
           outboundDepartureDateFrom: day, outboundDepartureDateTo: day,
@@ -52,7 +54,7 @@ export function parseRyanair(json, origin, weekend, seenAt) {
 export async function fetchRyanair(weekends, { fetchImpl = fetch, pauseMs = 800 } = {}) {
   const seenAt = new Date().toISOString();
   const all = [];
-  for (const q of buildRyanairQueries(weekends)) {
+  for (const q of buildRyanairQueries(weekends, todayRome())) {
     const json = await fetchJson(fetchImpl, q.url, { headers: { Accept: 'application/json' } });
     all.push(...parseRyanair(json, q.origin, q.weekend, seenAt));
     if (pauseMs) await jitter(pauseMs * 0.4, pauseMs);

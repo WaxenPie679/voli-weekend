@@ -2,6 +2,7 @@ import { DateTime } from 'luxon';
 import { CONSTRAINTS, isValid } from '../filter.js';
 import { itineraryId } from '../model.js';
 import { jitter } from '../util.js';
+import { todayRome } from '../weekends.js';
 
 // --- Parametro `tfs` (protobuf in base64url, stesso schema di fast-flights) ---
 const varint = (n) => { const b = []; while (n > 127) { b.push((n & 127) | 128); n >>>= 7; } b.push(n); return b; };
@@ -216,6 +217,11 @@ function outboundOk(o, now) {
   return dep.weekday === 6 || (dep.weekday === 5 && dep.toFormat('HH:mm') >= CONSTRAINTS.fridayMinDeparture);
 }
 
+/** Giorni di andata da esplorare (venerdì e sabato di ogni weekend), senza quelli già passati. */
+export function googleQueryDays(weekends, today) {
+  return weekends.flatMap((w) => [w.friday, w.saturday].filter((d) => d >= today).map((depDate) => ({ w, depDate })));
+}
+
 export async function fetchGoogle(weekends, { pauseMs = 4000, perExplore = 5, log = console.log } = {}) {
   const { chromium } = await import('playwright');
   const seenAt = new Date().toISOString();
@@ -225,22 +231,28 @@ export async function fetchGoogle(weekends, { pauseMs = 4000, perExplore = 5, lo
   try {
     const page = await browser.newPage({ locale: 'it-IT', viewport: { width: 1280, height: 800 } });
     for (const origin of CONSTRAINTS.origins) {
-      for (const w of weekends) {
-        for (const depDate of [w.friday, w.saturday]) {
-          const cands = exploreCandidates(await exploreDestinations(page, origin, depDate, w.sunday), perExplore);
-          log(`google ${origin} ${depDate}: ${cands.length} candidati`);
-          for (const c of cands) {
-            const dest = { code: c.code, city: c.city, country: c.country };
-            try {
-              const it = await bestItinerary(page, { origin, dest, depDate, w, seenAt, now, pauseMs });
-              if (it) all.push(it);
-            } catch (err) {
-              if (err.message === 'google-blocked') throw err;
-              log(`google ${origin}→${c.code} ${depDate}: ${err.message.split('\n')[0]}`);
-              if (process.env.GOOGLE_DEBUG) await page.screenshot({ path: `spike/fail-${origin}-${c.code}.png` });
-            }
-            if (pauseMs) await jitter(pauseMs / 2, pauseMs);
+      for (const { w, depDate } of googleQueryDays(weekends, todayRome(now))) {
+        // Un'Esplora fallita salta solo quella data; un blocco di Google ferma tutto
+        let cands;
+        try {
+          cands = exploreCandidates(await exploreDestinations(page, origin, depDate, w.sunday), perExplore);
+        } catch (err) {
+          if (err.message === 'google-blocked') throw err;
+          log(`google ${origin} ${depDate}: Esplora non riuscita (${err.message.split('\n')[0]})`);
+          continue;
+        }
+        log(`google ${origin} ${depDate}: ${cands.length} candidati`);
+        for (const c of cands) {
+          const dest = { code: c.code, city: c.city, country: c.country };
+          try {
+            const it = await bestItinerary(page, { origin, dest, depDate, w, seenAt, now, pauseMs });
+            if (it) all.push(it);
+          } catch (err) {
+            if (err.message === 'google-blocked') throw err;
+            log(`google ${origin}→${c.code} ${depDate}: ${err.message.split('\n')[0]}`);
+            if (process.env.GOOGLE_DEBUG) await page.screenshot({ path: `spike/fail-${origin}-${c.code}.png` });
           }
+          if (pauseMs) await jitter(pauseMs / 2, pauseMs);
         }
       }
     }

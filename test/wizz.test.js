@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { DateTime } from 'luxon';
 import { upcomingWeekends } from '../src/weekends.js';
-import { parseWizzVersion, wizzVersion, parseWizzRoutes, pairWizzFares, estimateMinutes, timetableWindows } from '../src/sources/wizz.js';
+import { fetchWizz, parseWizzVersion, wizzVersion, parseWizzRoutes, pairWizzFares, estimateMinutes, timetableWindows } from '../src/sources/wizz.js';
 
 const map = JSON.parse(readFileSync(new URL('./fixtures/wizz-map.json', import.meta.url)));
 const tt = JSON.parse(readFileSync(new URL('./fixtures/wizz-timetable.json', import.meta.url)));
@@ -74,4 +74,33 @@ test('wizzVersion: con fetch riuscito non chiama curl', async () => {
   const fetchImpl = async () => new Response('be.wizzair.com/30.1.0/Api', { status: 200 });
   const curlImpl = async () => { throw new Error('non doveva essere chiamato'); };
   assert.equal(await wizzVersion({ fetchImpl, curlImpl }), '30.1.0');
+});
+
+test('timetableWindows non parte da un giorno già passato', () => {
+  const sat = upcomingWeekends(DateTime.fromISO('2026-11-07T08:00Z'));
+  assert.equal(timetableWindows(sat, '2026-11-07')[0].from, '2026-11-07');
+});
+
+test('fetchWizz: un 429 su una rotta non fa fallire la fonte; fallisce solo se cade più di metà delle rotte', async () => {
+  const smallMap = { cities: [
+    { iata: 'BRI', shortName: 'Bari', countryName: 'Italia', countryCode: 'IT', latitude: 41.1, longitude: 16.8, connections: [{ iata: 'BUD' }, { iata: 'TIA' }, { iata: 'OTP' }] },
+    { iata: 'BUD', shortName: 'Budapest', countryName: 'Ungheria', countryCode: 'HU', latitude: 47.4, longitude: 19.2, connections: [] },
+    { iata: 'TIA', shortName: 'Tirana', countryName: 'Albania', countryCode: 'AL', latitude: 41.4, longitude: 19.7, connections: [] },
+    { iata: 'OTP', shortName: 'Bucarest', countryName: 'Romania', countryCode: 'RO', latitude: 44.6, longitude: 26.1, connections: [] },
+  ] };
+  const fake = (failing) => async (url, init) => {
+    if (url === 'https://wizzair.com/') return new Response('be.wizzair.com/29.23.1/Api');
+    if (url.includes('/asset/map')) return new Response(JSON.stringify(smallMap));
+    const body = JSON.parse(init.body);
+    if (failing.includes(body.flightList[0].arrivalStation)) return new Response('', { status: 429 });
+    return new Response(JSON.stringify({ outboundFlights: [], returnFlights: [] }));
+  };
+  const log = () => {};
+  await fetchWizz(weekends.slice(0, 1), { fetchImpl: fake(['TIA']), pauseMs: 0, log });
+  await assert.rejects(fetchWizz(weekends.slice(0, 1), { fetchImpl: fake(['TIA', 'OTP']), pauseMs: 0, log }));
+});
+
+test('wizzVersion: se fetch lancia un errore di rete usa curl', async () => {
+  const fetchImpl = async () => { throw new Error('ECONNRESET'); };
+  assert.equal(await wizzVersion({ fetchImpl, curlImpl: async () => 'be.wizzair.com/29.23.1/' }), '29.23.1');
 });

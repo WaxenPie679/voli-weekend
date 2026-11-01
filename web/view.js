@@ -49,6 +49,17 @@ export function stayHours(it) {
   return Math.round(ms / 360000) / 10;
 }
 
+/** Ora corrente a Roma come "YYYY-MM-DDTHH:mm", confrontabile con gli orari locali dei voli. */
+export function romeNow(date = new Date()) {
+  const p = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).formatToParts(date).map((x) => [x.type, x.value]));
+  return `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}`;
+}
+
+/** I dati degli scali si aggiornano ogni 4 ore: in pagina si nascondono i voli già partiti. */
+export const notDeparted = (its, nowLocal) => its.filter((it) => it.outbound.segments[0].dep > nowLocal);
+
 const AXIS_HOURS = 72; // venerdì 00:00 → lunedì 00:00
 
 /** Dove cade il soggiorno nel weekend: inizio e durata come frazioni dell'asse ven–lun. */

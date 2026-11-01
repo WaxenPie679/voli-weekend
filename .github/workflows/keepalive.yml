@@ -1,6 +1,8 @@
 name: Mantieni attive le ricerche
 
 # GitHub disattiva i workflow programmati dopo 60 giorni senza attività sul repo: li riattiviamo ogni mese.
+# L'API "enable" è idempotente. Serve solo finché questo stesso workflow non viene disattivato:
+# per sicurezza conviene comunque fare un commit sul repo ogni tanto.
 on:
   schedule:
     - cron: '0 6 1 * *'
@@ -14,7 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          gh workflow enable direct.yml --repo "$GITHUB_REPOSITORY"
-          gh workflow enable connections.yml --repo "$GITHUB_REPOSITORY"
+          for wf in direct.yml connections.yml keepalive.yml; do
+            gh api -X PUT "repos/$GITHUB_REPOSITORY/actions/workflows/$wf/enable"
+          done
         env:
           GH_TOKEN: ${{ github.token }}

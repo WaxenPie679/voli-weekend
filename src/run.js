@@ -9,9 +9,9 @@ import { fetchRyanair } from './sources/ryanair.js';
 import { fetchWizz } from './sources/wizz.js';
 import { fetchGoogle } from './sources/google.js';
 
-const MODES = {
-  direct: { file: 'direct.json', sources: { ryanair: fetchRyanair, wizz: fetchWizz } },
-  connections: { file: 'connections.json', sources: { google: fetchGoogle } },
+export const MODES = {
+  direct: { file: 'direct.json', stateFile: 'alerts_state_direct.json', sources: { ryanair: fetchRyanair, wizz: fetchWizz } },
+  connections: { file: 'connections.json', stateFile: 'alerts_state_connections.json', sources: { google: fetchGoogle } },
 };
 
 /** Esegue le fonti di una modalità, aggiorna il file dati e invia gli avvisi. Restituisce il codice d'uscita. */
@@ -38,7 +38,7 @@ export async function runMode(mode, dataDir, { sources, now = DateTime.now(), en
   }
   await writeFile(path, JSON.stringify(file, null, 1));
   log(`${cfg.file}: ${file.itineraries.length} itinerari validi`);
-  await processAlerts(dataDir, file.itineraries, env, now, { log });
+  await processAlerts(dataDir, file.itineraries, env, now, { log, stateFile: cfg.stateFile });
   return failures === Object.keys(active).length ? 1 : 0;
 }
 

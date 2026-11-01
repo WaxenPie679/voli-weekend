@@ -2,6 +2,9 @@ import { DateTime } from 'luxon';
 
 export const ZONE = 'Europe/Rome';
 
+/** Data di oggi a Roma (YYYY-MM-DD): i giorni precedenti non vanno interrogati. */
+export const todayRome = (now = DateTime.now()) => now.setZone(ZONE).toISODate();
+
 /**
  * Prossimi `count` weekend (venerdì/sabato/domenica). Il weekend corrente resta
  * incluso finché il suo sabato non è finito in ora di Roma.

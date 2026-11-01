@@ -4,7 +4,7 @@ import { mkdtemp, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { DateTime } from 'luxon';
-import { runMode } from '../src/run.js';
+import { runMode, MODES } from '../src/run.js';
 import { itineraryId } from '../src/model.js';
 
 const NOW = DateTime.fromISO('2026-11-02T10:00:00Z');
@@ -35,4 +35,9 @@ test('connections: tutte le fonti in errore → codice 1, file comunque scritto'
 
 test('modalità sconosciuta → errore', async () => {
   await assert.rejects(runMode('boh', '.', quiet));
+});
+
+test('ogni modalità ha il proprio file dati e il proprio file di stato degli avvisi', () => {
+  assert.equal(MODES.direct.stateFile, 'alerts_state_direct.json');
+  assert.equal(MODES.connections.stateFile, 'alerts_state_connections.json');
 });

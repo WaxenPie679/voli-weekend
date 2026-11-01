@@ -24,10 +24,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: scripts/prepare-data.sh
+      - run: bash scripts/prepare-data.sh
       - run: node src/run.js connections --data ./data
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       - if: always()
-        run: scripts/publish-data.sh ./data connections.json alerts_state.json
+        run: bash scripts/publish-data.sh ./data connections.json alerts_state_connections.json

@@ -7,29 +7,30 @@ import { sendTelegram } from './telegram.js';
 
 export { sendTelegram };
 
-/** Avvisa solo per itinerari nuovi sotto soglia o scesi di prezzo rispetto all'ultimo stato. */
+export const alertGroup = (it) => `${it.origin}|${it.destination.code}|${it.weekend}`;
+
+/**
+ * Una voce per aeroporto + destinazione + weekend (la più economica). Si avvisa se il gruppo è nuovo
+ * o se il prezzo scende sotto quello dell'ultimo avviso; il riferimento non risale mai.
+ */
 export function selectAlerts(itineraries, state, { threshold = CONSTRAINTS.alertThreshold, now }) {
   const today = now.setZone(ZONE).toISODate();
   const nextState = {};
-  for (const [id, entry] of Object.entries(state)) {
+  for (const [key, entry] of Object.entries(state)) {
     const sunday = DateTime.fromISO(entry.weekend).plus({ days: 2 }).toISODate();
-    if (sunday >= today) nextState[id] = entry;
+    if (sunday >= today) nextState[key] = entry;
   }
   const toSend = [];
   const groups = new Set();
   for (const it of [...itineraries].sort((a, b) => a.price - b.price)) {
     if (!(it.price < threshold)) continue;
-    // Una sola voce per aeroporto + destinazione + weekend: la più economica
-    const group = `${it.origin}|${it.destination.code}|${it.weekend}`;
+    const group = alertGroup(it);
     if (groups.has(group)) continue;
     groups.add(group);
-    const prev = nextState[it.id];
+    const prev = nextState[group];
     if (!prev || it.price < prev.price) {
       toSend.push(it);
-      nextState[it.id] = { price: it.price, alertedAt: now.toUTC().toISO(), weekend: it.weekend };
-    } else if (it.price > prev.price) {
-      // Risalito: si aggiorna lo stato così una nuova discesa verrà notificata
-      nextState[it.id] = { ...prev, price: it.price };
+      nextState[group] = { price: it.price, alertedAt: now.toUTC().toISO(), weekend: it.weekend };
     }
   }
   return { toSend, nextState };
@@ -73,15 +74,18 @@ export function formatDigest(items, threshold = CONSTRAINTS.alertThreshold) {
   return parts.join('\n\n');
 }
 
-/** Legge lo stato, invia gli avvisi e salva lo stato aggiornato in `<dataDir>/alerts_state.json`. */
-export async function processAlerts(dataDir, itineraries, env, now, { fetchImpl = fetch, log = console.log } = {}) {
+/**
+ * Legge lo stato, invia gli avvisi e salva lo stato aggiornato in `<dataDir>/<stateFile>`.
+ * Ogni ricerca ha il suo file di stato: i due workflow pubblicano in momenti diversi e non devono sovrascriversi.
+ */
+export async function processAlerts(dataDir, itineraries, env, now, { fetchImpl = fetch, log = console.log, stateFile = 'alerts_state.json' } = {}) {
   const { TELEGRAM_BOT_TOKEN: token, TELEGRAM_CHAT_ID: chatId } = env;
   if (!token || !chatId) {
     // Senza credenziali non si tocca lo stato: gli avvisi partiranno quando il bot sarà configurato
     log('avvisi: TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID mancanti, nessun invio');
     return 0;
   }
-  const path = join(dataDir, 'alerts_state.json');
+  const path = join(dataDir, stateFile);
   const state = JSON.parse(await readFile(path, 'utf8').catch(() => '{}'));
   const { toSend, nextState } = selectAlerts(itineraries, state, { now });
   let sent = 0;
@@ -91,7 +95,7 @@ export async function processAlerts(dataDir, itineraries, env, now, { fetchImpl 
       sent = toSend.length;
     } catch (err) {
       // Invio fallito: si ripristina lo stato precedente così si riprova al prossimo giro
-      for (const it of toSend) if (state[it.id]) nextState[it.id] = state[it.id]; else delete nextState[it.id];
+      for (const it of toSend) { const g = alertGroup(it); if (state[g]) nextState[g] = state[g]; else delete nextState[g]; }
       log(`avvisi: invio fallito: ${err.message}`);
     }
   }

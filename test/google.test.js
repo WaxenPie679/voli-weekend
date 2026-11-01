@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { DateTime } from 'luxon';
 import { isValid } from '../src/filter.js';
-import { encodeTfs, encodeExploreTfs, parseExplore, parseLegs, buildGoogleItinerary, exploreCandidates } from '../src/sources/google.js';
+import { encodeTfs, encodeExploreTfs, googleQueryDays, parseExplore, parseLegs, buildGoogleItinerary, exploreCandidates } from '../src/sources/google.js';
 
 const fx = (n) => readFileSync(new URL(`./fixtures/${n}`, import.meta.url), 'utf8');
 const explore = fx('google-explore.txt');
@@ -78,4 +78,10 @@ test('encodeExploreTfs replica il tfs che Google genera con le date specifiche',
     encodeExploreTfs('BRI', '2026-11-13', '2026-11-15'),
     'CBwQAxoXEgoyMDI2LTExLTEzKAFqBwgBEgNCUkkaFxIKMjAyNi0xMS0xNSgBcgcIARIDQlJJQAFIAXABggELCP___________wGYAQE',
   );
+});
+
+test('googleQueryDays: venerdì e sabato di ogni weekend, saltando i giorni passati', () => {
+  const w = [{ friday: '2026-11-06', saturday: '2026-11-07', sunday: '2026-11-08' }, { friday: '2026-11-13', saturday: '2026-11-14', sunday: '2026-11-15' }];
+  assert.deepEqual(googleQueryDays(w, '2026-11-07').map((x) => x.depDate), ['2026-11-07', '2026-11-13', '2026-11-14']);
+  assert.equal(googleQueryDays(w, '2026-11-07')[0].w.sunday, '2026-11-08');
 });

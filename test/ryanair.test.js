@@ -50,3 +50,12 @@ test('fetchRyanair unisce i risultati di tutte le query', async () => {
   const its = await fetchRyanair(weekends.slice(0, 1), { fetchImpl, pauseMs: 0 });
   assert.equal(its.length, fixture.fares.length * 4);
 });
+
+test('di sabato non interroga il venerdì già passato', () => {
+  const sat = upcomingWeekends(DateTime.fromISO('2026-11-07T08:00Z'));
+  const q = buildRyanairQueries(sat, '2026-11-07');
+  const days = q.map((x) => new URL(x.url).searchParams.get('outboundDepartureDateFrom'));
+  assert.ok(!days.includes('2026-11-06'));
+  assert.ok(days.includes('2026-11-07'));
+  assert.equal(q.length, 30);
+});
