@@ -1,0 +1,20 @@
+name: Mantieni attive le ricerche
+
+# GitHub disattiva i workflow programmati dopo 60 giorni senza attività sul repo: li riattiviamo ogni mese.
+on:
+  schedule:
+    - cron: '0 6 1 * *'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+jobs:
+  enable:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          gh workflow enable direct.yml --repo "$GITHUB_REPOSITORY"
+          gh workflow enable connections.yml --repo "$GITHUB_REPOSITORY"
+        env:
+          GH_TOKEN: ${{ github.token }}
