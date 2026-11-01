@@ -1,0 +1,20 @@
+{
+  "name": "voli-weekend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Voli weekend economici da Bari e Brindisi",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "node --test",
+    "serve": "node scripts/serve.js",
+    "direct": "node src/run.js direct --data ./data",
+    "connections": "node src/run.js connections --data ./data"
+  },
+  "dependencies": {
+    "luxon": "^3.7.2",
+    "playwright": "^1.64.1"
+  }
+}

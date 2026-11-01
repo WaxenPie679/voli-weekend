@@ -1,0 +1,14 @@
+import { chromium } from 'playwright';
+const url = process.argv[2];
+const browser = await chromium.launch();
+const page = await browser.newPage({ locale: 'it-IT', viewport: { width: 1280, height: 800 } });
+await page.goto(url, { waitUntil: 'domcontentloaded' });
+const reject = page.getByRole('button', { name: /Rifiuta tutto/i });
+if (await reject.count()) await reject.first().click();
+await page.waitForTimeout(5000);
+await page.getByText(/Viaggio di 1 settimana/).first().click();
+await page.waitForTimeout(2000);
+await page.screenshot({ path: 'spike/dates1.png' });
+const tabs = await page.getByRole('tab').allInnerTexts();
+console.log('tabs', tabs);
+await browser.close();
