@@ -243,6 +243,13 @@ async function getJson(name) {
 async function load() {
   const [d, c] = await Promise.allSettled([getJson('direct.json'), getJson('connections.json')]);
   if (d.status === 'rejected' && c.status === 'rejected') {
+    // 404 su entrambi: il branch dei dati non esiste ancora (prima ricerca non terminata)
+    if (/HTTP 404/.test(d.reason.message) && /HTTP 404/.test(c.reason.message)) {
+      list.classList.remove('loading');
+      $('finding').textContent = 'In attesa della prima ricerca automatica.';
+      list.replaceChildren(emptyNoData());
+      return;
+    }
     renderError(d.reason.message);
     return;
   }
