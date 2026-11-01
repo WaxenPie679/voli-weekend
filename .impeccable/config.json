@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "web/index.html"
+        ],
+        "createdAt": "2026-11-01T09:27:58.800Z",
+        "reason": "finish reviewer: the <details class=filters-box> summary row (44px, 16px side padding) supplies the inset on phone; on desktop the box has no background (mobile-filters-open.png)"
+      }
+    ]
+  }
+}

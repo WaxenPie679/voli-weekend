@@ -78,7 +78,7 @@
     </form>
     </details>
 
-    <p class="fare-note">Prezzi andata e ritorno per 1 adulto, tariffa base con solo bagaglio a mano piccolo.</p>
+    <p class="fare-note">Prezzi andata e ritorno per 1 adulto, tariffa base con solo bagaglio a mano piccolo.<span id="estimate-note" hidden> ~ = orario di arrivo stimato (Wizz Air).</span></p>
 
     <section aria-labelledby="list-title">
       <h2 id="list-title" class="visually-hidden">Classifica</h2>
@@ -107,7 +107,10 @@
             <div class="leg back"><dt>Ritorno</dt><dd></dd></div>
           </dl>
           <div class="stay">
-            <div class="stay-track" aria-hidden="true"><div class="stay-fill"></div></div>
+            <div class="stay-axis" aria-hidden="true">
+              <div class="stay-track"><div class="stay-fill"></div></div>
+              <div class="stay-days"><span>ven</span><span>sab</span><span>dom</span></div>
+            </div>
             <p class="stay-label"></p>
           </div>
         </div>

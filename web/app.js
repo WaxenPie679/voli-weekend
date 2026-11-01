@@ -1,5 +1,5 @@
 import { DATA_BASE_URL, PAGE_SIZE, ALERT_THRESHOLD, MAX_PRICE, REFRESH_MS } from './config.js';
-import { combine, applyFilters, bestPerDestination, stayHours, airlinesOf, freshness, legTimes } from './view.js';
+import { combine, applyFilters, bestPerDestination, stayHours, stayWindow, airlinesOf, freshness, legTimes, isDirect } from './view.js';
 
 const $ = (id) => document.getElementById(id);
 const form = $('filters');
@@ -7,7 +7,7 @@ const list = $('passes');
 const tpl = $('pass-template');
 const STORE_KEY = 'voli-weekend-filtri';
 const SOURCE_NAMES = { ryanair: 'Ryanair', wizz: 'Wizz Air', google: 'Google Voli' };
-const MAX_STAY_HOURS = 54; // da venerdì 18:00 a domenica 24:00
+const SHORT_NAMES = { ryanair: 'Ryanair', wizz: 'Wizz', google: 'Google' };
 
 let all = [];
 let files = { direct: null, connections: null };
@@ -28,15 +28,28 @@ const fmtWeekend = (friday) => {
 const fmtDuration = (m) => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ''}` : `${m} min`);
 const airportName = (code) => (code === 'BRI' ? 'Bari' : code === 'BDS' ? 'Brindisi' : code);
 
+/** Giorno e orari della tratta; lo scalo compare solo se c'è (compagnia e "diretto" stanno una volta sola nella carta). */
 function legText(leg) {
-  const first = leg.segments[0];
-  const last = leg.segments.at(-1);
   const hubs = leg.segments.slice(0, -1).map((s) => s.to);
   const layovers = leg.layovers ?? [];
-  const stops = hubs.length
+  const stop = hubs.length
     ? `1 scalo a ${hubs.join(', ')}${layovers[0] != null ? ` (${fmtDuration(layovers[0])})` : ''}`
-    : 'diretto';
-  return { day: fmtDay(first.dep), time: legTimes(leg), meta: `${first.airline} · ${stops}` };
+    : '';
+  return { day: fmtDay(leg.segments[0].dep), time: legTimes(leg), stop };
+}
+
+const airlinesText = (it) => [...new Set([it.outbound.segments[0].airline, it.inbound.segments[0].airline])].join(' / ');
+const ageShort = (label) => label.replace('aggiornato ', '').replace(' min fa', '′').replace(' fa', '');
+
+/** Suggerimenti per lo stato vuoto, solo per i filtri davvero attivi. */
+function emptyAdvice(f) {
+  const tips = [];
+  if (f.maxPrice < MAX_PRICE) tips.push('alzare il prezzo massimo');
+  if (f.weekend) tips.push('scegliere tutti i weekend');
+  if (f.origin) tips.push('includere entrambi gli aeroporti');
+  if (f.directOnly || f.stopsOnly) tips.push('mostrare tutti i voli');
+  if (f.airline) tips.push('scegliere tutte le compagnie');
+  return tips.length ? `Prova a ${tips.join(', oppure ')}.` : 'Nessun volo soddisfa i criteri al momento.';
 }
 
 // --- Filtri ---
@@ -101,10 +114,12 @@ function renderSources(now) {
     const f = freshness(name, status, now);
     const li = document.createElement('li');
     li.className = f.stale ? 'stale' : '';
-    li.innerHTML = '<span class="dot" aria-hidden="true"></span>';
-    const b = document.createElement('b');
-    b.textContent = SOURCE_NAMES[name] ?? name;
-    li.append(b, ` ${f.label.replace('aggiornato ', '')}`);
+    li.innerHTML = '<span class="dot" aria-hidden="true"></span><b><span class="long"></span><span class="short"></span></b> <span class="long"></span><span class="short"></span>';
+    const [nameLong, nameShort, ageLong, ageShortEl] = li.querySelectorAll('.long, .short');
+    nameLong.textContent = SOURCE_NAMES[name] ?? name;
+    nameShort.textContent = SHORT_NAMES[name] ?? name;
+    ageLong.textContent = f.label.replace('aggiornato ', '');
+    ageShortEl.textContent = ageShort(f.label);
     li.title = status?.error ? `Errore: ${status.error}` : f.label;
     if (f.stale) stale.push(`${SOURCE_NAMES[name] ?? name} ${status?.error ? `non risponde (${status.error})` : 'non si aggiorna'}: dati ${f.label.replace('aggiornato ', 'di ')}`);
     return li;
@@ -121,24 +136,31 @@ function renderPass(it) {
   q('.to').textContent = it.destination.code;
   q('.route').setAttribute('aria-label', `Da ${airportName(it.origin)} a ${it.destination.city}`);
   q('.city').textContent = it.destination.city;
-  q('.country').textContent = it.destination.country;
+  q('.country').textContent = `${it.destination.country} · ${isDirect(it) ? 'diretto' : 'con scalo'}`;
   for (const [cls, leg] of [['.out', it.outbound], ['.back', it.inbound]]) {
     const t = legText(leg);
     const dd = q(`${cls} dd`);
-    dd.innerHTML = '<span class="day"></span> · <span class="time"></span> <span class="meta"></span>';
+    dd.innerHTML = '<span class="day"></span> · <span class="time"></span><span class="meta"></span>';
     dd.querySelector('.day').textContent = t.day;
     dd.querySelector('.time').textContent = t.time;
-    dd.querySelector('.meta').textContent = `· ${t.meta}`;
+    dd.querySelector('.meta').textContent = t.stop ? ` · ${t.stop}` : '';
+    if (leg.arrivalEstimated) dd.querySelector('.time').title = 'Orario di arrivo stimato';
   }
   const hours = stayHours(it);
-  q('.stay-fill').style.transform = `scaleX(${Math.min(1, Math.max(0, hours / MAX_STAY_HOURS))})`;
-  q('.stay-label').innerHTML = `<b>${Math.round(hours)} h</b> a ${it.destination.city.replace(/[<>&]/g, '')}`;
-  q('.weekend').textContent = `Weekend ${fmtWeekend(it.weekend)} · da ${airportName(it.origin)}`;
+  const win = stayWindow(it);
+  const fill = q('.stay-fill');
+  fill.style.left = `${win.start * 100}%`;
+  fill.style.width = `${win.width * 100}%`;
+  const label = q('.stay-label');
+  const b = document.createElement('b');
+  b.textContent = `${Math.round(hours)} h`;
+  label.replaceChildren(b, ` a ${it.destination.city}`);
+  q('.weekend').textContent = `Weekend ${fmtWeekend(it.weekend)}`;
   q('.amount').textContent = fmtPrice(it.price);
   const book = q('.btn-book');
   book.href = it.bookingUrl;
   book.setAttribute('aria-label', `Prenota ${it.destination.city} a ${fmtPrice(it.price)} euro su ${SOURCE_NAMES[it.source]}`);
-  q('.price-note').textContent = `andata e ritorno · via ${SOURCE_NAMES[it.source] ?? it.source}`;
+  q('.price-note').textContent = `andata e ritorno · ${airlinesText(it)}${it.source === 'google' ? ' · via Google Voli' : ''}`;
   return node;
 }
 
@@ -152,7 +174,12 @@ function render() {
 
   const finding = $('finding');
   if (!its.length) {
-    finding.textContent = all.length ? 'Nessun volo con questi filtri.' : 'Nessun volo disponibile al momento.';
+    const cheapest = applyFilters(all, { ...f, maxPrice: undefined })[0];
+    finding.textContent = !all.length
+      ? 'Nessun volo disponibile al momento.'
+      : cheapest && cheapest.price > f.maxPrice
+        ? `Nessun volo fino a ${f.maxPrice} €: il più economico con questi filtri costa ${fmtPrice(cheapest.price)} €.`
+        : 'Nessun volo con questa combinazione di filtri.';
   } else {
     const top = its[0];
     finding.innerHTML = '';
@@ -169,12 +196,15 @@ function render() {
   if (!its.length) {
     const li = document.createElement('li');
     li.className = 'empty';
-    li.innerHTML = '<h3>Nessun volo con questi filtri</h3><p>Prova ad alzare il prezzo massimo o a scegliere tutti i weekend.</p><button type="button" class="btn-secondary">Azzera filtri</button>';
+    li.innerHTML = '<h3>Nessun volo con questi filtri</h3><p></p><button type="button" class="btn-secondary">Azzera filtri</button>';
+    li.querySelector('p').textContent = emptyAdvice(f);
     li.querySelector('button').addEventListener('click', () => { form.reset(); saveFilters(); render(); });
     list.replaceChildren(all.length ? li : emptyNoData());
   } else {
     list.replaceChildren(...its.slice(0, shown).map(renderPass));
   }
+  const estimated = its.slice(0, shown).some((it) => it.outbound.arrivalEstimated || it.inbound.arrivalEstimated);
+  $('estimate-note').hidden = !estimated;
   const more = $('more');
   const rest = its.length - shown;
   more.hidden = rest <= 0;

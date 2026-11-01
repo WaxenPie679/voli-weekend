@@ -17,7 +17,7 @@ OWN-WORLD: cartoncino bianco su fondo grigio-azzurro (#f2f4f7), inchiostro quasi
 
 STORY: Bruno apre la pagina, legge in alto la frase con l'offerta migliore e quanti voli ci sono sotto 80 €, scorre la classifica (una carta per destinazione, la più economica), filtra per aeroporto o diretti, tocca "Prenota" e passa al sito della compagnia.
 
-FIRST VIEWPORT: barra superiore di 48px con monogramma VW, nome e due indicatori di freschezza (diretti e scali). Titolo h1 "Le offerte migliori" con la frase dell'offerta principale; sotto, una riga di filtri standard (aeroporto, tipo, prezzo massimo, weekend, raggruppa). Poi le prime 3-4 carte d'imbarco a tutta colonna (1100px); su telefono le carte si impilano con la matrice sotto.
+FIRST VIEWPORT: barra superiore di 48px con il marchio (un biglietto stilizzato in inchiostro: scelto al posto del monogramma VW perché richiama la carta d'imbarco senza usare il colore riservato al prezzo), il nome e tre indicatori di freschezza (Ryanair, Wizz, Google), in forma compatta su telefono. Titolo h1 "Le offerte migliori" con la frase dell'offerta principale; sotto, una riga di filtri standard (aeroporto, tipo, prezzo massimo, weekend, raggruppa). Poi le prime 3-4 carte d'imbarco a tutta colonna (1100px); su telefono le carte si impilano con la matrice sotto.
 
 FORM: carta d'imbarco (scelta da Bruno, "pick" di Impeccable, la n. 1 della mia lista ordinata); mossa caratteristica: la barra "ore a destinazione", con la lunghezza proporzionale al tempo passato a destinazione (dalla notazione Labanotation, la durata è la lunghezza). Stile app di taste: achromatic-ledger. seed:761e24898744d4e5
 

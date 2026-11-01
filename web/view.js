@@ -49,6 +49,17 @@ export function stayHours(it) {
   return Math.round(ms / 360000) / 10;
 }
 
+const AXIS_HOURS = 72; // venerdì 00:00 → lunedì 00:00
+
+/** Dove cade il soggiorno nel weekend: inizio e durata come frazioni dell'asse ven–lun. */
+export function stayWindow(it) {
+  const axis0 = localMs(`${it.weekend}T00:00`);
+  const clamp = (x) => Math.min(1, Math.max(0, x));
+  const start = clamp((localMs(it.outbound.segments.at(-1).arr) - axis0) / 36e5 / AXIS_HOURS);
+  const end = clamp((localMs(it.inbound.segments[0].dep) - axis0) / 36e5 / AXIS_HOURS);
+  return { start, width: Math.max(0, end - start) };
+}
+
 /** "partenza → arrivo", con ~ se l'arrivo è stimato e +1 se è il giorno dopo. */
 export function legTimes(leg) {
   const dep = leg.segments[0].dep;

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { combine, groupByWeekend, applyFilters, freshness, bestPerDestination, stayHours, airlinesOf, legTimes } from '../web/view.js';
+import { combine, groupByWeekend, applyFilters, freshness, bestPerDestination, stayHours, airlinesOf, legTimes, stayWindow } from '../web/view.js';
 
 const leg = (from, to, dep, arr, airline = 'Ryanair', hubs = []) => ({
   segments: hubs.length
@@ -70,4 +70,11 @@ test('legTimes segna +1 quando l\'arrivo è il giorno dopo e ~ quando è stimato
   assert.equal(legTimes(leg('BRI', 'BGY', '2026-11-14T23:25', '2026-11-15T00:55')), '23:25 → 00:55 +1');
   assert.equal(legTimes(leg('BRI', 'BUD', '2026-11-06T19:00', '2026-11-06T20:40')), '19:00 → 20:40');
   assert.equal(legTimes({ ...leg('BRI', 'OTP', '2026-12-12T14:55', '2026-12-12T17:33'), arrivalEstimated: true }), '14:55 → ~17:33');
+});
+
+test('stayWindow: posizione e durata del soggiorno su un asse ven 00:00 → lun 00:00', () => {
+  const w = stayWindow(it('a'));
+  // arrivo ven 20:40 (20,67 h dall'inizio), ripartenza dom 18:00 (66 h) su 72 h
+  assert.equal(Math.round(w.start * 1000), 287);
+  assert.equal(Math.round(w.width * 1000), 630);
 });
