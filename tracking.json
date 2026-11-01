@@ -1,0 +1,296 @@
+{
+ "generatedAt": "2026-11-21T19:16:12.705Z",
+ "items": [
+  {
+   "id": 5,
+   "url": "https://github.com/WaxenPie679/voli-weekend/issues/5",
+   "title": "Segui: Bari → Skiathos e ritorno · 7 ago → 12 ago 2027 · 8 persone",
+   "tracking": {
+    "from": "BRI",
+    "to": "JSI",
+    "roundTrip": true,
+    "mode": "precise",
+    "people": 8,
+    "name": "Viaggio Scapuloni 2027",
+    "out": "2027-08-07",
+    "back": "2027-08-12"
+   },
+   "hash": "[\"BRI\",\"JSI\",true,\"precise\",\"2027-08-07\",\"2027-08-12\",null,null,null,8,\"Viaggio Scapuloni 2027\"]",
+   "status": "attivo",
+   "errors": [],
+   "airlines": [
+    "ryanair"
+   ],
+   "best": null,
+   "top": [],
+   "checkedAt": "2026-11-21T19:16:12.705Z",
+   "sourceErrors": [],
+   "series": [],
+   "links": [],
+   "commentedFor": "[\"BRI\",\"JSI\",true,\"precise\",\"2027-08-07\",\"2027-08-12\",null,null,null,8,\"Viaggio Scapuloni 2027\"]",
+   "alertRef": null
+  },
+  {
+   "id": 4,
+   "url": "https://github.com/WaxenPie679/voli-weekend/issues/4",
+   "title": "Segui: Bari → Rodi e ritorno · 7 ago → 12 ago 2027 · 8 persone",
+   "tracking": {
+    "from": "BRI",
+    "to": "RHO",
+    "roundTrip": true,
+    "mode": "precise",
+    "people": 8,
+    "name": "Viaggio scapuloni",
+    "out": "2027-08-07",
+    "back": "2027-08-12"
+   },
+   "hash": "[\"BRI\",\"RHO\",true,\"precise\",\"2027-08-07\",\"2027-08-12\",null,null,null,8,\"Viaggio scapuloni\"]",
+   "status": "attivo",
+   "errors": [],
+   "airlines": [
+    "ryanair"
+   ],
+   "best": {
+    "out": {
+     "airline": "ryanair",
+     "date": "2027-08-07",
+     "price": 114.99,
+     "time": "10:25-13:20"
+    },
+    "back": {
+     "airline": "ryanair",
+     "date": "2027-08-12",
+     "price": 72.99,
+     "time": "23:30-00:35"
+    },
+    "price": 187.98,
+    "nights": 5
+   },
+   "top": [
+    {
+     "out": {
+      "airline": "ryanair",
+      "date": "2027-08-07",
+      "price": 114.99,
+      "time": "10:25-13:20"
+     },
+     "back": {
+      "airline": "ryanair",
+      "date": "2027-08-12",
+      "price": 72.99,
+      "time": "23:30-00:35"
+     },
+     "price": 187.98,
+     "nights": 5
+    }
+   ],
+   "checkedAt": "2026-11-21T19:16:12.705Z",
+   "sourceErrors": [],
+   "series": [
+    [
+     "2026-11-15",
+     187.98
+    ],
+    [
+     "2026-11-16",
+     187.98
+    ],
+    [
+     "2026-11-17",
+     187.98
+    ],
+    [
+     "2026-11-18",
+     187.98
+    ],
+    [
+     "2026-11-19",
+     187.98
+    ],
+    [
+     "2026-11-20",
+     187.98
+    ],
+    [
+     "2026-11-21",
+     187.98
+    ]
+   ],
+   "links": [
+    {
+     "label": "Ryanair",
+     "url": "https://www.ryanair.com/it/it/trip/flights/select?adults=8&teens=0&children=0&infants=0&dateOut=2027-08-07&isReturn=true&originIata=BRI&destinationIata=RHO&dateIn=2027-08-12"
+    }
+   ],
+   "commentedFor": "[\"BRI\",\"RHO\",true,\"precise\",\"2027-08-07\",\"2027-08-12\",null,null,null,8,\"Viaggio scapuloni\"]",
+   "alertRef": 187.98
+  },
+  {
+   "id": 1,
+   "url": "https://github.com/WaxenPie679/voli-weekend/issues/1",
+   "title": "Segui: Brindisi → Roma (tutti gli aeroporti) e ritorno · gennaio 2027 · ven · 2–3 notti · 1 persona",
+   "tracking": {
+    "from": "BDS",
+    "to": "FCO",
+    "roundTrip": true,
+    "mode": "finestra",
+    "people": 1,
+    "name": "",
+    "months": [
+     "2027-01"
+    ],
+    "weekdays": [
+     5
+    ],
+    "nights": [
+     2,
+     3
+    ]
+   },
+   "hash": "[\"BDS\",\"FCO\",true,\"finestra\",null,null,[\"2027-01\"],[5],[2,3],1,\"\"]",
+   "status": "attivo",
+   "errors": [],
+   "airlines": [
+    "ryanair"
+   ],
+   "best": {
+    "out": {
+     "airline": "ryanair",
+     "date": "2027-01-29",
+     "price": 23.35,
+     "time": "16:30-17:50"
+    },
+    "back": {
+     "airline": "ryanair",
+     "date": "2027-02-01",
+     "price": 22.84,
+     "time": "11:35-12:50"
+    },
+    "price": 46.19,
+    "nights": 3
+   },
+   "top": [
+    {
+     "out": {
+      "airline": "ryanair",
+      "date": "2027-01-29",
+      "price": 23.35,
+      "time": "16:30-17:50"
+     },
+     "back": {
+      "airline": "ryanair",
+      "date": "2027-02-01",
+      "price": 22.84,
+      "time": "11:35-12:50"
+     },
+     "price": 46.19,
+     "nights": 3
+    },
+    {
+     "out": {
+      "airline": "ryanair",
+      "date": "2027-01-29",
+      "price": 23.35,
+      "time": "16:30-17:50"
+     },
+     "back": {
+      "airline": "ryanair",
+      "date": "2027-01-31",
+      "price": 27.67,
+      "time": "12:35-13:50"
+     },
+     "price": 51.02,
+     "nights": 2
+    },
+    {
+     "out": {
+      "airline": "ryanair",
+      "date": "2027-01-22",
+      "price": 28.46,
+      "time": "16:30-17:50"
+     },
+     "back": {
+      "airline": "ryanair",
+      "date": "2027-01-24",
+      "price": 27.67,
+      "time": "12:35-13:50"
+     },
+     "price": 56.13,
+     "nights": 2
+    },
+    {
+     "out": {
+      "airline": "ryanair",
+      "date": "2027-01-22",
+      "price": 28.46,
+      "time": "16:30-17:50"
+     },
+     "back": {
+      "airline": "ryanair",
+      "date": "2027-01-25",
+      "price": 30.99,
+      "time": "11:35-12:50"
+     },
+     "price": 59.45,
+     "nights": 3
+    },
+    {
+     "out": {
+      "airline": "ryanair",
+      "date": "2027-01-01",
+      "price": 25.29,
+      "time": "16:30-17:50"
+     },
+     "back": {
+      "airline": "ryanair",
+      "date": "2027-01-04",
+      "price": 34.99,
+      "time": "21:10-22:25"
+     },
+     "price": 60.28,
+     "nights": 3
+    }
+   ],
+   "checkedAt": "2026-11-21T19:16:12.705Z",
+   "sourceErrors": [],
+   "series": [
+    [
+     "2026-11-15",
+     43.55
+    ],
+    [
+     "2026-11-16",
+     43.55
+    ],
+    [
+     "2026-11-17",
+     44.24
+    ],
+    [
+     "2026-11-18",
+     50.14
+    ],
+    [
+     "2026-11-19",
+     42.48
+    ],
+    [
+     "2026-11-20",
+     43.58
+    ],
+    [
+     "2026-11-21",
+     46.19
+    ]
+   ],
+   "links": [
+    {
+     "label": "Ryanair",
+     "url": "https://www.ryanair.com/it/it/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2027-01-29&isReturn=true&originIata=BDS&destinationIata=FCO&dateIn=2027-02-01"
+    }
+   ],
+   "commentedFor": "[\"BDS\",\"FCO\",true,\"finestra\",null,null,[\"2027-01\"],[5],[2,3],1,\"\"]",
+   "alertRef": 43.55
+  }
+ ]
+}
