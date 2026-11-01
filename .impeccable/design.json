@@ -1,0 +1,394 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-01T09:40:28.856Z",
+  "title": "Design System: Voli Weekend",
+  "extensions": {
+    "colorMeta": {
+      "price-blue": {
+        "role": "primary",
+        "displayName": "Price Blue",
+        "canonical": "#1d5fbf",
+        "tonalRamp": [
+          "#0b2550",
+          "#123a7a",
+          "#1a4fa3",
+          "#1d5fbf",
+          "#4a7fd0",
+          "#7fa4de",
+          "#b3c9ec",
+          "#dbe7f8"
+        ]
+      },
+      "price-blue-tint": {
+        "role": "primary",
+        "displayName": "Price Blue Tint",
+        "canonical": "#dbe7f8",
+        "tonalRamp": [
+          "#0b2550",
+          "#123a7a",
+          "#1a4fa3",
+          "#1d5fbf",
+          "#4a7fd0",
+          "#7fa4de",
+          "#b3c9ec",
+          "#dbe7f8"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#0a0a0a",
+        "tonalRamp": [
+          "#0a0a0a",
+          "#141414",
+          "#333333",
+          "#4d4d4d",
+          "#737373",
+          "#a3a3a3",
+          "#d4d4d4",
+          "#f5f5f5"
+        ]
+      },
+      "ink-control": {
+        "role": "neutral",
+        "displayName": "Control Ink",
+        "canonical": "#141414",
+        "tonalRamp": [
+          "#0a0a0a",
+          "#141414",
+          "#333333",
+          "#4d4d4d",
+          "#737373",
+          "#a3a3a3",
+          "#d4d4d4",
+          "#f5f5f5"
+        ]
+      },
+      "ink-hover": {
+        "role": "neutral",
+        "displayName": "Ink Hover",
+        "canonical": "#333333",
+        "tonalRamp": [
+          "#0a0a0a",
+          "#141414",
+          "#333333",
+          "#4d4d4d",
+          "#737373",
+          "#a3a3a3",
+          "#d4d4d4",
+          "#f5f5f5"
+        ]
+      },
+      "card-stock": {
+        "role": "neutral",
+        "displayName": "Card Stock",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#1b1f25",
+          "#353b44",
+          "#5d636c",
+          "#8a9099",
+          "#c9ced6",
+          "#dde1e7",
+          "#e9ecf1",
+          "#ffffff"
+        ]
+      },
+      "apron-grey": {
+        "role": "neutral",
+        "displayName": "Apron Grey",
+        "canonical": "#f2f4f7",
+        "tonalRamp": [
+          "#1b1f25",
+          "#353b44",
+          "#5d636c",
+          "#8a9099",
+          "#c9ced6",
+          "#dde1e7",
+          "#e9ecf1",
+          "#f2f4f7"
+        ]
+      },
+      "raised-grey": {
+        "role": "neutral",
+        "displayName": "Raised Grey",
+        "canonical": "#e9ecf1",
+        "tonalRamp": [
+          "#1b1f25",
+          "#353b44",
+          "#5d636c",
+          "#8a9099",
+          "#c9ced6",
+          "#dde1e7",
+          "#e9ecf1",
+          "#f2f4f7"
+        ]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#dde1e7",
+        "tonalRamp": [
+          "#1b1f25",
+          "#353b44",
+          "#5d636c",
+          "#8a9099",
+          "#c9ced6",
+          "#dde1e7",
+          "#e9ecf1",
+          "#f2f4f7"
+        ]
+      },
+      "control-stroke": {
+        "role": "neutral",
+        "displayName": "Control Stroke",
+        "canonical": "#c9ced6",
+        "tonalRamp": [
+          "#1b1f25",
+          "#353b44",
+          "#5d636c",
+          "#8a9099",
+          "#c9ced6",
+          "#dde1e7",
+          "#e9ecf1",
+          "#f2f4f7"
+        ]
+      },
+      "muted-ink": {
+        "role": "neutral",
+        "displayName": "Muted Ink",
+        "canonical": "#5d636c",
+        "tonalRamp": [
+          "#1b1f25",
+          "#353b44",
+          "#5d636c",
+          "#8a9099",
+          "#c9ced6",
+          "#dde1e7",
+          "#e9ecf1",
+          "#f2f4f7"
+        ]
+      },
+      "stale-amber": {
+        "role": "tertiary",
+        "displayName": "Stale Amber",
+        "canonical": "#d97706",
+        "tonalRamp": [
+          "#451a03",
+          "#78350f",
+          "#92400e",
+          "#b45309",
+          "#d97706",
+          "#f59e0b",
+          "#fde68a",
+          "#fffbeb"
+        ]
+      },
+      "stale-ink": {
+        "role": "tertiary",
+        "displayName": "Stale Ink",
+        "canonical": "#92400e",
+        "tonalRamp": [
+          "#451a03",
+          "#78350f",
+          "#92400e",
+          "#b45309",
+          "#d97706",
+          "#f59e0b",
+          "#fde68a",
+          "#fffbeb"
+        ]
+      },
+      "stale-wash": {
+        "role": "tertiary",
+        "displayName": "Stale Wash",
+        "canonical": "#fffbeb",
+        "tonalRamp": [
+          "#451a03",
+          "#78350f",
+          "#92400e",
+          "#b45309",
+          "#d97706",
+          "#f59e0b",
+          "#fde68a",
+          "#fffbeb"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "IATA Display",
+        "purpose": "IATA codes on the boarding pass; 36px under 720px. Origin muted, destination ink."
+      },
+      "price": {
+        "displayName": "Price",
+        "purpose": "Stub amount in Price Blue; euro unit at 500/18px."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page h1."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Destination city; the finding sentence at 16px/400."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Leg times, controls, buttons."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Legends, leg names, weekend dates, notes, source freshness. Sentence case, muted."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "ease-tear",
+        "value": "transform .28s cubic-bezier(.16, 1, .3, 1)",
+        "purpose": "Stub slides 4px right (3px down on mobile) along the perforation when Prenota is hovered or focused."
+      },
+      {
+        "name": "state-fast",
+        "value": "background-color .15s, color .15s",
+        "purpose": "Button, segment, and select state changes."
+      },
+      {
+        "name": "press",
+        "value": "transform .1s; :active scale(.97)",
+        "purpose": "Button press feedback."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "transition: none",
+        "purpose": "All transitions removed under prefers-reduced-motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "mobile",
+        "value": "720px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Prenota Button",
+      "kind": "button",
+      "refersTo": "button-book",
+      "description": "Primary action: ink fill, external-link arrow, opens the airline site.",
+      "html": "<a class=\"ds-btn-book\" href=\"#\">Prenota<svg viewBox=\"0 0 12 12\" aria-hidden=\"true\"><path d=\"M4 2h6v6M10 2 3 9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"/></svg></a>",
+      "css": ".ds-btn-book{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:6px;background:#141414;color:#fff;font:500 14px/1 Geist,Inter,system-ui,sans-serif;text-decoration:none;transition:background-color .15s,transform .1s}.ds-btn-book svg{width:11px;height:11px}.ds-btn-book:hover{background:#333}.ds-btn-book:active{transform:scale(.97)}.ds-btn-book:focus-visible{outline:2px solid #1d5fbf;outline-offset:2px}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Quiet action such as Mostra altre.",
+      "html": "<button type=\"button\" class=\"ds-btn-secondary\">Mostra altre</button>",
+      "css": ".ds-btn-secondary{display:inline-flex;align-items:center;height:36px;padding:0 14px;border:0;border-radius:6px;background:#e9ecf1;color:#0a0a0a;font:500 14px/1 Geist,Inter,system-ui,sans-serif;cursor:pointer;transition:background-color .15s,transform .1s}.ds-btn-secondary:hover{background:#dde1e7}.ds-btn-secondary:active{transform:scale(.97)}.ds-btn-secondary:focus-visible{outline:2px solid #1d5fbf;outline-offset:2px}"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "chip",
+      "refersTo": "segmented",
+      "description": "Single-choice filter: raised trough, selected option becomes card stock.",
+      "html": "<div class=\"ds-seg\"><label><input type=\"radio\" name=\"o\" checked><span>Tutte</span></label><label><input type=\"radio\" name=\"o\"><span>Bari</span></label><label><input type=\"radio\" name=\"o\"><span>Brindisi</span></label></div>",
+      "css": ".ds-seg{display:inline-flex;gap:2px;background:#e9ecf1;border-radius:6px;padding:3px;font:400 14px/1.5 Geist,Inter,system-ui,sans-serif}.ds-seg input{position:absolute;opacity:0;pointer-events:none}.ds-seg span{display:inline-flex;align-items:center;height:30px;padding:0 12px;border-radius:4px;color:#5d636c;cursor:pointer;transition:background-color .15s,color .15s}.ds-seg label:hover span{color:#0a0a0a}.ds-seg input:checked+span{background:#fff;color:#0a0a0a;font-weight:500}.ds-seg input:focus-visible+span{outline:2px solid #1d5fbf;outline-offset:1px}"
+    },
+    {
+      "name": "Select Field",
+      "kind": "input",
+      "refersTo": "select",
+      "description": "Labelled native select with an SVG chevron.",
+      "html": "<label class=\"ds-field\"><span>Compagnia</span><select><option>Tutte</option><option>Ryanair</option></select></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;font:400 14px/1.5 Geist,Inter,system-ui,sans-serif}.ds-field>span{font-size:12px;line-height:16px;color:#5d636c;margin-bottom:6px}.ds-field select{height:36px;width:160px;padding:0 32px 0 10px;font:inherit;color:#0a0a0a;appearance:none;cursor:pointer;border:1px solid #c9ced6;border-radius:6px;background:#fff url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%235d636c' stroke-width='1.5'/%3E%3C/svg%3E\") no-repeat right 12px center/10px 6px}.ds-field select:hover{border-color:#5d636c}.ds-field select:focus-visible{outline:2px solid #1d5fbf;outline-offset:2px}"
+    },
+    {
+      "name": "Top Bar",
+      "kind": "nav",
+      "refersTo": "",
+      "description": "Ticket-shaped brand mark and per-source freshness; one source shown stale.",
+      "html": "<header class=\"ds-topbar\"><span class=\"ds-brand\"><svg viewBox=\"0 0 28 20\" aria-hidden=\"true\"><path d=\"M3 1h22a2 2 0 0 1 2 2v4.2a2.8 2.8 0 0 0 0 5.6V17a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-4.2a2.8 2.8 0 0 0 0-5.6V3a2 2 0 0 1 2-2Z\" fill=\"currentColor\"/><path d=\"M19 4.5v11\" stroke=\"#fff\" stroke-width=\"1.4\" stroke-dasharray=\"1.6 1.6\"/><path d=\"M6.5 12.5 13.5 7.5M10.6 7.4l2.9.1-.2 2.9\" stroke=\"#fff\" stroke-width=\"1.6\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>Voli Weekend</span><ul class=\"ds-sources\"><li><i></i><b>Ryanair</b> 29 min fa</li><li class=\"stale\"><i></i><b>Google Voli</b> 6 h fa</li></ul></header>",
+      "css": ".ds-topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;height:48px;padding:0 24px;background:#f2f4f7;font-family:Geist,Inter,system-ui,sans-serif;font-variant-numeric:tabular-nums}.ds-brand{display:inline-flex;align-items:center;gap:10px;font-weight:500;font-size:15px;color:#0a0a0a}.ds-brand svg{width:28px;height:20px}.ds-sources{list-style:none;margin:0;padding:0;display:flex;gap:16px;font-size:12px;color:#5d636c}.ds-sources li{display:inline-flex;align-items:center;gap:6px}.ds-sources i{width:7px;height:7px;border-radius:50%;background:#c9ced6}.ds-sources b{font-weight:500;color:#0a0a0a}.ds-sources .stale{color:#92400e}.ds-sources .stale i{background:#d97706}"
+    },
+    {
+      "name": "Boarding Pass",
+      "kind": "card",
+      "refersTo": "pass-card",
+      "description": "Signature result card: IATA route, stay axis, notched stub with the price; the stub nudges along the perforation on Prenota hover.",
+      "html": "<div class=\"ds-pass\"><div class=\"ds-main\"><div><div class=\"ds-route\"><span class=\"ds-iata ds-from\">BRI</span><svg viewBox=\"0 0 24 12\" aria-hidden=\"true\"><path d=\"M1 6h20M16 1.5 21.5 6 16 10.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg><span class=\"ds-iata\">TIA</span></div><p class=\"ds-place\"><strong>Tirana</strong> <span>Albania · diretto</span></p></div><div><div class=\"ds-track\"><div class=\"ds-fill\"></div></div><div class=\"ds-days\"><span>ven</span><span>sab</span><span>dom</span></div></div></div><div class=\"ds-stub\"><p class=\"ds-wk\">Weekend 20–22 nov</p><p class=\"ds-price\"><span>29,98</span> <small>€</small></p><p class=\"ds-wk\">andata e ritorno</p><a class=\"ds-book\" href=\"#\">Prenota</a></div></div>",
+      "css": ".ds-pass{display:grid;grid-template-columns:minmax(0,1fr) 224px;background:#fff;border-radius:8px;font:400 14px/1.5 Geist,Inter,system-ui,sans-serif;font-variant-numeric:tabular-nums;color:#0a0a0a}.ds-main{padding:18px 24px;display:grid;grid-template-columns:1fr 1fr;gap:12px 24px;align-items:center}.ds-route{display:flex;align-items:center;gap:12px}.ds-route svg{width:28px;height:14px;color:#5d636c}.ds-iata{font-size:52px;line-height:1;font-weight:700;letter-spacing:-.03em}.ds-from{color:#5d636c}.ds-place{margin:6px 0 0;line-height:1.3}.ds-place strong{font-size:16px;font-weight:500}.ds-place span{font-size:13px;color:#5d636c}.ds-track{position:relative;height:6px;border-radius:3px;background:#e9ecf1}.ds-track::before,.ds-track::after{content:\"\";position:absolute;top:-2px;bottom:-2px;width:1px;background:#c9ced6}.ds-track::before{left:33.333%}.ds-track::after{left:66.667%}.ds-fill{position:absolute;top:0;bottom:0;left:44%;width:30%;background:#141414;border-radius:3px;z-index:1}.ds-days{display:grid;grid-template-columns:repeat(3,1fr);font-size:11px;color:#5d636c;margin-top:3px}.ds-stub{position:relative;padding:16px 24px;display:flex;flex-direction:column;align-items:flex-start;gap:2px;border-left:1.5px dashed #dde1e7;transition:transform .28s cubic-bezier(.16,1,.3,1)}.ds-stub::before,.ds-stub::after{content:\"\";position:absolute;left:-10px;width:18px;height:18px;border-radius:50%;background:#f2f4f7}.ds-stub::before{top:-9px}.ds-stub::after{bottom:-9px}.ds-pass:has(.ds-book:hover) .ds-stub,.ds-pass:has(.ds-book:focus-visible) .ds-stub{transform:translateX(4px)}.ds-wk{margin:0;font-size:12px;color:#5d636c}.ds-price{margin:6px 0 0;color:#1d5fbf;line-height:1}.ds-price span{font-size:30px;font-weight:700;letter-spacing:-.02em}.ds-price small{font-size:18px;font-weight:500}.ds-book{margin-top:12px;display:inline-flex;align-items:center;height:36px;padding:0 14px;border-radius:6px;background:#141414;color:#fff;font-weight:500;text-decoration:none;transition:background-color .15s}.ds-book:hover{background:#333}.ds-book:focus-visible{outline:2px solid #1d5fbf;outline-offset:2px}"
+    },
+    {
+      "name": "Stale Note",
+      "kind": "custom",
+      "refersTo": "stale-note",
+      "description": "Shown under the finding only when a data source is stale.",
+      "html": "<p class=\"ds-stale\">Google Voli non aggiorna da 6 ore.</p>",
+      "css": ".ds-stale{display:inline-block;margin:0;padding:6px 10px;border-radius:6px;background:#fffbeb;color:#92400e;font:400 13px/1.5 Geist,Inter,system-ui,sans-serif}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Boarding Pass",
+    "overview": "Every deal is issued as a boarding pass: white card stock laid on a cool grey-blue apron, the route printed in oversized IATA codes, the price carried on a tear-off stub separated by a dashed perforation and two semicircular notches. The page reads like a short stack of passes handed across a counter, ranked cheapest first, so that one glance answers whether there is a weekend worth booking.\n\nThe palette is an achromatic ledger with a single voice. Chrome, controls, and the primary action are near-black ink; everything structural is a cool grey. The only colour on the page is the price blue, and it lands where the money is: the stub amount and the price in the headline finding. Depth is entirely tonal; there are no shadows anywhere. Geist with tabular figures keeps times, prices, and hours aligned like printed fields.\n\nDensity is operational, not editorial: a 48px top bar, one sentence of finding, a single row of standard filters, then the passes at full column width. On a phone the stub drops beneath the pass and the perforation turns horizontal.",
+    "keyCharacteristics": [
+      "White card stock (8px corners) on a cool grey-blue apron, flat, no shadows.",
+      "Oversized IATA codes at 700; origin in muted ink, destination in full ink.",
+      "A notched, dashed-perforation stub that carries the price in the one hue.",
+      "A Friday-to-Monday stay axis whose filled length is the time spent at the destination.",
+      "Ink-black primary action; the stub nudges 4px along the perforation when Prenota is about to be pressed.",
+      "Tabular figures everywhere."
+    ],
+    "rules": [
+      {
+        "name": "The One Voice Rule",
+        "body": "Price Blue appears only on prices (plus the focus ring and selection, which are functional). Not on the brand mark, links, buttons, filters, icons, or the stay axis. If a new element wants colour, it gets ink.",
+        "section": "colors"
+      },
+      {
+        "name": "The Ink Action Rule",
+        "body": "Every action, fill, and control accent is ink (`ink-control`), never the hue. The button that books is black so the price stays the only blue thing.",
+        "section": "colors"
+      },
+      {
+        "name": "The Honest Amber Rule",
+        "body": "Amber exists only to say a data source is stale. A fresh page carries no amber at all.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Rule",
+        "body": "`font-variant-numeric: tabular-nums` is set on the body and inherited everywhere; times, prices, and hours must align in columns.",
+        "section": "typography"
+      },
+      {
+        "name": "The Printed Field Rule",
+        "body": "Only two things are set at 700 and tight negative tracking: IATA codes and the price amount. Bold elsewhere is limited to the destination name inside the finding sentence.",
+        "section": "typography"
+      },
+      {
+        "name": "The Card Stock Rule",
+        "body": "Surfaces separate from the page by tone alone (card-stock on apron-grey). If something needs to feel lifted, change its tone, not its shadow.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** set every price in Price Blue (price-blue) and nothing else in that hue except the focus ring and text selection.",
+      "**Do** make every action and control accent ink (ink-control), including slider and checkbox `accent-color`.",
+      "**Do** separate surfaces by tone: card stock (#ffffff) on apron (#f2f4f7), raised grey for troughs.",
+      "**Do** keep tabular figures on for all text that carries numbers.",
+      "**Do** set IATA codes and the price amount at 700 with tight negative tracking; keep the rest at 400-500.",
+      "**Do** fill the stub notches with the page ground so they read as cuts through the card.",
+      "**Do** keep every control at 36px and every mobile touch target at 44px.",
+      "**Do** honour `prefers-reduced-motion` by removing transitions, including the stub nudge."
+    ],
+    "donts": [
+      "**Don't** add box-shadows; the system is flat.",
+      "**Don't** use Price Blue on the brand mark, buttons, links, filters, icons, or the stay axis.",
+      "**Don't** use amber for anything except a stale data source.",
+      "**Don't** introduce a second hue or a second type family.",
+      "**Don't** set text in uppercase or add tracked labels above titles; labels are sentence-case 12px muted ink.",
+      "**Don't** use icon fonts or emoji glyphs as icons; icons are thin inline SVG strokes in currentColor."
+    ]
+  }
+}
