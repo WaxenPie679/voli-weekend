@@ -11,7 +11,7 @@ I voli weekend più economici da **Bari (BRI)** e **Brindisi (BDS)**, verso qual
 
 | Cosa | Dove | Quando |
 |---|---|---|
-| Ryanair + Wizz Air (diretti) | GitHub Actions `direct.yml` | ogni 15 minuti |
+| Ryanair + Wizz Air (diretti) | GitHub Actions `direct.yml` | ogni 15 minuti (ai minuti :07, :22, :37, :52) |
 | Google Voli (scali e altre compagnie) | GitHub Actions `connections.yml` | ogni 4 ore |
 | Dati | branch `data` (`direct.json`, `connections.json`) | a ogni ricerca |
 | Webapp | GitHub Pages, oppure in locale su http://127.0.0.1:5190 | sempre |

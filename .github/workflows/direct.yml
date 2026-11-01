@@ -2,7 +2,8 @@ name: Ricerca diretti (Ryanair, Wizz)
 
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    # Minuti non tondi: allo scoccare del quarto d'ora GitHub accoda più esecuzioni e le ritarda
+    - cron: '7,22,37,52 * * * *'
   workflow_dispatch:
 
 concurrency:
