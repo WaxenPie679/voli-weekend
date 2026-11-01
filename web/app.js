@@ -180,11 +180,15 @@ function render() {
   const finding = $('finding');
   if (!its.length) {
     const cheapest = applyFilters(all, { ...f, maxPrice: undefined })[0];
+    const withoutStay = f.minStay ? applyFilters(all, { ...f, minStay: 0 }) : [];
+    const longest = Math.max(0, ...withoutStay.map(stayHours));
     finding.textContent = !all.length
       ? 'Nessun volo disponibile al momento.'
-      : cheapest && cheapest.price > f.maxPrice
-        ? `Nessun volo fino a ${f.maxPrice} €: il più economico costa ${fmtPrice(cheapest.price)} €.`
-        : 'Nessun volo con questa combinazione di filtri.';
+      : withoutStay.length
+        ? `Nessun volo con almeno ${f.minStay} h sul posto: il soggiorno più lungo trovato è di ${Math.floor(longest)} h.`
+        : cheapest && cheapest.price > f.maxPrice
+          ? `Nessun volo fino a ${f.maxPrice} €: il più economico costa ${fmtPrice(cheapest.price)} €.`
+          : 'Nessun volo con questa combinazione di filtri.';
   } else {
     const top = its[0];
     finding.innerHTML = '';
