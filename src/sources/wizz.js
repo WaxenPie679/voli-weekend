@@ -19,6 +19,19 @@ export function parseWizzVersion(html) {
   return m[1];
 }
 
+const curl = async (url) => {
+  const { execFile } = await import('node:child_process');
+  return new Promise((resolve, reject) =>
+    execFile('curl', ['-sL', '--max-time', '30', url], { maxBuffer: 20e6 }, (err, out) => (err ? reject(err) : resolve(out))));
+};
+
+/** Versione corrente dell'API dalla home. La home rifiuta (405) il client HTTP di Node, non curl. */
+export async function wizzVersion({ fetchImpl = fetch, curlImpl = curl } = {}) {
+  const home = 'https://wizzair.com/';
+  const res = await fetchImpl(home);
+  return parseWizzVersion(res.ok ? await res.text() : await curlImpl(home));
+}
+
 function km(a, b) {
   const rad = (d) => (d * Math.PI) / 180;
   const dLat = rad(b.latitude - a.latitude);
@@ -103,9 +116,7 @@ export function pairWizzFares(ttJson, route, weekends, seenAt) {
 
 export async function fetchWizz(weekends, { fetchImpl = fetch, pauseMs = 1500 } = {}) {
   const seenAt = new Date().toISOString();
-  const homeRes = await fetchImpl('https://wizzair.com/');
-  if (!homeRes.ok) throw new Error(`HTTP ${homeRes.status} wizzair.com`);
-  const base = `https://be.wizzair.com/${parseWizzVersion(await homeRes.text())}/Api`;
+  const base = `https://be.wizzair.com/${await wizzVersion({ fetchImpl })}/Api`;
   const routes = parseWizzRoutes(await fetchJson(fetchImpl, `${base}/asset/map?languageCode=it-it`), CONSTRAINTS.origins);
   const all = [];
   for (const route of routes) {

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { DateTime } from 'luxon';
 import { upcomingWeekends } from '../src/weekends.js';
-import { parseWizzVersion, parseWizzRoutes, pairWizzFares, estimateMinutes, timetableWindows } from '../src/sources/wizz.js';
+import { parseWizzVersion, wizzVersion, parseWizzRoutes, pairWizzFares, estimateMinutes, timetableWindows } from '../src/sources/wizz.js';
 
 const map = JSON.parse(readFileSync(new URL('./fixtures/wizz-map.json', import.meta.url)));
 const tt = JSON.parse(readFileSync(new URL('./fixtures/wizz-timetable.json', import.meta.url)));
@@ -62,4 +62,16 @@ test('pairWizzFares abbina andata ven/sab e ritorno domenica dello stesso weeken
 test('estimateMinutes: 760 km ≈ 1h30', () => {
   const m = estimateMinutes(760);
   assert.ok(m >= 80 && m <= 100);
+});
+
+test('wizzVersion: se la home risponde 405 a fetch, usa curl', async () => {
+  const fetchImpl = async () => new Response('', { status: 405 });
+  const curlImpl = async (url) => { assert.equal(url, 'https://wizzair.com/'); return '<a href="https://be.wizzair.com/29.23.1/Api">'; };
+  assert.equal(await wizzVersion({ fetchImpl, curlImpl }), '29.23.1');
+});
+
+test('wizzVersion: con fetch riuscito non chiama curl', async () => {
+  const fetchImpl = async () => new Response('be.wizzair.com/30.1.0/Api', { status: 200 });
+  const curlImpl = async () => { throw new Error('non doveva essere chiamato'); };
+  assert.equal(await wizzVersion({ fetchImpl, curlImpl }), '30.1.0');
 });
