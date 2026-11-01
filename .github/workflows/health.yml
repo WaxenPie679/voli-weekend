@@ -1,0 +1,35 @@
+name: Check-up giornaliero
+
+# Controlla webapp, dati, ricerche, fonti e bot Telegram. Scrive su Telegram solo se qualcosa non va.
+on:
+  schedule:
+    # 6:13 UTC = 7:13 d'inverno, 8:13 d'estate (minuto non tondo, vedi direct.yml)
+    - cron: '13 6 * * *'
+  workflow_dispatch:
+    inputs:
+      always:
+        description: 'Invia il resoconto anche se è tutto OK'
+        type: boolean
+        default: true
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: node src/health.js
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          HEALTH_ALWAYS: ${{ inputs.always && '1' || '0' }}
