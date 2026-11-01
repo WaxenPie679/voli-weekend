@@ -32,8 +32,10 @@ export async function runMode(mode, dataDir, { sources, now = DateTime.now(), en
       log(`${name}: ${itineraries.length} trovati in ${Math.round((Date.now() - started) / 1000)} s`);
     } catch (err) {
       failures++;
-      file = mergeSource(file, name, { ok: false, error: err.message.split('\n')[0] }, now);
-      log(`${name}: ERRORE ${err.message.split('\n')[0]}`);
+      // Qualsiasi cosa venga lanciata (anche senza message), i dati si salvano comunque con lo stato d'errore
+      const message = String(err?.message ?? err ?? '').split('\n')[0] || 'errore sconosciuto';
+      file = mergeSource(file, name, { ok: false, error: message }, now);
+      log(`${name}: ERRORE ${message}`);
     }
   }
   await writeFile(path, JSON.stringify(file, null, 1));
@@ -43,6 +45,8 @@ export async function runMode(mode, dataDir, { sources, now = DateTime.now(), en
 }
 
 if (process.argv[1]?.endsWith('run.js')) {
+  // Un errore asincrono sfuggito (es. dal browser) viene registrato invece di terminare la ricerca senza salvare
+  process.on('unhandledRejection', (err) => console.error('errore asincrono non gestito:', err?.message ?? err));
   const [mode] = process.argv.slice(2);
   const i = process.argv.indexOf('--data');
   const dataDir = i > 0 ? process.argv[i + 1] : './data';

@@ -148,10 +148,15 @@ async function exploreDestinations(page, origin, depDate, retDate) {
   const bodies = [];
   const PATTERN = '**/*GetExploreDestinations*';
   const handler = async (route) => {
-    const response = await route.fetch();
-    const body = await response.text();
-    bodies.push(body);
-    await route.fulfill({ response, body });
+    // Gli errori qui non risalgono a nessun chiamante: senza try/catch farebbero terminare Node
+    try {
+      const response = await route.fetch();
+      const body = await response.text();
+      bodies.push(body);
+      await route.fulfill({ response, body });
+    } catch {
+      await route.continue().catch(() => {});
+    }
   };
   await page.route(PATTERN, handler);
   try {

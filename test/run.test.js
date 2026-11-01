@@ -41,3 +41,12 @@ test('ogni modalità ha il proprio file dati e il proprio file di stato degli av
   assert.equal(MODES.direct.stateFile, 'alerts_state_direct.json');
   assert.equal(MODES.connections.stateFile, 'alerts_state_connections.json');
 });
+
+test('una fonte che lancia un valore senza message non fa crashare il runner', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'voli-'));
+  const code = await runMode('connections', dir, { ...quiet, sources: { google: async () => { throw undefined; } } });
+  assert.equal(code, 1);
+  const file = JSON.parse(await readFile(join(dir, 'connections.json'), 'utf8'));
+  assert.equal(file.sources.google.status, 'error');
+  assert.equal(file.sources.google.error, 'errore sconosciuto');
+});
