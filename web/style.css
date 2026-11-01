@@ -175,6 +175,12 @@ h1 { font-size: var(--fs-title); line-height: 1.2; font-weight: 500; letter-spac
 .loading .pass { min-height: 150px; background: var(--surface); }
 .loading .pass > * { visibility: hidden; }
 
+/* Larghezze medie (tablet, finestra ridotta): tratta sopra, orari sotto */
+@media (max-width: 1000px) {
+  .iata { font-size: 40px; }
+  .pass-main { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 720px) {
   :root { --pad: 16px; }
   .brand { gap: 8px; font-size: 14px; white-space: nowrap; }
