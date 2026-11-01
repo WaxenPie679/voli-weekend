@@ -14,6 +14,8 @@ export const CONSTRAINTS = Object.freeze({
 const local = (s) => DateTime.fromISO(s, { zone: ZONE });
 
 export function layoverMinutes(leg) {
+  // Google fornisce la durata dello scalo ma non gli orari intermedi
+  if (leg.layovers) return leg.layovers;
   const out = [];
   for (let i = 1; i < leg.segments.length; i++) {
     out.push(local(leg.segments[i].dep).diff(local(leg.segments[i - 1].arr), 'minutes').minutes);

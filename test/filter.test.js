@@ -54,5 +54,11 @@ test('andata già partita non valida', () =>
   assert.equal(isValid(mk(), DateTime.fromISO('2026-11-06T18:30', { zone: 'Europe/Rome' })), false));
 test('layoverMinutes calcola le attese tra segmenti', () =>
   assert.deepEqual(layoverMinutes({ segments: [seg('BRI', 'FCO', '2026-11-06T18:00', '2026-11-06T19:00'), seg('FCO', 'BUD', '2026-11-06T20:40', '2026-11-06T23:00')] }), [100]));
+test('layovers espliciti (Google) hanno la precedenza sui segmenti senza orari intermedi', () => {
+  const leg = (m) => ({ segments: [{ ...seg('BRI', 'MUC', '2026-11-06T18:00', null) }, { ...seg('MUC', 'BUD', null, '2026-11-06T23:00') }], selfTransfer: false, layovers: [m] });
+  assert.deepEqual(layoverMinutes(leg(80)), [80]);
+  assert.equal(isValid({ ...mk(), outbound: leg(180) }, NOW), true);
+  assert.equal(isValid({ ...mk(), outbound: leg(200) }, NOW), false);
+});
 test('itineraryId unisce origine, destinazione, partenze e voli', () =>
   assert.equal(mk().id, 'BRI|BUD|2026-11-06T18:00|2026-11-08T20:00|FR1+FR2'));
