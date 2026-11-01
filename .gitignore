@@ -3,3 +3,6 @@ node_modules/
 data/
 spike/*.png
 spike/*.html
+.taste-skill/
+.impeccable/review/
+.impeccable/brief-body.md

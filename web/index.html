@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Voli Weekend</title>
+  <meta name="description" content="I voli weekend più economici da Bari e Brindisi, aggiornati in continuo.">
+  <meta name="theme-color" content="#f2f4f7">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Voli Weekend">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="./" aria-label="Voli Weekend, ricarica">
+        <svg class="brand-mark" viewBox="0 0 28 20" aria-hidden="true">
+          <path d="M3 1h22a2 2 0 0 1 2 2v4.2a2.8 2.8 0 0 0 0 5.6V17a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-4.2a2.8 2.8 0 0 0 0-5.6V3a2 2 0 0 1 2-2Z" fill="currentColor"/>
+          <path d="M19 4.5v11" stroke="#fff" stroke-width="1.4" stroke-dasharray="1.6 1.6"/>
+          <path d="M6.5 12.5 13.5 7.5M10.6 7.4l2.9.1-.2 2.9" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Voli Weekend</span>
+      </a>
+      <ul class="sources" id="sources" aria-label="Stato delle fonti"></ul>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="title-row">
+      <h1>Le offerte migliori</h1>
+      <p class="finding" id="finding" aria-live="polite">Carico le offerte…</p>
+      <p class="stale-note" id="stale-note" hidden></p>
+    </div>
+
+    <details class="filters-box" id="filters-box" open>
+      <summary><span>Filtri</span><span class="filters-summary" id="filters-summary"></span></summary>
+      <form class="filters" id="filters" aria-label="Filtri">
+      <fieldset class="seg-field">
+        <legend>Partenza</legend>
+        <div class="seg">
+          <label><input type="radio" name="origin" value="" checked><span>Tutte</span></label>
+          <label><input type="radio" name="origin" value="BRI"><span>Bari</span></label>
+          <label><input type="radio" name="origin" value="BDS"><span>Brindisi</span></label>
+        </div>
+      </fieldset>
+      <fieldset class="seg-field">
+        <legend>Voli</legend>
+        <div class="seg">
+          <label><input type="radio" name="kind" value="" checked><span>Tutti</span></label>
+          <label><input type="radio" name="kind" value="direct"><span>Diretti</span></label>
+          <label><input type="radio" name="kind" value="stops"><span>Con scalo</span></label>
+        </div>
+      </fieldset>
+      <label class="field">
+        <span>Weekend</span>
+        <select name="weekend" id="weekend"><option value="">Tutti gli 8</option></select>
+      </label>
+      <label class="field">
+        <span>Compagnia</span>
+        <select name="airline" id="airline"><option value="">Tutte</option></select>
+      </label>
+      <label class="field price-field">
+        <span>Fino a <output id="max-out" for="max">200 €</output></span>
+        <input type="range" name="max" id="max" min="20" max="200" step="10" value="200">
+      </label>
+      <label class="check">
+        <input type="checkbox" name="perDest" checked>
+        <span>Una per destinazione</span>
+      </label>
+    </form>
+    </details>
+
+    <p class="fare-note">Prezzi andata e ritorno per 1 adulto, tariffa base con solo bagaglio a mano piccolo.</p>
+
+    <section aria-labelledby="list-title">
+      <h2 id="list-title" class="visually-hidden">Classifica</h2>
+      <ol class="passes" id="passes"></ol>
+      <div class="list-foot">
+        <p class="count" id="count"></p>
+        <button type="button" class="btn-secondary" id="more" hidden>Mostra altre</button>
+      </div>
+    </section>
+  </main>
+
+  <template id="pass-template">
+    <li class="pass">
+      <div class="pass-main">
+        <div class="route-block">
+          <div class="route">
+            <span class="iata from"></span>
+            <svg class="route-arrow" viewBox="0 0 24 12" aria-hidden="true"><path d="M1 6h20M16 1.5 21.5 6 16 10.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="iata to"></span>
+          </div>
+          <p class="place"><strong class="city"></strong> <span class="country"></span></p>
+        </div>
+        <div class="leg-block">
+          <dl class="legs">
+            <div class="leg out"><dt>Andata</dt><dd></dd></div>
+            <div class="leg back"><dt>Ritorno</dt><dd></dd></div>
+          </dl>
+          <div class="stay">
+            <div class="stay-track" aria-hidden="true"><div class="stay-fill"></div></div>
+            <p class="stay-label"></p>
+          </div>
+        </div>
+      </div>
+      <div class="pass-stub">
+        <p class="weekend"></p>
+        <p class="price"><span class="amount"></span> <span class="unit">€</span></p>
+        <p class="price-note">andata e ritorno</p>
+        <a class="btn-book" target="_blank" rel="noopener">Prenota<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2h6v6M10 2 3 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></a>
+      </div>
+    </li>
+  </template>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
