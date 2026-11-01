@@ -1,0 +1,2427 @@
+{
+ "generatedAt": "2026-11-14T12:53:11.474Z",
+ "sources": {
+  "google": {
+   "status": "ok",
+   "error": null,
+   "lastSuccessAt": "2026-11-14T12:53:11.474Z"
+  }
+ },
+ "itineraries": [
+  {
+   "id": "BDS|MXP|2026-12-11T21:40|2026-12-13T07:00|easyJet@2026-12-11T21:40+easyJet@2026-12-13T07:00",
+   "source": "google",
+   "origin": "BDS",
+   "destination": {
+    "code": "MXP",
+    "city": "Milano",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BDS",
+      "to": "MXP",
+      "dep": "2026-12-11T21:40",
+      "arr": "2026-12-11T23:25",
+      "flight": "easyJet@2026-12-11T21:40",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "MXP",
+      "to": "BDS",
+      "dep": "2026-12-13T07:00",
+      "arr": "2026-12-13T08:50",
+      "flight": "easyJet@2026-12-13T07:00",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 48,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTItMTEoAWoFEgNCRFNyBRIDTVhQGhwSCjIwMjYtMTItMTMoAWoFEgNNWFByBRIDQkRTQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-12-11",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BDS|MXP|2026-12-11T21:40|2026-12-13T19:35|easyJet@2026-12-11T21:40+easyJet@2026-12-13T19:35",
+   "source": "google",
+   "origin": "BDS",
+   "destination": {
+    "code": "MXP",
+    "city": "Milano",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BDS",
+      "to": "MXP",
+      "dep": "2026-12-11T21:40",
+      "arr": "2026-12-11T23:25",
+      "flight": "easyJet@2026-12-11T21:40",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "MXP",
+      "to": "BDS",
+      "dep": "2026-12-13T19:35",
+      "arr": "2026-12-13T21:20",
+      "flight": "easyJet@2026-12-13T19:35",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 83,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTItMTEoAWoFEgNCRFNyBRIDTVhQGhwSCjIwMjYtMTItMTMoAWoFEgNNWFByBRIDQkRTQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-12-11",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|MXP|2027-01-02T06:00|2027-01-03T08:15|Ryanair. Operato da Malta Air@2027-01-02T06:00+Ryanair. Operato da Malta Air@2027-01-03T08:15",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "MXP",
+    "city": "Milano",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "MXP",
+      "dep": "2027-01-02T06:00",
+      "arr": "2027-01-02T07:40",
+      "flight": "Ryanair. Operato da Malta Air@2027-01-02T06:00",
+      "airline": "Ryanair. Operato da Malta Air"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "MXP",
+      "to": "BRI",
+      "dep": "2027-01-03T08:15",
+      "arr": "2027-01-03T09:55",
+      "flight": "Ryanair. Operato da Malta Air@2027-01-03T08:15",
+      "airline": "Ryanair. Operato da Malta Air"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 120,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjctMDEtMDIoAWoFEgNCUklyBRIDTVhQGhwSCjIwMjctMDEtMDMoAWoFEgNNWFByBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2027-01-01",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BDS|MXP|2027-01-01T21:40|2027-01-03T07:00|easyJet@2027-01-01T21:40+easyJet@2027-01-03T07:00",
+   "source": "google",
+   "origin": "BDS",
+   "destination": {
+    "code": "MXP",
+    "city": "Milano",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BDS",
+      "to": "MXP",
+      "dep": "2027-01-01T21:40",
+      "arr": "2027-01-01T23:25",
+      "flight": "easyJet@2027-01-01T21:40",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "MXP",
+      "to": "BDS",
+      "dep": "2027-01-03T07:00",
+      "arr": "2027-01-03T08:50",
+      "flight": "easyJet@2027-01-03T07:00",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 122,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjctMDEtMDEoAWoFEgNCRFNyBRIDTVhQGhwSCjIwMjctMDEtMDMoAWoFEgNNWFByBRIDQkRTQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2027-01-01",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|BUD|2026-11-27T20:30|2026-11-29T09:30|Ryanair. Operato da Ryanair Sun@2026-11-27T20:30+Ryanair. Operato da Ryanair Sun@2026-11-29T09:30",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "BUD",
+    "city": "Budapest",
+    "country": "Ungheria"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "BUD",
+      "dep": "2026-11-27T20:30",
+      "arr": "2026-11-27T22:00",
+      "flight": "Ryanair. Operato da Ryanair Sun@2026-11-27T20:30",
+      "airline": "Ryanair. Operato da Ryanair Sun"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "BUD",
+      "to": "BRI",
+      "dep": "2026-11-29T09:30",
+      "arr": "2026-11-29T11:00",
+      "flight": "Ryanair. Operato da Ryanair Sun@2026-11-29T09:30",
+      "airline": "Ryanair. Operato da Ryanair Sun"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 131,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMjcoAWoFEgNCUklyBRIDQlVEGhwSCjIwMjYtMTEtMjkoAWoFEgNCVURyBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-27",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|PMO|2026-11-28T20:20|2026-11-29T12:20|Ryanair. Operato da Malta Air@2026-11-28T20:20+Ryanair. Operato da Malta Air@2026-11-29T12:20",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "PMO",
+    "city": "Palermo",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "PMO",
+      "dep": "2026-11-28T20:20",
+      "arr": "2026-11-28T21:30",
+      "flight": "Ryanair. Operato da Malta Air@2026-11-28T20:20",
+      "airline": "Ryanair. Operato da Malta Air"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "PMO",
+      "to": "BRI",
+      "dep": "2026-11-29T12:20",
+      "arr": "2026-11-29T13:30",
+      "flight": "Ryanair. Operato da Malta Air@2026-11-29T12:20",
+      "airline": "Ryanair. Operato da Malta Air"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 137,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMjgoAWoFEgNCUklyBRIDUE1PGhwSCjIwMjYtMTEtMjkoAWoFEgNQTU9yBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-27",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|FCO|2026-11-21T17:55|2026-11-22T17:45|Ryanair. Operato da Malta Air@2026-11-21T17:55+Ryanair. Operato da Malta Air@2026-11-22T17:45",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "FCO",
+    "city": "Roma",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "FCO",
+      "dep": "2026-11-21T17:55",
+      "arr": "2026-11-21T19:05",
+      "flight": "Ryanair. Operato da Malta Air@2026-11-21T17:55",
+      "airline": "Ryanair. Operato da Malta Air"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "FCO",
+      "to": "BRI",
+      "dep": "2026-11-22T17:45",
+      "arr": "2026-11-22T18:55",
+      "flight": "Ryanair. Operato da Malta Air@2026-11-22T17:45",
+      "airline": "Ryanair. Operato da Malta Air"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 144,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMjEoAWoFEgNCUklyBRIDRkNPGhwSCjIwMjYtMTEtMjIoAWoFEgNGQ09yBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-20",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BDS|MXP|2026-12-04T21:40|2026-12-06T19:35|easyJet@2026-12-04T21:40+easyJet@2026-12-06T19:35",
+   "source": "google",
+   "origin": "BDS",
+   "destination": {
+    "code": "MXP",
+    "city": "Milano",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BDS",
+      "to": "MXP",
+      "dep": "2026-12-04T21:40",
+      "arr": "2026-12-04T23:25",
+      "flight": "easyJet@2026-12-04T21:40",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "MXP",
+      "to": "BDS",
+      "dep": "2026-12-06T19:35",
+      "arr": "2026-12-06T21:20",
+      "flight": "easyJet@2026-12-06T19:35",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 149,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTItMDQoAWoFEgNCRFNyBRIDTVhQGhwSCjIwMjYtMTItMDYoAWoFEgNNWFByBRIDQkRTQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-12-04",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|VCE|2026-11-21T06:30|2026-11-22T06:15|ITA@2026-11-21T06:30+ITA@FCO+ITA@2026-11-22T06:15+ITA@FCO",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "VCE",
+    "city": "Venezia",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "FCO",
+      "dep": "2026-11-21T06:30",
+      "arr": null,
+      "flight": "ITA@2026-11-21T06:30",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "VCE",
+      "dep": null,
+      "arr": "2026-11-21T10:30",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     100
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "VCE",
+      "to": "FCO",
+      "dep": "2026-11-22T06:15",
+      "arr": null,
+      "flight": "ITA@2026-11-22T06:15",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BRI",
+      "dep": null,
+      "arr": "2026-11-22T10:35",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     120
+    ]
+   },
+   "price": 150,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMjEoAWoFEgNCUklyBRIDVkNFGhwSCjIwMjYtMTEtMjIoAWoFEgNWQ0VyBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-20",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|VCE|2026-11-27T19:30|2026-11-29T11:20|ITA@2026-11-27T19:30+ITA@FCO+ITA@2026-11-29T11:20+ITA@FCO",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "VCE",
+    "city": "Venezia",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "FCO",
+      "dep": "2026-11-27T19:30",
+      "arr": null,
+      "flight": "ITA@2026-11-27T19:30",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "VCE",
+      "dep": null,
+      "arr": "2026-11-27T22:55",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     65
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "VCE",
+      "to": "FCO",
+      "dep": "2026-11-29T11:20",
+      "arr": null,
+      "flight": "ITA@2026-11-29T11:20",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BRI",
+      "dep": null,
+      "arr": "2026-11-29T14:30",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     50
+    ]
+   },
+   "price": 150,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMjcoAWoFEgNCUklyBRIDVkNFGhwSCjIwMjYtMTEtMjkoAWoFEgNWQ0VyBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-27",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|VCE|2026-11-27T19:30|2026-11-29T19:25|ITA@2026-11-27T19:30+ITA@FCO+ITA@2026-11-29T19:25+ITA@FCO",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "VCE",
+    "city": "Venezia",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "FCO",
+      "dep": "2026-11-27T19:30",
+      "arr": null,
+      "flight": "ITA@2026-11-27T19:30",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "VCE",
+      "dep": null,
+      "arr": "2026-11-27T22:55",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     65
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "VCE",
+      "to": "FCO",
+      "dep": "2026-11-29T19:25",
+      "arr": null,
+      "flight": "ITA@2026-11-29T19:25",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BRI",
+      "dep": null,
+      "arr": "2026-11-29T23:00",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     70
+    ]
+   },
+   "price": 150,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMjcoAWoFEgNCUklyBRIDVkNFGhwSCjIwMjYtMTEtMjkoAWoFEgNWQ0VyBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-27",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|VCE|2026-11-28T06:30|2026-11-29T11:20|ITA@2026-11-28T06:30+ITA@FCO+ITA@2026-11-29T11:20+ITA@FCO",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "VCE",
+    "city": "Venezia",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "FCO",
+      "dep": "2026-11-28T06:30",
+      "arr": null,
+      "flight": "ITA@2026-11-28T06:30",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "VCE",
+      "dep": null,
+      "arr": "2026-11-28T10:30",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     100
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "VCE",
+      "to": "FCO",
+      "dep": "2026-11-29T11:20",
+      "arr": null,
+      "flight": "ITA@2026-11-29T11:20",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BRI",
+      "dep": null,
+      "arr": "2026-11-29T14:30",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     50
+    ]
+   },
+   "price": 150,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMjgoAWoFEgNCUklyBRIDVkNFGhwSCjIwMjYtMTEtMjkoAWoFEgNWQ0VyBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-27",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|VCE|2026-11-28T06:30|2026-11-29T19:25|ITA@2026-11-28T06:30+ITA@FCO+ITA@2026-11-29T19:25+ITA@FCO",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "VCE",
+    "city": "Venezia",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "FCO",
+      "dep": "2026-11-28T06:30",
+      "arr": null,
+      "flight": "ITA@2026-11-28T06:30",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "VCE",
+      "dep": null,
+      "arr": "2026-11-28T10:30",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     100
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "VCE",
+      "to": "FCO",
+      "dep": "2026-11-29T19:25",
+      "arr": null,
+      "flight": "ITA@2026-11-29T19:25",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BRI",
+      "dep": null,
+      "arr": "2026-11-29T23:00",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     70
+    ]
+   },
+   "price": 150,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMjgoAWoFEgNCUklyBRIDVkNFGhwSCjIwMjYtMTEtMjkoAWoFEgNWQ0VyBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-27",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BDS|FCO|2026-12-05T13:00|2026-12-06T12:35|Ryanair. Operato da Malta Air@2026-12-05T13:00+Ryanair. Operato da Malta Air@2026-12-06T12:35",
+   "source": "google",
+   "origin": "BDS",
+   "destination": {
+    "code": "FCO",
+    "city": "Roma",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BDS",
+      "to": "FCO",
+      "dep": "2026-12-05T13:00",
+      "arr": "2026-12-05T14:20",
+      "flight": "Ryanair. Operato da Malta Air@2026-12-05T13:00",
+      "airline": "Ryanair. Operato da Malta Air"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "FCO",
+      "to": "BDS",
+      "dep": "2026-12-06T12:35",
+      "arr": "2026-12-06T13:50",
+      "flight": "Ryanair. Operato da Malta Air@2026-12-06T12:35",
+      "airline": "Ryanair. Operato da Malta Air"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 151,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTItMDUoAWoFEgNCRFNyBRIDRkNPGhwSCjIwMjYtMTItMDYoAWoFEgNGQ09yBRIDQkRTQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-12-04",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BDS|MXP|2027-01-01T21:40|2027-01-03T19:35|easyJet@2027-01-01T21:40+easyJet@2027-01-03T19:35",
+   "source": "google",
+   "origin": "BDS",
+   "destination": {
+    "code": "MXP",
+    "city": "Milano",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BDS",
+      "to": "MXP",
+      "dep": "2027-01-01T21:40",
+      "arr": "2027-01-01T23:25",
+      "flight": "easyJet@2027-01-01T21:40",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "MXP",
+      "to": "BDS",
+      "dep": "2027-01-03T19:35",
+      "arr": "2027-01-03T21:20",
+      "flight": "easyJet@2027-01-03T19:35",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 154,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjctMDEtMDEoAWoFEgNCRFNyBRIDTVhQGhwSCjIwMjctMDEtMDMoAWoFEgNNWFByBRIDQkRTQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2027-01-01",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|AMS|2026-12-11T20:55|2026-12-13T05:30|Transavia@2026-12-11T20:55+Transavia@2026-12-13T05:30",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "AMS",
+    "city": "Amsterdam",
+    "country": "Paesi Bassi"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "AMS",
+      "dep": "2026-12-11T20:55",
+      "arr": "2026-12-11T23:40",
+      "flight": "Transavia@2026-12-11T20:55",
+      "airline": "Transavia"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "AMS",
+      "to": "BRI",
+      "dep": "2026-12-13T05:30",
+      "arr": "2026-12-13T07:55",
+      "flight": "Transavia@2026-12-13T05:30",
+      "airline": "Transavia"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 155,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTItMTEoAWoFEgNCUklyBRIDQU1TGhwSCjIwMjYtMTItMTMoAWoFEgNBTVNyBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-12-11",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BDS|MXP|2026-12-19T20:20|2026-12-20T07:00|easyJet@2026-12-19T20:20+easyJet@2026-12-20T07:00",
+   "source": "google",
+   "origin": "BDS",
+   "destination": {
+    "code": "MXP",
+    "city": "Milano",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BDS",
+      "to": "MXP",
+      "dep": "2026-12-19T20:20",
+      "arr": "2026-12-19T22:10",
+      "flight": "easyJet@2026-12-19T20:20",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "MXP",
+      "to": "BDS",
+      "dep": "2026-12-20T07:00",
+      "arr": "2026-12-20T08:50",
+      "flight": "easyJet@2026-12-20T07:00",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 156,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTItMTkoAWoFEgNCRFNyBRIDTVhQGhwSCjIwMjYtMTItMjAoAWoFEgNNWFByBRIDQkRTQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-12-18",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|BUD|2026-11-27T20:30|2026-11-29T14:35|Ryanair. Operato da Ryanair Sun@2026-11-27T20:30+Ryanair. Operato da Ryanair Sun@2026-11-29T14:35",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "BUD",
+    "city": "Budapest",
+    "country": "Ungheria"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "BUD",
+      "dep": "2026-11-27T20:30",
+      "arr": "2026-11-27T22:00",
+      "flight": "Ryanair. Operato da Ryanair Sun@2026-11-27T20:30",
+      "airline": "Ryanair. Operato da Ryanair Sun"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "BUD",
+      "to": "BRI",
+      "dep": "2026-11-29T14:35",
+      "arr": "2026-11-29T16:05",
+      "flight": "Ryanair. Operato da Ryanair Sun@2026-11-29T14:35",
+      "airline": "Ryanair. Operato da Ryanair Sun"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 158,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMjcoAWoFEgNCUklyBRIDQlVEGhwSCjIwMjYtMTEtMjkoAWoFEgNCVURyBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-27",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|MXP|2027-01-02T06:00|2027-01-03T20:20|Ryanair. Operato da Malta Air@2027-01-02T06:00+Ryanair. Operato da Malta Air@2027-01-03T20:20",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "MXP",
+    "city": "Milano",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "MXP",
+      "dep": "2027-01-02T06:00",
+      "arr": "2027-01-02T07:40",
+      "flight": "Ryanair. Operato da Malta Air@2027-01-02T06:00",
+      "airline": "Ryanair. Operato da Malta Air"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "MXP",
+      "to": "BRI",
+      "dep": "2027-01-03T20:20",
+      "arr": "2027-01-03T22:00",
+      "flight": "Ryanair. Operato da Malta Air@2027-01-03T20:20",
+      "airline": "Ryanair. Operato da Malta Air"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 161,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjctMDEtMDIoAWoFEgNCUklyBRIDTVhQGhwSCjIwMjctMDEtMDMoAWoFEgNNWFByBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2027-01-01",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|BUD|2026-11-21T10:35|2026-11-22T09:30|Ryanair. Operato da Malta Air@2026-11-21T10:35+Ryanair. Operato da Ryanair Sun@2026-11-22T09:30",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "BUD",
+    "city": "Budapest",
+    "country": "Ungheria"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "BUD",
+      "dep": "2026-11-21T10:35",
+      "arr": "2026-11-21T12:05",
+      "flight": "Ryanair. Operato da Malta Air@2026-11-21T10:35",
+      "airline": "Ryanair. Operato da Malta Air"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "BUD",
+      "to": "BRI",
+      "dep": "2026-11-22T09:30",
+      "arr": "2026-11-22T11:00",
+      "flight": "Ryanair. Operato da Ryanair Sun@2026-11-22T09:30",
+      "airline": "Ryanair. Operato da Ryanair Sun"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 162,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMjEoAWoFEgNCUklyBRIDQlVEGhwSCjIwMjYtMTEtMjIoAWoFEgNCVURyBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-20",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BDS|MXP|2026-12-26T07:55|2026-12-27T11:35|Ryanair. Operato da Malta Air@2026-12-26T07:55+Ryanair. Operato da Malta Air@2026-12-27T11:35",
+   "source": "google",
+   "origin": "BDS",
+   "destination": {
+    "code": "MXP",
+    "city": "Milano",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BDS",
+      "to": "MXP",
+      "dep": "2026-12-26T07:55",
+      "arr": "2026-12-26T09:40",
+      "flight": "Ryanair. Operato da Malta Air@2026-12-26T07:55",
+      "airline": "Ryanair. Operato da Malta Air"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "MXP",
+      "to": "BDS",
+      "dep": "2026-12-27T11:35",
+      "arr": "2026-12-27T13:15",
+      "flight": "Ryanair. Operato da Malta Air@2026-12-27T11:35",
+      "airline": "Ryanair. Operato da Malta Air"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 163,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTItMjYoAWoFEgNCRFNyBRIDTVhQGhwSCjIwMjYtMTItMjcoAWoFEgNNWFByBRIDQkRTQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-12-25",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|VCE|2026-11-27T19:30|2026-11-29T15:15|ITA@2026-11-27T19:30+ITA@FCO+ITA@2026-11-29T15:15+ITA@FCO",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "VCE",
+    "city": "Venezia",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "FCO",
+      "dep": "2026-11-27T19:30",
+      "arr": null,
+      "flight": "ITA@2026-11-27T19:30",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "VCE",
+      "dep": null,
+      "arr": "2026-11-27T22:55",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     65
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "VCE",
+      "to": "FCO",
+      "dep": "2026-11-29T15:15",
+      "arr": null,
+      "flight": "ITA@2026-11-29T15:15",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BRI",
+      "dep": null,
+      "arr": "2026-11-29T18:45",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     70
+    ]
+   },
+   "price": 164,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMjcoAWoFEgNCUklyBRIDVkNFGhwSCjIwMjYtMTEtMjkoAWoFEgNWQ0VyBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-27",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|VCE|2026-11-28T06:30|2026-11-29T15:15|ITA@2026-11-28T06:30+ITA@FCO+ITA@2026-11-29T15:15+ITA@FCO",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "VCE",
+    "city": "Venezia",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "FCO",
+      "dep": "2026-11-28T06:30",
+      "arr": null,
+      "flight": "ITA@2026-11-28T06:30",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "VCE",
+      "dep": null,
+      "arr": "2026-11-28T10:30",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     100
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "VCE",
+      "to": "FCO",
+      "dep": "2026-11-29T15:15",
+      "arr": null,
+      "flight": "ITA@2026-11-29T15:15",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BRI",
+      "dep": null,
+      "arr": "2026-11-29T18:45",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     70
+    ]
+   },
+   "price": 164,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMjgoAWoFEgNCUklyBRIDVkNFGhwSCjIwMjYtMTEtMjkoAWoFEgNWQ0VyBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-27",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BDS|VCE|2026-11-21T15:20|2026-11-22T11:20|ITA@2026-11-21T15:20+ITA@FCO+ITA@2026-11-22T11:20+ITA@FCO",
+   "source": "google",
+   "origin": "BDS",
+   "destination": {
+    "code": "VCE",
+    "city": "Venezia",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BDS",
+      "to": "FCO",
+      "dep": "2026-11-21T15:20",
+      "arr": null,
+      "flight": "ITA@2026-11-21T15:20",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "VCE",
+      "dep": null,
+      "arr": "2026-11-21T18:35",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     50
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "VCE",
+      "to": "FCO",
+      "dep": "2026-11-22T11:20",
+      "arr": null,
+      "flight": "ITA@2026-11-22T11:20",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BDS",
+      "dep": null,
+      "arr": "2026-11-22T14:35",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     50
+    ]
+   },
+   "price": 164,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMjEoAWoFEgNCRFNyBRIDVkNFGhwSCjIwMjYtMTEtMjIoAWoFEgNWQ0VyBRIDQkRTQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-20",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BDS|MXP|2026-12-26T07:55|2026-12-27T19:25|Ryanair. Operato da Malta Air@2026-12-26T07:55+Ryanair. Operato da Malta Air@2026-12-27T19:25",
+   "source": "google",
+   "origin": "BDS",
+   "destination": {
+    "code": "MXP",
+    "city": "Milano",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BDS",
+      "to": "MXP",
+      "dep": "2026-12-26T07:55",
+      "arr": "2026-12-26T09:40",
+      "flight": "Ryanair. Operato da Malta Air@2026-12-26T07:55",
+      "airline": "Ryanair. Operato da Malta Air"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "MXP",
+      "to": "BDS",
+      "dep": "2026-12-27T19:25",
+      "arr": "2026-12-27T21:10",
+      "flight": "Ryanair. Operato da Malta Air@2026-12-27T19:25",
+      "airline": "Ryanair. Operato da Malta Air"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 173,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTItMjYoAWoFEgNCRFNyBRIDTVhQGhwSCjIwMjYtMTItMjcoAWoFEgNNWFByBRIDQkRTQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-12-25",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|BUD|2026-11-14T20:35|2026-11-15T14:35|Ryanair. Operato da Ryanair Sun@2026-11-14T20:35+Ryanair. Operato da Ryanair Sun@2026-11-15T14:35",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "BUD",
+    "city": "Budapest",
+    "country": "Ungheria"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "BUD",
+      "dep": "2026-11-14T20:35",
+      "arr": "2026-11-14T22:05",
+      "flight": "Ryanair. Operato da Ryanair Sun@2026-11-14T20:35",
+      "airline": "Ryanair. Operato da Ryanair Sun"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "BUD",
+      "to": "BRI",
+      "dep": "2026-11-15T14:35",
+      "arr": "2026-11-15T16:05",
+      "flight": "Ryanair. Operato da Ryanair Sun@2026-11-15T14:35",
+      "airline": "Ryanair. Operato da Ryanair Sun"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 174,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMTQoAWoFEgNCUklyBRIDQlVEGhwSCjIwMjYtMTEtMTUoAWoFEgNCVURyBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-13",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|VCE|2026-11-14T15:15|2026-11-15T06:15|ITA@2026-11-14T15:15+ITA@FCO+ITA@2026-11-15T06:15+ITA@FCO",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "VCE",
+    "city": "Venezia",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "FCO",
+      "dep": "2026-11-14T15:15",
+      "arr": null,
+      "flight": "ITA@2026-11-14T15:15",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "VCE",
+      "dep": null,
+      "arr": "2026-11-14T18:35",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     60
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "VCE",
+      "to": "FCO",
+      "dep": "2026-11-15T06:15",
+      "arr": null,
+      "flight": "ITA@2026-11-15T06:15",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BRI",
+      "dep": null,
+      "arr": "2026-11-15T10:35",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     120
+    ]
+   },
+   "price": 178,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMTQoAWoFEgNCUklyBRIDVkNFGhwSCjIwMjYtMTEtMTUoAWoFEgNWQ0VyBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-13",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|BCN|2026-11-14T19:30|2026-11-15T06:20|ITA@2026-11-14T19:30+ITA@FCO+ITA@2026-11-15T06:20+ITA@FCO",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "BCN",
+    "city": "Barcellona",
+    "country": "Spagna"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "FCO",
+      "dep": "2026-11-14T19:30",
+      "arr": null,
+      "flight": "ITA@2026-11-14T19:30",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BCN",
+      "dep": null,
+      "arr": "2026-11-14T23:15",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     45
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "BCN",
+      "to": "FCO",
+      "dep": "2026-11-15T06:20",
+      "arr": null,
+      "flight": "ITA@2026-11-15T06:20",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BRI",
+      "dep": null,
+      "arr": "2026-11-15T10:35",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     80
+    ]
+   },
+   "price": 179,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMTQoAWoFEgNCUklyBRIDQkNOGhwSCjIwMjYtMTEtMTUoAWoFEgNCQ05yBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-13",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|PMO|2026-11-14T15:15|2026-11-15T06:10|ITA@2026-11-14T15:15+ITA@FCO+ITA@2026-11-15T06:10+ITA@FCO",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "PMO",
+    "city": "Palermo",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "FCO",
+      "dep": "2026-11-14T15:15",
+      "arr": null,
+      "flight": "ITA@2026-11-14T15:15",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "PMO",
+      "dep": null,
+      "arr": "2026-11-14T19:50",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     140
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "PMO",
+      "to": "FCO",
+      "dep": "2026-11-15T06:10",
+      "arr": null,
+      "flight": "ITA@2026-11-15T06:10",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BRI",
+      "dep": null,
+      "arr": "2026-11-15T10:35",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     125
+    ]
+   },
+   "price": 179,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMTQoAWoFEgNCUklyBRIDUE1PGhwSCjIwMjYtMTEtMTUoAWoFEgNQTU9yBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-13",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|PMO|2026-11-21T15:15|2026-11-22T06:10|ITA@2026-11-21T15:15+ITA@FCO+ITA@2026-11-22T06:10+ITA@FCO",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "PMO",
+    "city": "Palermo",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "FCO",
+      "dep": "2026-11-21T15:15",
+      "arr": null,
+      "flight": "ITA@2026-11-21T15:15",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "PMO",
+      "dep": null,
+      "arr": "2026-11-21T19:50",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     140
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "PMO",
+      "to": "FCO",
+      "dep": "2026-11-22T06:10",
+      "arr": null,
+      "flight": "ITA@2026-11-22T06:10",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BRI",
+      "dep": null,
+      "arr": "2026-11-22T10:35",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     125
+    ]
+   },
+   "price": 179,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMjEoAWoFEgNCUklyBRIDUE1PGhwSCjIwMjYtMTEtMjIoAWoFEgNQTU9yBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-20",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|PMO|2026-11-28T06:30|2026-11-29T10:05|ITA@2026-11-28T06:30+ITA@FCO+ITA@2026-11-29T10:05+ITA@FCO",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "PMO",
+    "city": "Palermo",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "FCO",
+      "dep": "2026-11-28T06:30",
+      "arr": null,
+      "flight": "ITA@2026-11-28T06:30",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "PMO",
+      "dep": null,
+      "arr": "2026-11-28T11:50",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     180
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "PMO",
+      "to": "FCO",
+      "dep": "2026-11-29T10:05",
+      "arr": null,
+      "flight": "ITA@2026-11-29T10:05",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BRI",
+      "dep": null,
+      "arr": "2026-11-29T14:30",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     125
+    ]
+   },
+   "price": 179,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMjgoAWoFEgNCUklyBRIDUE1PGhwSCjIwMjYtMTEtMjkoAWoFEgNQTU9yBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-27",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|BCN|2026-11-28T06:30|2026-11-29T06:20|ITA@2026-11-28T06:30+ITA@FCO+ITA@2026-11-29T06:20+ITA@FCO",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "BCN",
+    "city": "Barcellona",
+    "country": "Spagna"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "FCO",
+      "dep": "2026-11-28T06:30",
+      "arr": null,
+      "flight": "ITA@2026-11-28T06:30",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BCN",
+      "dep": null,
+      "arr": "2026-11-28T10:50",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     80
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "BCN",
+      "to": "FCO",
+      "dep": "2026-11-29T06:20",
+      "arr": null,
+      "flight": "ITA@2026-11-29T06:20",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BRI",
+      "dep": null,
+      "arr": "2026-11-29T10:35",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     80
+    ]
+   },
+   "price": 179,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMjgoAWoFEgNCUklyBRIDQkNOGhwSCjIwMjYtMTEtMjkoAWoFEgNCQ05yBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-27",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|BCN|2026-12-11T19:30|2026-12-13T06:20|ITA@2026-12-11T19:30+ITA@FCO+ITA@2026-12-13T06:20+ITA@FCO",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "BCN",
+    "city": "Barcellona",
+    "country": "Spagna"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "FCO",
+      "dep": "2026-12-11T19:30",
+      "arr": null,
+      "flight": "ITA@2026-12-11T19:30",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BCN",
+      "dep": null,
+      "arr": "2026-12-11T23:15",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     45
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "BCN",
+      "to": "FCO",
+      "dep": "2026-12-13T06:20",
+      "arr": null,
+      "flight": "ITA@2026-12-13T06:20",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BRI",
+      "dep": null,
+      "arr": "2026-12-13T10:35",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     80
+    ]
+   },
+   "price": 179,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTItMTEoAWoFEgNCUklyBRIDQkNOGhwSCjIwMjYtMTItMTMoAWoFEgNCQ05yBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-12-11",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BDS|VCE|2026-11-21T15:20|2026-11-22T19:25|ITA@2026-11-21T15:20+ITA@FCO+ITA@2026-11-22T19:25+ITA@FCO",
+   "source": "google",
+   "origin": "BDS",
+   "destination": {
+    "code": "VCE",
+    "city": "Venezia",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BDS",
+      "to": "FCO",
+      "dep": "2026-11-21T15:20",
+      "arr": null,
+      "flight": "ITA@2026-11-21T15:20",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "VCE",
+      "dep": null,
+      "arr": "2026-11-21T18:35",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     50
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "VCE",
+      "to": "FCO",
+      "dep": "2026-11-22T19:25",
+      "arr": null,
+      "flight": "ITA@2026-11-22T19:25",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BDS",
+      "dep": null,
+      "arr": "2026-11-22T23:00",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     65
+    ]
+   },
+   "price": 179,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMjEoAWoFEgNCRFNyBRIDVkNFGhwSCjIwMjYtMTEtMjIoAWoFEgNWQ0VyBRIDQkRTQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-20",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|WAW|2026-11-28T20:55|2026-11-29T17:30|Wizz Air@2026-11-28T20:55+Wizz Air@2026-11-29T17:30",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "WAW",
+    "city": "Varsavia",
+    "country": "Polonia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "WAW",
+      "dep": "2026-11-28T20:55",
+      "arr": "2026-11-28T23:20",
+      "flight": "Wizz Air@2026-11-28T20:55",
+      "airline": "Wizz Air"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "WAW",
+      "to": "BRI",
+      "dep": "2026-11-29T17:30",
+      "arr": "2026-11-29T19:35",
+      "flight": "Wizz Air@2026-11-29T17:30",
+      "airline": "Wizz Air"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 180,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMjgoAWoFEgNCUklyBRIDV0FXGhwSCjIwMjYtMTEtMjkoAWoFEgNXQVdyBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-27",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|MAD|2026-11-20T19:30|2026-11-22T05:55|ITA@2026-11-20T19:30+ITA@FCO+ITA@2026-11-22T05:55+ITA@FCO",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "MAD",
+    "city": "Madrid",
+    "country": "Spagna"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "FCO",
+      "dep": "2026-11-20T19:30",
+      "arr": null,
+      "flight": "ITA@2026-11-20T19:30",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "MAD",
+      "dep": null,
+      "arr": "2026-11-21T00:05",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     55
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "MAD",
+      "to": "FCO",
+      "dep": "2026-11-22T05:55",
+      "arr": null,
+      "flight": "ITA@2026-11-22T05:55",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BRI",
+      "dep": null,
+      "arr": "2026-11-22T10:35",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     70
+    ]
+   },
+   "price": 186,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMjAoAWoFEgNCUklyBRIDTUFEGhwSCjIwMjYtMTEtMjIoAWoFEgNNQURyBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-20",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|MAD|2026-12-11T19:30|2026-12-13T05:55|ITA@2026-12-11T19:30+ITA@FCO+ITA@2026-12-13T05:55+ITA@FCO",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "MAD",
+    "city": "Madrid",
+    "country": "Spagna"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "FCO",
+      "dep": "2026-12-11T19:30",
+      "arr": null,
+      "flight": "ITA@2026-12-11T19:30",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "MAD",
+      "dep": null,
+      "arr": "2026-12-12T00:05",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     55
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "MAD",
+      "to": "FCO",
+      "dep": "2026-12-13T05:55",
+      "arr": null,
+      "flight": "ITA@2026-12-13T05:55",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BRI",
+      "dep": null,
+      "arr": "2026-12-13T10:35",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     70
+    ]
+   },
+   "price": 186,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTItMTEoAWoFEgNCUklyBRIDTUFEGhwSCjIwMjYtMTItMTMoAWoFEgNNQURyBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-12-11",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|MAD|2026-12-11T19:30|2026-12-13T18:00|ITA@2026-12-11T19:30+ITA@FCO+ITA@2026-12-13T18:00+ITA@FCO",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "MAD",
+    "city": "Madrid",
+    "country": "Spagna"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "FCO",
+      "dep": "2026-12-11T19:30",
+      "arr": null,
+      "flight": "ITA@2026-12-11T19:30",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "MAD",
+      "dep": null,
+      "arr": "2026-12-12T00:05",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     55
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "MAD",
+      "to": "FCO",
+      "dep": "2026-12-13T18:00",
+      "arr": null,
+      "flight": "ITA@2026-12-13T18:00",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BRI",
+      "dep": null,
+      "arr": "2026-12-13T23:00",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     80
+    ]
+   },
+   "price": 186,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTItMTEoAWoFEgNCUklyBRIDTUFEGhwSCjIwMjYtMTItMTMoAWoFEgNNQURyBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-12-11",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BDS|MXP|2026-12-19T07:55|2026-12-20T19:25|Ryanair. Operato da Malta Air@2026-12-19T07:55+Ryanair. Operato da Malta Air@2026-12-20T19:25",
+   "source": "google",
+   "origin": "BDS",
+   "destination": {
+    "code": "MXP",
+    "city": "Milano",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BDS",
+      "to": "MXP",
+      "dep": "2026-12-19T07:55",
+      "arr": "2026-12-19T09:40",
+      "flight": "Ryanair. Operato da Malta Air@2026-12-19T07:55",
+      "airline": "Ryanair. Operato da Malta Air"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "MXP",
+      "to": "BDS",
+      "dep": "2026-12-20T19:25",
+      "arr": "2026-12-20T21:10",
+      "flight": "Ryanair. Operato da Malta Air@2026-12-20T19:25",
+      "airline": "Ryanair. Operato da Malta Air"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 191,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTItMTkoAWoFEgNCRFNyBRIDTVhQGhwSCjIwMjYtMTItMjAoAWoFEgNNWFByBRIDQkRTQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-12-18",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|BCN|2026-11-27T19:30|2026-11-29T06:20|ITA@2026-11-27T19:30+ITA@FCO+ITA@2026-11-29T06:20+ITA@FCO",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "BCN",
+    "city": "Barcellona",
+    "country": "Spagna"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "FCO",
+      "dep": "2026-11-27T19:30",
+      "arr": null,
+      "flight": "ITA@2026-11-27T19:30",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BCN",
+      "dep": null,
+      "arr": "2026-11-27T23:15",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     45
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "BCN",
+      "to": "FCO",
+      "dep": "2026-11-29T06:20",
+      "arr": null,
+      "flight": "ITA@2026-11-29T06:20",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BRI",
+      "dep": null,
+      "arr": "2026-11-29T10:35",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     80
+    ]
+   },
+   "price": 193,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMjcoAWoFEgNCUklyBRIDQkNOGhwSCjIwMjYtMTEtMjkoAWoFEgNCQ05yBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-27",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|PMO|2026-11-28T06:30|2026-11-29T19:05|ITA@2026-11-28T06:30+ITA@FCO+ITA@2026-11-29T19:05+ITA@FCO",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "PMO",
+    "city": "Palermo",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "FCO",
+      "dep": "2026-11-28T06:30",
+      "arr": null,
+      "flight": "ITA@2026-11-28T06:30",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "PMO",
+      "dep": null,
+      "arr": "2026-11-28T11:50",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     180
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "PMO",
+      "to": "FCO",
+      "dep": "2026-11-29T19:05",
+      "arr": null,
+      "flight": "ITA@2026-11-29T19:05",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BRI",
+      "dep": null,
+      "arr": "2026-11-29T23:00",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     90
+    ]
+   },
+   "price": 193,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMjgoAWoFEgNCUklyBRIDUE1PGhwSCjIwMjYtMTEtMjkoAWoFEgNQTU9yBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-27",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|BUD|2026-11-14T20:35|2026-11-15T09:30|Ryanair. Operato da Ryanair Sun@2026-11-14T20:35+Ryanair. Operato da Ryanair Sun@2026-11-15T09:30",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "BUD",
+    "city": "Budapest",
+    "country": "Ungheria"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "BUD",
+      "dep": "2026-11-14T20:35",
+      "arr": "2026-11-14T22:05",
+      "flight": "Ryanair. Operato da Ryanair Sun@2026-11-14T20:35",
+      "airline": "Ryanair. Operato da Ryanair Sun"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "BUD",
+      "to": "BRI",
+      "dep": "2026-11-15T09:30",
+      "arr": "2026-11-15T11:00",
+      "flight": "Ryanair. Operato da Ryanair Sun@2026-11-15T09:30",
+      "airline": "Ryanair. Operato da Ryanair Sun"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 194,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMTQoAWoFEgNCUklyBRIDQlVEGhwSCjIwMjYtMTEtMTUoAWoFEgNCVURyBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-13",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|FLR|2026-12-11T19:30|2026-12-13T06:25|ITA@2026-12-11T19:30+ITA@FCO+ITA@2026-12-13T06:25+ITA@FCO",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "FLR",
+    "city": "Firenze",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "FCO",
+      "dep": "2026-12-11T19:30",
+      "arr": null,
+      "flight": "ITA@2026-12-11T19:30",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "FLR",
+      "dep": null,
+      "arr": "2026-12-11T22:45",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     70
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "FLR",
+      "to": "FCO",
+      "dep": "2026-12-13T06:25",
+      "arr": null,
+      "flight": "ITA@2026-12-13T06:25",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BRI",
+      "dep": null,
+      "arr": "2026-12-13T10:35",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     125
+    ]
+   },
+   "price": 194,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTItMTEoAWoFEgNCUklyBRIDRkxSGhwSCjIwMjYtMTItMTMoAWoFEgNGTFJyBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-12-11",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|FLR|2026-12-11T19:30|2026-12-13T15:30|ITA@2026-12-11T19:30+ITA@FCO+ITA@2026-12-13T15:30+ITA@FCO",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "FLR",
+    "city": "Firenze",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "FCO",
+      "dep": "2026-12-11T19:30",
+      "arr": null,
+      "flight": "ITA@2026-12-11T19:30",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "FLR",
+      "dep": null,
+      "arr": "2026-12-11T22:45",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     70
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "FLR",
+      "to": "FCO",
+      "dep": "2026-12-13T15:30",
+      "arr": null,
+      "flight": "ITA@2026-12-13T15:30",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BRI",
+      "dep": null,
+      "arr": "2026-12-13T18:45",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     70
+    ]
+   },
+   "price": 194,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTItMTEoAWoFEgNCUklyBRIDRkxSGhwSCjIwMjYtMTItMTMoAWoFEgNGTFJyBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-12-11",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  },
+  {
+   "id": "BRI|VCE|2026-11-21T06:30|2026-11-22T19:25|ITA@2026-11-21T06:30+ITA@FCO+ITA@2026-11-22T19:25+ITA@FCO",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "VCE",
+    "city": "Venezia",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "FCO",
+      "dep": "2026-11-21T06:30",
+      "arr": null,
+      "flight": "ITA@2026-11-21T06:30",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "VCE",
+      "dep": null,
+      "arr": "2026-11-21T10:30",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     100
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "VCE",
+      "to": "FCO",
+      "dep": "2026-11-22T19:25",
+      "arr": null,
+      "flight": "ITA@2026-11-22T19:25",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BRI",
+      "dep": null,
+      "arr": "2026-11-22T23:00",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     70
+    ]
+   },
+   "price": 197,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMjEoAWoFEgNCUklyBRIDVkNFGhwSCjIwMjYtMTEtMjIoAWoFEgNWQ0VyBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-20",
+   "seenAt": "2026-11-14T12:53:11.810Z"
+  }
+ ]
+}
