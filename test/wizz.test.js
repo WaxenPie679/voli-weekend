@@ -1,0 +1,65 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { DateTime } from 'luxon';
+import { upcomingWeekends } from '../src/weekends.js';
+import { parseWizzVersion, parseWizzRoutes, pairWizzFares, estimateMinutes, timetableWindows } from '../src/sources/wizz.js';
+
+const map = JSON.parse(readFileSync(new URL('./fixtures/wizz-map.json', import.meta.url)));
+const tt = JSON.parse(readFileSync(new URL('./fixtures/wizz-timetable.json', import.meta.url)));
+const weekends = upcomingWeekends(DateTime.fromISO('2026-11-02T10:00Z'));
+const SEEN = '2026-11-02T10:00:00Z';
+
+test('parseWizzVersion legge la versione dalla home', () => {
+  assert.equal(parseWizzVersion('<script src="https://be.wizzair.com/29.23.1/Api/x">'), '29.23.1');
+  assert.throws(() => parseWizzVersion('<html></html>'));
+});
+
+test('parseWizzRoutes elenca le rotte da BRI e BDS senza duplicati', () => {
+  const r = parseWizzRoutes(map, ['BRI', 'BDS']);
+  assert.ok(r.length > 0);
+  const keys = r.map((x) => `${x.origin}-${x.code}`);
+  assert.equal(new Set(keys).size, keys.length);
+  const bud = r.find((x) => x.origin === 'BRI' && x.code === 'BUD');
+  assert.equal(bud.city, 'Budapest');
+  assert.equal(bud.country, 'Ungheria');
+  assert.ok(bud.km > 600 && bud.km < 900);
+});
+
+test('timetableWindows copre gli 8 weekend in finestre di massimo 30 giorni', () => {
+  const w = timetableWindows(weekends);
+  assert.equal(w[0].from, '2026-11-06');
+  assert.equal(w.at(-1).to, '2026-12-27');
+  for (const x of w) assert.ok(DateTime.fromISO(x.to).diff(DateTime.fromISO(x.from), 'days').days <= 29);
+});
+
+test('timetableWindows: ogni weekend sta tutto dentro una finestra', () => {
+  const w = timetableWindows(weekends);
+  for (const wk of weekends) assert.ok(w.some((x) => x.from <= wk.friday && wk.sunday <= x.to), wk.friday);
+});
+
+test('pairWizzFares abbina andata ven/sab e ritorno domenica dello stesso weekend', () => {
+  const route = parseWizzRoutes(map, ['BRI']).find((x) => x.code === 'BUD');
+  const its = pairWizzFares(tt, route, weekends, SEEN);
+  const sat = its.find((i) => i.outbound.segments[0].dep === '2026-11-07T15:20');
+  assert.equal(sat.price, 101.98);
+  assert.equal(sat.inbound.segments[0].dep, '2026-11-08T13:30');
+  assert.equal(sat.weekend, '2026-11-06');
+  assert.equal(sat.source, 'wizz');
+  assert.equal(sat.inbound.arrivalEstimated, true);
+  assert.match(sat.bookingUrl, /wizzair\.com.*BRI\/BUD\/2026-11-07\/2026-11-08/);
+  // weekend del 20: ritorno domenica senza prezzo (0) → nessuna coppia
+  assert.equal(its.filter((i) => i.weekend === '2026-11-20').length, 0);
+  for (const i of its) {
+    const o = DateTime.fromISO(i.outbound.segments[0].dep);
+    const r = DateTime.fromISO(i.inbound.segments[0].dep);
+    assert.ok([5, 6].includes(o.weekday));
+    assert.equal(r.weekday, 7);
+    assert.ok(r.diff(o, 'days').days < 3);
+  }
+});
+
+test('estimateMinutes: 760 km ≈ 1h30', () => {
+  const m = estimateMinutes(760);
+  assert.ok(m >= 80 && m <= 100);
+});
