@@ -61,7 +61,7 @@ export function formatAlert(it) {
 }
 
 export const WEBAPP_URL = 'https://waxenpie679.github.io/voli-weekend/';
-const DIGEST_MAX = 10;
+const DIGEST_MAX = 8;
 
 /** Un solo messaggio per giro: i migliori DIGEST_MAX, poi il conteggio degli altri. */
 export function formatDigest(items, threshold = CONSTRAINTS.alertThreshold) {

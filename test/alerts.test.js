@@ -93,7 +93,7 @@ test('processAlerts: invio fallito non registra l\'itinerario, invio riuscito s�
   assert.equal(JSON.parse(await readFile(join(dir, 'alerts_state.json'), 'utf8'))[it(50).id].price, 50);
 });
 
-test('processAlerts: tanti voli nuovi → un solo messaggio riepilogativo con i 10 migliori', async () => {
+test('processAlerts: tanti voli nuovi → un solo messaggio riepilogativo con gli 8 migliori, sotto i 4096 caratteri', async () => {
   const { mkdtemp } = await import('node:fs/promises');
   const dir = await mkdtemp(join(tmpdir(), 'voli-'));
   const many = Array.from({ length: 25 }, (_, n) => it(40 + n, {
@@ -105,9 +105,10 @@ test('processAlerts: tanti voli nuovi → un solo messaggio riepilogativo con i 
   assert.equal(await processAlerts(dir, many, env, NOW, { fetchImpl, log: () => {} }), 25);
   assert.equal(sent.length, 1);
   assert.match(sent[0], /Città0\b/);
-  assert.match(sent[0], /Città9\b/);
-  assert.doesNotMatch(sent[0], /Città10\b/);
-  assert.match(sent[0], /altri 15/);
+  assert.match(sent[0], /Città7\b/);
+  assert.doesNotMatch(sent[0], /Città8\b/);
+  assert.ok(sent[0].length < 4096);
+  assert.match(sent[0], /altri 17/);
 });
 
 test('selectAlerts: stessa destinazione e weekend da più itinerari → una sola voce, la più economica', () => {
