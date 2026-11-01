@@ -1,0 +1,482 @@
+{
+ "generatedAt": "2026-11-24T14:14:52.187Z",
+ "sources": {
+  "google": {
+   "status": "ok",
+   "error": null,
+   "lastSuccessAt": "2026-11-24T14:14:52.187Z"
+  }
+ },
+ "itineraries": [
+  {
+   "id": "LIN|FRA|2027-01-09T07:00|2027-01-10T09:10|easyJet@2027-01-09T07:00+easyJet@2027-01-10T09:10",
+   "source": "google",
+   "origin": "LIN",
+   "destination": {
+    "code": "FRA",
+    "city": "Francoforte sul Meno",
+    "country": "Germania"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "LIN",
+      "to": "FRA",
+      "dep": "2027-01-09T07:00",
+      "arr": "2027-01-09T08:20",
+      "flight": "easyJet@2027-01-09T07:00",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "FRA",
+      "to": "LIN",
+      "dep": "2027-01-10T09:10",
+      "arr": "2027-01-10T10:20",
+      "flight": "easyJet@2027-01-10T09:10",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 67,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjctMDEtMDkoAWoFEgNMSU5yBRIDRlJBGhwSCjIwMjctMDEtMTAoAWoFEgNGUkFyBRIDTElOQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2027-01-08",
+   "seenAt": "2026-11-24T14:14:52.390Z"
+  },
+  {
+   "id": "LIN|FRA|2027-01-09T07:00|2027-01-10T20:20|easyJet@2027-01-09T07:00+easyJet@2027-01-10T20:20",
+   "source": "google",
+   "origin": "LIN",
+   "destination": {
+    "code": "FRA",
+    "city": "Francoforte sul Meno",
+    "country": "Germania"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "LIN",
+      "to": "FRA",
+      "dep": "2027-01-09T07:00",
+      "arr": "2027-01-09T08:20",
+      "flight": "easyJet@2027-01-09T07:00",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "FRA",
+      "to": "LIN",
+      "dep": "2027-01-10T20:20",
+      "arr": "2027-01-10T21:30",
+      "flight": "easyJet@2027-01-10T20:20",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 67,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjctMDEtMDkoAWoFEgNMSU5yBRIDRlJBGhwSCjIwMjctMDEtMTAoAWoFEgNGUkFyBRIDTElOQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2027-01-08",
+   "seenAt": "2026-11-24T14:14:52.390Z"
+  },
+  {
+   "id": "MXP|PMO|2026-12-05T22:05|2026-12-06T06:15|Wizz Air@2026-12-05T22:05+Wizz Air@2026-12-06T06:15",
+   "source": "google",
+   "origin": "MXP",
+   "destination": {
+    "code": "PMO",
+    "city": "Palermo",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "MXP",
+      "to": "PMO",
+      "dep": "2026-12-05T22:05",
+      "arr": "2026-12-05T23:55",
+      "flight": "Wizz Air@2026-12-05T22:05",
+      "airline": "Wizz Air"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "PMO",
+      "to": "MXP",
+      "dep": "2026-12-06T06:15",
+      "arr": "2026-12-06T08:05",
+      "flight": "Wizz Air@2026-12-06T06:15",
+      "airline": "Wizz Air"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 86,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTItMDUoAWoFEgNNWFByBRIDUE1PGhwSCjIwMjYtMTItMDYoAWoFEgNQTU9yBRIDTVhQQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-12-04",
+   "seenAt": "2026-11-24T14:14:52.390Z"
+  },
+  {
+   "id": "MXP|PMO|2026-12-05T22:05|2026-12-06T19:40|Wizz Air@2026-12-05T22:05+Wizz Air@2026-12-06T19:40",
+   "source": "google",
+   "origin": "MXP",
+   "destination": {
+    "code": "PMO",
+    "city": "Palermo",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "MXP",
+      "to": "PMO",
+      "dep": "2026-12-05T22:05",
+      "arr": "2026-12-05T23:55",
+      "flight": "Wizz Air@2026-12-05T22:05",
+      "airline": "Wizz Air"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "PMO",
+      "to": "MXP",
+      "dep": "2026-12-06T19:40",
+      "arr": "2026-12-06T21:30",
+      "flight": "Wizz Air@2026-12-06T19:40",
+      "airline": "Wizz Air"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 86,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTItMDUoAWoFEgNNWFByBRIDUE1PGhwSCjIwMjYtMTItMDYoAWoFEgNQTU9yBRIDTVhQQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-12-04",
+   "seenAt": "2026-11-24T14:14:52.390Z"
+  },
+  {
+   "id": "LIN|FRA|2026-12-19T17:15|2026-12-20T09:10|easyJet@2026-12-19T17:15+easyJet@2026-12-20T09:10",
+   "source": "google",
+   "origin": "LIN",
+   "destination": {
+    "code": "FRA",
+    "city": "Francoforte sul Meno",
+    "country": "Germania"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "LIN",
+      "to": "FRA",
+      "dep": "2026-12-19T17:15",
+      "arr": "2026-12-19T18:35",
+      "flight": "easyJet@2026-12-19T17:15",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "FRA",
+      "to": "LIN",
+      "dep": "2026-12-20T09:10",
+      "arr": "2026-12-20T10:20",
+      "flight": "easyJet@2026-12-20T09:10",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 102,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTItMTkoAWoFEgNMSU5yBRIDRlJBGhwSCjIwMjYtMTItMjAoAWoFEgNGUkFyBRIDTElOQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-12-18",
+   "seenAt": "2026-11-24T14:14:52.390Z"
+  },
+  {
+   "id": "MXP|BCN|2026-12-05T21:35|2026-12-06T13:25|easyJet@2026-12-05T21:35+easyJet@2026-12-06T13:25",
+   "source": "google",
+   "origin": "MXP",
+   "destination": {
+    "code": "BCN",
+    "city": "Barcellona",
+    "country": "Spagna"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "MXP",
+      "to": "BCN",
+      "dep": "2026-12-05T21:35",
+      "arr": "2026-12-05T23:15",
+      "flight": "easyJet@2026-12-05T21:35",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "BCN",
+      "to": "MXP",
+      "dep": "2026-12-06T13:25",
+      "arr": "2026-12-06T15:05",
+      "flight": "easyJet@2026-12-06T13:25",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 105,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTItMDUoAWoFEgNNWFByBRIDQkNOGhwSCjIwMjYtMTItMDYoAWoFEgNCQ05yBRIDTVhQQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-12-04",
+   "seenAt": "2026-11-24T14:14:52.390Z"
+  },
+  {
+   "id": "MXP|BCN|2026-12-05T21:35|2026-12-06T22:05|easyJet@2026-12-05T21:35+easyJet@2026-12-06T22:05",
+   "source": "google",
+   "origin": "MXP",
+   "destination": {
+    "code": "BCN",
+    "city": "Barcellona",
+    "country": "Spagna"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "MXP",
+      "to": "BCN",
+      "dep": "2026-12-05T21:35",
+      "arr": "2026-12-05T23:15",
+      "flight": "easyJet@2026-12-05T21:35",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "BCN",
+      "to": "MXP",
+      "dep": "2026-12-06T22:05",
+      "arr": "2026-12-06T23:45",
+      "flight": "easyJet@2026-12-06T22:05",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 116,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTItMDUoAWoFEgNNWFByBRIDQkNOGhwSCjIwMjYtMTItMDYoAWoFEgNCQ05yBRIDTVhQQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-12-04",
+   "seenAt": "2026-11-24T14:14:52.390Z"
+  },
+  {
+   "id": "LIN|FRA|2026-12-19T17:15|2026-12-20T20:20|easyJet@2026-12-19T17:15+easyJet@2026-12-20T20:20",
+   "source": "google",
+   "origin": "LIN",
+   "destination": {
+    "code": "FRA",
+    "city": "Francoforte sul Meno",
+    "country": "Germania"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "LIN",
+      "to": "FRA",
+      "dep": "2026-12-19T17:15",
+      "arr": "2026-12-19T18:35",
+      "flight": "easyJet@2026-12-19T17:15",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "FRA",
+      "to": "LIN",
+      "dep": "2026-12-20T20:20",
+      "arr": "2026-12-20T21:30",
+      "flight": "easyJet@2026-12-20T20:20",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 126,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTItMTkoAWoFEgNMSU5yBRIDRlJBGhwSCjIwMjYtMTItMjAoAWoFEgNGUkFyBRIDTElOQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-12-18",
+   "seenAt": "2026-11-24T14:14:52.390Z"
+  },
+  {
+   "id": "LIN|BCN|2027-01-08T19:00|2027-01-10T11:40|ITA@2027-01-08T19:00+ITA@FCO+ITA@2027-01-10T11:40+ITA@FCO",
+   "source": "google",
+   "origin": "LIN",
+   "destination": {
+    "code": "BCN",
+    "city": "Barcellona",
+    "country": "Spagna"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "LIN",
+      "to": "FCO",
+      "dep": "2027-01-08T19:00",
+      "arr": null,
+      "flight": "ITA@2027-01-08T19:00",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BCN",
+      "dep": null,
+      "arr": "2027-01-08T23:15",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     75
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "BCN",
+      "to": "FCO",
+      "dep": "2027-01-10T11:40",
+      "arr": null,
+      "flight": "ITA@2027-01-10T11:40",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "LIN",
+      "dep": null,
+      "arr": "2027-01-10T16:10",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     95
+    ]
+   },
+   "price": 174,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjctMDEtMDgoAWoFEgNMSU5yBRIDQkNOGhwSCjIwMjctMDEtMTAoAWoFEgNCQ05yBRIDTElOQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2027-01-08",
+   "seenAt": "2026-11-24T14:14:52.390Z"
+  },
+  {
+   "id": "LIN|BCN|2027-01-08T19:00|2027-01-10T16:50|ITA@2027-01-08T19:00+ITA@FCO+ITA@2027-01-10T16:50+ITA@FCO",
+   "source": "google",
+   "origin": "LIN",
+   "destination": {
+    "code": "BCN",
+    "city": "Barcellona",
+    "country": "Spagna"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "LIN",
+      "to": "FCO",
+      "dep": "2027-01-08T19:00",
+      "arr": null,
+      "flight": "ITA@2027-01-08T19:00",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BCN",
+      "dep": null,
+      "arr": "2027-01-08T23:15",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     75
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "BCN",
+      "to": "FCO",
+      "dep": "2027-01-10T16:50",
+      "arr": null,
+      "flight": "ITA@2027-01-10T16:50",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "LIN",
+      "dep": null,
+      "arr": "2027-01-10T22:15",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     145
+    ]
+   },
+   "price": 174,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjctMDEtMDgoAWoFEgNMSU5yBRIDQkNOGhwSCjIwMjctMDEtMTAoAWoFEgNCQ05yBRIDTElOQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2027-01-08",
+   "seenAt": "2026-11-24T14:14:52.390Z"
+  }
+ ]
+}

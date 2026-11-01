@@ -1,0 +1,181 @@
+{
+ "generatedAt": "2026-11-24T14:14:52.187Z",
+ "sources": {
+  "google": {
+   "status": "ok",
+   "error": null,
+   "lastSuccessAt": "2026-11-24T14:14:52.187Z"
+  }
+ },
+ "itineraries": [
+  {
+   "id": "BRI|AMS|2026-12-11T20:55|2026-12-13T05:30|Transavia@2026-12-11T20:55+Transavia@2026-12-13T05:30",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "AMS",
+    "city": "Amsterdam",
+    "country": "Paesi Bassi"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "AMS",
+      "dep": "2026-12-11T20:55",
+      "arr": "2026-12-11T23:40",
+      "flight": "Transavia@2026-12-11T20:55",
+      "airline": "Transavia"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "AMS",
+      "to": "BRI",
+      "dep": "2026-12-13T05:30",
+      "arr": "2026-12-13T07:55",
+      "flight": "Transavia@2026-12-13T05:30",
+      "airline": "Transavia"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 162,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTItMTEoAWoFEgNCUklyBRIDQU1TGhwSCjIwMjYtMTItMTMoAWoFEgNBTVNyBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-12-11",
+   "seenAt": "2026-11-24T14:14:52.405Z"
+  },
+  {
+   "id": "BRI|MAD|2026-11-27T19:30|2026-11-29T05:55|ITA@2026-11-27T19:30+ITA@FCO+ITA@2026-11-29T05:55+ITA@FCO",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "MAD",
+    "city": "Madrid",
+    "country": "Spagna"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "FCO",
+      "dep": "2026-11-27T19:30",
+      "arr": null,
+      "flight": "ITA@2026-11-27T19:30",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "MAD",
+      "dep": null,
+      "arr": "2026-11-28T00:05",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     55
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "MAD",
+      "to": "FCO",
+      "dep": "2026-11-29T05:55",
+      "arr": null,
+      "flight": "ITA@2026-11-29T05:55",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BRI",
+      "dep": null,
+      "arr": "2026-11-29T10:35",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     70
+    ]
+   },
+   "price": 186,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTEtMjcoAWoFEgNCUklyBRIDTUFEGhwSCjIwMjYtMTEtMjkoAWoFEgNNQURyBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-11-27",
+   "seenAt": "2026-11-24T14:14:52.405Z"
+  },
+  {
+   "id": "BRI|BCN|2027-01-16T11:20|2027-01-17T06:20|ITA@2027-01-16T11:20+ITA@FCO+ITA@2027-01-17T06:20+ITA@FCO",
+   "source": "google",
+   "origin": "BRI",
+   "destination": {
+    "code": "BCN",
+    "city": "Barcellona",
+    "country": "Spagna"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "FCO",
+      "dep": "2027-01-16T11:20",
+      "arr": null,
+      "flight": "ITA@2027-01-16T11:20",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BCN",
+      "dep": null,
+      "arr": "2027-01-16T15:55",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     90
+    ]
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "BCN",
+      "to": "FCO",
+      "dep": "2027-01-17T06:20",
+      "arr": null,
+      "flight": "ITA@2027-01-17T06:20",
+      "airline": "ITA"
+     },
+     {
+      "from": "FCO",
+      "to": "BRI",
+      "dep": null,
+      "arr": "2027-01-17T10:35",
+      "flight": "ITA@FCO",
+      "airline": "ITA"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     75
+    ]
+   },
+   "price": 195,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjctMDEtMTYoAWoFEgNCUklyBRIDQkNOGhwSCjIwMjctMDEtMTcoAWoFEgNCQ05yBRIDQlJJQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2027-01-15",
+   "seenAt": "2026-11-24T14:14:52.405Z"
+  }
+ ]
+}

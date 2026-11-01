@@ -1,0 +1,151 @@
+{
+ "generatedAt": "2026-11-24T14:14:57.300Z",
+ "sources": {
+  "google": {
+   "status": "ok",
+   "error": null,
+   "lastSuccessAt": "2026-11-24T14:14:57.300Z"
+  }
+ },
+ "itineraries": [
+  {
+   "id": "FCO|ZRH|2026-12-12T06:00|2026-12-13T08:15|easyJet@2026-12-12T06:00+easyJet@2026-12-13T08:15",
+   "source": "google",
+   "origin": "FCO",
+   "destination": {
+    "code": "ZRH",
+    "city": "Zurigo",
+    "country": "Svizzera"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "FCO",
+      "to": "ZRH",
+      "dep": "2026-12-12T06:00",
+      "arr": "2026-12-12T07:40",
+      "flight": "easyJet@2026-12-12T06:00",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "ZRH",
+      "to": "FCO",
+      "dep": "2026-12-13T08:15",
+      "arr": "2026-12-13T09:50",
+      "flight": "easyJet@2026-12-13T08:15",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 104,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTItMTIoAWoFEgNGQ09yBRIDWlJIGhwSCjIwMjYtMTItMTMoAWoFEgNaUkhyBRIDRkNPQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-12-11",
+   "seenAt": "2026-11-24T14:14:57.725Z"
+  },
+  {
+   "id": "FCO|ZRH|2026-12-12T09:35|2026-12-13T12:35|SWISS@2026-12-12T09:35+SWISS e ITA. Operato da Helvetic@2026-12-13T12:35+SWISS e ITA. Operato da Helvetic@FLR",
+   "source": "google",
+   "origin": "FCO",
+   "destination": {
+    "code": "ZRH",
+    "city": "Zurigo",
+    "country": "Svizzera"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "FCO",
+      "to": "ZRH",
+      "dep": "2026-12-12T09:35",
+      "arr": "2026-12-12T11:20",
+      "flight": "SWISS@2026-12-12T09:35",
+      "airline": "SWISS"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "ZRH",
+      "to": "FLR",
+      "dep": "2026-12-13T12:35",
+      "arr": null,
+      "flight": "SWISS e ITA. Operato da Helvetic@2026-12-13T12:35",
+      "airline": "SWISS e ITA. Operato da Helvetic"
+     },
+     {
+      "from": "FLR",
+      "to": "FCO",
+      "dep": null,
+      "arr": "2026-12-13T16:25",
+      "flight": "SWISS e ITA. Operato da Helvetic@FLR",
+      "airline": "SWISS e ITA. Operato da Helvetic"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": [
+     100
+    ]
+   },
+   "price": 170,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTItMTIoAWoFEgNGQ09yBRIDWlJIGhwSCjIwMjYtMTItMTMoAWoFEgNaUkhyBRIDRkNPQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-12-11",
+   "seenAt": "2026-11-24T14:14:57.725Z"
+  },
+  {
+   "id": "FCO|ZRH|2026-12-12T06:00|2026-12-13T21:55|easyJet@2026-12-12T06:00+easyJet@2026-12-13T21:55",
+   "source": "google",
+   "origin": "FCO",
+   "destination": {
+    "code": "ZRH",
+    "city": "Zurigo",
+    "country": "Svizzera"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "FCO",
+      "to": "ZRH",
+      "dep": "2026-12-12T06:00",
+      "arr": "2026-12-12T07:40",
+      "flight": "easyJet@2026-12-12T06:00",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "ZRH",
+      "to": "FCO",
+      "dep": "2026-12-13T21:55",
+      "arr": "2026-12-13T23:30",
+      "flight": "easyJet@2026-12-13T21:55",
+      "airline": "easyJet"
+     }
+    ],
+    "selfTransfer": false,
+    "layovers": []
+   },
+   "price": 185,
+   "currency": "EUR",
+   "bookingUrl": "https://www.google.com/travel/flights/search?tfs=GhwSCjIwMjYtMTItMTIoAWoFEgNGQ09yBRIDWlJIGhwSCjIwMjYtMTItMTMoAWoFEgNaUkhyBRIDRkNPQAFIAZgBAQ&hl=it&gl=IT&curr=EUR",
+   "weekend": "2026-12-11",
+   "seenAt": "2026-11-24T14:14:57.725Z"
+  }
+ ]
+}
