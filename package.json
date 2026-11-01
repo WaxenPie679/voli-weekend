@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "luxon": "^3.7.2",
-    "playwright": "^1.64.1"
+    "playwright": "^1.64.1",
+    "web-push": "^3.6.7"
   }
 }

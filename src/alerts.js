@@ -4,6 +4,7 @@ import { DateTime } from 'luxon';
 import { CONSTRAINTS, layoverMinutes } from './filter.js';
 import { ZONE } from './weekends.js';
 import { sendTelegram } from './telegram.js';
+import { sendPush } from './push.js';
 
 export { sendTelegram };
 
@@ -74,15 +75,31 @@ export function formatDigest(items, threshold = CONSTRAINTS.alertThreshold) {
   return parts.join('\n\n');
 }
 
+const euro = (n) => `${n.toFixed(2).replace('.', ',').replace(',00', '')} €`;
+const origin = (it) => (it.origin === 'BRI' ? 'Bari' : 'Brindisi');
+
+/** Notifica dell'app: iOS ne mostra titolo e una riga, quindi solo il volo migliore. */
+export function formatPush(items, threshold = CONSTRAINTS.alertThreshold) {
+  const [best] = [...items].sort((a, b) => a.price - b.price);
+  const line = `weekend del ${fmtDay(best.weekend)} · da ${origin(best)}`;
+  return items.length === 1
+    ? { title: `${best.destination.city} a ${euro(best.price)}`, body: `${line[0].toUpperCase()}${line.slice(1)}`, url: WEBAPP_URL }
+    : { title: `${items.length} nuovi voli sotto ${threshold} €`, body: `Il migliore: ${best.destination.city} a ${euro(best.price)}, ${line}`, url: WEBAPP_URL };
+}
+
 /**
- * Legge lo stato, invia gli avvisi e salva lo stato aggiornato in `<dataDir>/<stateFile>`.
+ * Legge lo stato, invia gli avvisi (Telegram e/o notifica dell'app) e salva lo stato in `<dataDir>/<stateFile>`.
  * Ogni ricerca ha il suo file di stato: i due workflow pubblicano in momenti diversi e non devono sovrascriversi.
+ * Un avviso conta come inviato se almeno un canale lo consegna.
  */
-export async function processAlerts(dataDir, itineraries, env, now, { fetchImpl = fetch, log = console.log, stateFile = 'alerts_state.json' } = {}) {
-  const { TELEGRAM_BOT_TOKEN: token, TELEGRAM_CHAT_ID: chatId } = env;
-  if (!token || !chatId) {
-    // Senza credenziali non si tocca lo stato: gli avvisi partiranno quando il bot sarà configurato
-    log('avvisi: TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID mancanti, nessun invio');
+export async function processAlerts(dataDir, itineraries, env, now, { fetchImpl = fetch, pushImpl = sendPush, log = console.log, stateFile = 'alerts_state.json' } = {}) {
+  const { TELEGRAM_BOT_TOKEN: token, TELEGRAM_CHAT_ID: chatId, PUSH_SUBSCRIPTION: subscription, VAPID_PRIVATE_KEY: vapidKey } = env;
+  const channels = [];
+  if (token && chatId) channels.push(['Telegram', (items) => sendTelegram(formatDigest(items), { token, chatId, fetchImpl })]);
+  if (subscription && vapidKey) channels.push(['app', (items) => pushImpl(formatPush(items), { subscription, vapidKey })]);
+  if (!channels.length) {
+    // Senza canali configurati non si tocca lo stato: gli avvisi partiranno quando ce ne sarà uno
+    log('avvisi: nessun canale configurato (Telegram o notifica app), nessun invio');
     return 0;
   }
   const path = join(dataDir, stateFile);
@@ -90,14 +107,18 @@ export async function processAlerts(dataDir, itineraries, env, now, { fetchImpl 
   const { toSend, nextState } = selectAlerts(itineraries, state, { now });
   let sent = 0;
   if (toSend.length) {
-    try {
-      await sendTelegram(formatDigest(toSend), { token, chatId, fetchImpl });
-      sent = toSend.length;
-    } catch (err) {
-      // Invio fallito: si ripristina lo stato precedente così si riprova al prossimo giro
-      for (const it of toSend) { const g = alertGroup(it); if (state[g]) nextState[g] = state[g]; else delete nextState[g]; }
-      log(`avvisi: invio fallito: ${err.message}`);
+    let delivered = false;
+    for (const [name, send] of channels) {
+      try {
+        await send(toSend);
+        delivered = true;
+      } catch (err) {
+        log(`avvisi: invio ${name} fallito: ${err.message}`);
+      }
     }
+    if (delivered) sent = toSend.length;
+    // Nessun canale riuscito: si ripristina lo stato precedente così si riprova al prossimo giro
+    else for (const it of toSend) { const g = alertGroup(it); if (state[g]) nextState[g] = state[g]; else delete nextState[g]; }
   }
   await writeFile(path, JSON.stringify(nextState, null, 1));
   log(`avvisi: ${sent} inviati`);

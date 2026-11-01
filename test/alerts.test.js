@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { DateTime } from 'luxon';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { selectAlerts, formatAlert, sendTelegram, processAlerts } from '../src/alerts.js';
+import { selectAlerts, formatAlert, sendTelegram, processAlerts, formatPush, WEBAPP_URL } from '../src/alerts.js';
 
 const NOW = DateTime.fromISO('2026-11-02T10:00:00Z');
 
@@ -126,4 +126,40 @@ test('selectAlerts: stessa destinazione e weekend da più itinerari → una sola
   const b = it(60, { id: 'b' });
   const { toSend } = selectAlerts([a, b], {}, { now: NOW });
   assert.deepEqual(toSend.map((x) => x.id), ['b']);
+});
+
+test('formatPush: un volo → titolo con città e prezzo; più voli → conteggio e il migliore', () => {
+  const one = formatPush([it(46)]);
+  assert.equal(one.title, 'Budapest a 46 €');
+  assert.match(one.body, /^Weekend del ven 6 nov/);
+  assert.match(one.body, /da Bari/);
+  assert.equal(one.url, WEBAPP_URL);
+  const many = formatPush([it(70, { id: 'x' }), it(46.5, { id: 'y', destination: { code: 'TIA', city: 'Tirana', country: 'Albania' } })]);
+  assert.equal(many.title, '2 nuovi voli sotto 80 €');
+  assert.match(many.body, /^Il migliore: Tirana a 46,50 €/);
+});
+
+test('processAlerts: con solo la notifica push configurata invia e registra lo stato', async () => {
+  const { mkdtemp, readFile } = await import('node:fs/promises');
+  const dir = await mkdtemp(join(tmpdir(), 'voli-'));
+  const sent = [];
+  const pushImpl = async (payload) => { sent.push(payload); };
+  const env = { PUSH_SUBSCRIPTION: '{"endpoint":"https://push.test/x","keys":{}}', VAPID_PRIVATE_KEY: 'k' };
+  assert.equal(await processAlerts(dir, [it(50)], env, NOW, { pushImpl, stateFile: 's.json', log: () => {} }), 1);
+  assert.equal(sent.length, 1);
+  assert.equal(sent[0].title, 'Budapest a 50 €');
+  assert.ok(JSON.parse(await readFile(join(dir, 's.json'), 'utf8'))['BRI|BUD|2026-11-06']);
+});
+
+test('processAlerts: Telegram fallisce ma la push riesce → avviso registrato; falliscono entrambi → no', async () => {
+  const { mkdtemp, readFile } = await import('node:fs/promises');
+  const env = { TELEGRAM_BOT_TOKEN: 'T', TELEGRAM_CHAT_ID: '1', PUSH_SUBSCRIPTION: '{}', VAPID_PRIVATE_KEY: 'k' };
+  const tgFail = async () => new Response('', { status: 500 });
+  const read = async (d) => JSON.parse(await readFile(join(d, 's.json'), 'utf8'));
+  const d1 = await mkdtemp(join(tmpdir(), 'voli-'));
+  await processAlerts(d1, [it(50)], env, NOW, { fetchImpl: tgFail, pushImpl: async () => {}, stateFile: 's.json', log: () => {} });
+  assert.ok((await read(d1))['BRI|BUD|2026-11-06']);
+  const d2 = await mkdtemp(join(tmpdir(), 'voli-'));
+  await processAlerts(d2, [it(50)], env, NOW, { fetchImpl: tgFail, pushImpl: async () => { throw new Error('410'); }, stateFile: 's.json', log: () => {} });
+  assert.deepEqual(await read(d2), {});
 });

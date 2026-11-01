@@ -228,3 +228,21 @@ h1 { font-size: var(--fs-title); line-height: 1.2; font-weight: 500; letter-spac
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; }
 }
+
+/* Notifiche dell'app */
+.notify { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 6px; }
+.notify .btn-secondary { height: 32px; font-size: 13px; }
+.notify-hint { font-size: var(--fs-small); color: var(--muted); max-width: 60ch; }
+.sheet {
+  width: min(520px, calc(100vw - 32px)); border: 0; border-radius: var(--radius-card); padding: 24px;
+  background: var(--surface); color: var(--text); box-shadow: 0 12px 40px rgba(10, 10, 10, .18);
+}
+.sheet::backdrop { background: rgba(10, 10, 10, .35); }
+.sheet h2 { font-size: 16px; font-weight: 500; margin: 0 0 12px; }
+.sheet .steps { margin: 0 0 14px; padding-left: 20px; display: grid; gap: 6px; }
+.sheet a { color: var(--text); text-underline-offset: 3px; }
+.sheet textarea {
+  width: 100%; font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--muted);
+  border: 1px solid var(--control); border-radius: var(--radius-control); padding: 8px; resize: none; background: var(--ground);
+}
+.sheet-actions { display: flex; gap: 8px; margin-top: 14px; }

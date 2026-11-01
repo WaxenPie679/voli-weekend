@@ -280,3 +280,5 @@ load();
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => { /* la pagina funziona anche senza */ });
 }
+
+import('./notify.js').then((m) => m.initNotifications()).catch(() => { /* notifiche non disponibili */ });

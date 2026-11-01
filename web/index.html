@@ -38,7 +38,25 @@
       <h1>Le offerte migliori</h1>
       <p class="finding" id="finding" aria-live="polite">Carico le offerte…</p>
       <p class="stale-note" id="stale-note" hidden></p>
+      <div class="notify" id="notify" hidden>
+        <button type="button" class="btn-secondary" id="notify-btn">Attiva notifiche</button>
+        <p class="notify-hint" id="notify-hint"></p>
+      </div>
     </div>
+
+    <dialog class="sheet" id="notify-dialog" aria-labelledby="notify-title">
+      <h2 id="notify-title">Ultimo passaggio: copia il codice in GitHub</h2>
+      <ol class="steps">
+        <li>Tocca <b>Copia codice</b>.</li>
+        <li>Apri <a id="secrets-link" target="_blank" rel="noopener">i Secrets del repository</a> e crea un secret chiamato <b>PUSH_SUBSCRIPTION</b>.</li>
+        <li>Incolla il codice come valore e salva.</li>
+      </ol>
+      <textarea id="notify-code" readonly rows="5" aria-label="Codice di iscrizione alle notifiche"></textarea>
+      <div class="sheet-actions">
+        <button type="button" class="btn-book" id="notify-copy">Copia codice</button>
+        <button type="button" class="btn-secondary" id="notify-close">Chiudi</button>
+      </div>
+    </dialog>
 
     <details class="filters-box" id="filters-box" open>
       <summary><span>Filtri</span><span class="filters-summary" id="filters-summary"></span></summary>
