@@ -183,8 +183,22 @@ async function openResults(page, url) {
 const grab = (page) => page.locator(LEG_SELECTOR).evaluateAll((els) =>
   els.map((e) => ({ label: e.getAttribute('aria-label'), text: (e.closest('li') || e).innerText.replace(/\s+/g, ' ') })));
 
-/** Cerca la combinazione valida più economica per una destinazione, provando le 2 andate migliori. */
-async function bestItinerary(page, { origin, dest, depDate, w, seenAt, now, pauseMs }) {
+/** Fasce di ritorno della domenica: mattina, pomeriggio, sera (come per Ryanair). */
+const RETURN_BAND_STARTS = ['00:00', '12:00', '18:00'];
+const returnBand = (it) => RETURN_BAND_STARTS.findLastIndex((t) => it.inbound.segments[0].dep.slice(11) >= t);
+
+/** Il più economico per fascia di ritorno: così il filtro sulle ore di permanenza ha anche i soggiorni lunghi. */
+export function cheapestPerReturnBand(its) {
+  const best = new Map();
+  for (const it of its) {
+    const band = returnBand(it);
+    if (!best.has(band) || it.price < best.get(band).price) best.set(band, it);
+  }
+  return [...best.keys()].sort().map((b) => best.get(b));
+}
+
+/** Combinazioni valide per una destinazione (la più economica per fascia di ritorno), provando le 2 andate migliori. */
+async function bestItineraries(page, { origin, dest, depDate, w, seenAt, now, pauseMs }) {
   const tfs = encodeTfs([{ date: depDate, from: origin, to: dest.code }, { date: w.sunday, from: dest.code, to: origin }]);
   const url = `https://www.google.com/travel/flights/search?tfs=${tfs}&${BASE}`;
   await openResults(page, url);
@@ -194,7 +208,7 @@ async function bestItinerary(page, { origin, dest, depDate, w, seenAt, now, paus
   const goodOuts = outs.filter((o) => !o.leg.selfTransfer
     && o.leg.layovers.every((m) => m <= CONSTRAINTS.maxLayoverMinutes)
     && outboundOk(o, now)).slice(0, 2);
-  let best = null;
+  const valid = [];
   for (const o of goodOuts) {
     // Ricarica la lista delle andate e clicca quella scelta (l'header intercetta i click di Playwright)
     await openResults(page, url);
@@ -204,11 +218,11 @@ async function bestItinerary(page, { origin, dest, depDate, w, seenAt, now, paus
     await page.waitForTimeout(4000);
     for (const back of parseLegs(await grab(page), w.friday)) {
       const it = buildGoogleItinerary({ origin, destination: dest, out: o, back, weekend: w.friday, seenAt, bookingUrl: url });
-      if (isValid(it, now) && (!best || it.price < best.price)) best = it;
+      if (isValid(it, now)) valid.push(it);
     }
     if (pauseMs) await jitter(pauseMs / 2, pauseMs);
   }
-  return best;
+  return cheapestPerReturnBand(valid);
 }
 
 function outboundOk(o, now) {
@@ -245,8 +259,7 @@ export async function fetchGoogle(weekends, { pauseMs = 4000, perExplore = 5, lo
         for (const c of cands) {
           const dest = { code: c.code, city: c.city, country: c.country };
           try {
-            const it = await bestItinerary(page, { origin, dest, depDate, w, seenAt, now, pauseMs });
-            if (it) all.push(it);
+            all.push(...await bestItineraries(page, { origin, dest, depDate, w, seenAt, now, pauseMs }));
           } catch (err) {
             if (err.message === 'google-blocked') throw err;
             log(`google ${origin}→${c.code} ${depDate}: ${err.message.split('\n')[0]}`);

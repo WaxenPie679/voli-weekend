@@ -25,13 +25,14 @@ export function groupByWeekend(its) {
 
 export const isDirect = (it) => it.outbound.segments.length === 1 && it.inbound.segments.length === 1;
 
-export function applyFilters(its, { origin, directOnly, stopsOnly, maxPrice, airline, weekend } = {}) {
+export function applyFilters(its, { origin, directOnly, stopsOnly, maxPrice, airline, weekend, minStay } = {}) {
   return its.filter((it) => (!origin || it.origin === origin)
     && (!directOnly || isDirect(it))
     && (!stopsOnly || !isDirect(it))
     && (maxPrice == null || it.price <= maxPrice)
     && (!airline || it.outbound.segments[0].airline === airline)
-    && (!weekend || it.weekend === weekend));
+    && (!weekend || it.weekend === weekend)
+    && (!minStay || stayHours(it) >= minStay));
 }
 
 /** Una carta per destinazione: la più economica tra tutti i weekend e gli aeroporti. */

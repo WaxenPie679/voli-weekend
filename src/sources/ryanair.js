@@ -5,22 +5,28 @@ import { todayRome } from '../weekends.js';
 
 const API = 'https://www.ryanair.com/api/farfnd/v4/roundTripFares';
 
-/** Una query per aeroporto × weekend × giorno di andata (venerdì sera / sabato), saltando i giorni già passati. */
+// Il fare finder restituisce solo la combinazione più economica per destinazione: dividendo il ritorno
+// della domenica in fasce si ottengono anche i soggiorni più lunghi, per il filtro sulle ore di permanenza.
+const RETURN_BANDS = [['00:00', '11:59'], ['12:00', '17:59'], ['18:00', '23:59']];
+
+/** Una query per aeroporto × weekend × giorno di andata × fascia di ritorno, saltando i giorni già passati. */
 export function buildRyanairQueries(weekends, today = '') {
   const queries = [];
   for (const origin of CONSTRAINTS.origins) {
     for (const w of weekends) {
       for (const [day, from] of [[w.friday, CONSTRAINTS.fridayMinDeparture], [w.saturday, '00:00']]) {
         if (day < today) continue;
-        const p = new URLSearchParams({
-          departureAirportIataCode: origin,
-          outboundDepartureDateFrom: day, outboundDepartureDateTo: day,
-          outboundDepartureTimeFrom: from, outboundDepartureTimeTo: '23:59',
-          inboundDepartureDateFrom: w.sunday, inboundDepartureDateTo: w.sunday,
-          inboundDepartureTimeFrom: '00:00', inboundDepartureTimeTo: '23:59',
-          priceValueTo: String(CONSTRAINTS.maxPrice), currency: 'EUR', adultPaxCount: '1', market: 'it-it',
-        });
-        queries.push({ url: `${API}?${p}`, origin, weekend: w.friday });
+        for (const [retFrom, retTo] of RETURN_BANDS) {
+          const p = new URLSearchParams({
+            departureAirportIataCode: origin,
+            outboundDepartureDateFrom: day, outboundDepartureDateTo: day,
+            outboundDepartureTimeFrom: from, outboundDepartureTimeTo: '23:59',
+            inboundDepartureDateFrom: w.sunday, inboundDepartureDateTo: w.sunday,
+            inboundDepartureTimeFrom: retFrom, inboundDepartureTimeTo: retTo,
+            priceValueTo: String(CONSTRAINTS.maxPrice), currency: 'EUR', adultPaxCount: '1', market: 'it-it',
+          });
+          queries.push({ url: `${API}?${p}`, origin, weekend: w.friday });
+        }
       }
     }
   }
@@ -51,7 +57,7 @@ export function parseRyanair(json, origin, weekend, seenAt) {
   });
 }
 
-export async function fetchRyanair(weekends, { fetchImpl = fetch, pauseMs = 800 } = {}) {
+export async function fetchRyanair(weekends, { fetchImpl = fetch, pauseMs = 500 } = {}) {
   const seenAt = new Date().toISOString();
   const all = [];
   for (const q of buildRyanairQueries(weekends, todayRome())) {

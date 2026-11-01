@@ -89,3 +89,11 @@ test('romeNow formatta l\'ora di Roma come stringa locale', () => {
   assert.equal(romeNow(new Date('2026-11-06T18:30:00Z')), '2026-11-06T19:30');
   assert.equal(romeNow(new Date('2026-07-03T16:05:00Z')), '2026-07-03T18:05');
 });
+
+test('applyFilters minStay: tiene solo i soggiorni di almeno N ore', () => {
+  const short = it('short', { arr: '2026-11-07T20:00', back: '2026-11-08T06:00' }); // 10 h
+  const long = it('long'); // 45,3 h
+  assert.deepEqual(applyFilters([short, long], { minStay: 24 }).map((x) => x.id), ['long']);
+  assert.equal(applyFilters([short, long], { minStay: 0 }).length, 2);
+  assert.equal(applyFilters([short, long], { minStay: 10 }).length, 2);
+});

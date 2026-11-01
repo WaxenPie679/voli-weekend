@@ -45,6 +45,7 @@ const ageShort = (label) => label.replace('aggiornato ', '').replace(' min fa', 
 function emptyAdvice(f) {
   const tips = [];
   if (f.maxPrice < MAX_PRICE) tips.push('alzare il prezzo massimo');
+  if (f.minStay) tips.push('ridurre le ore sul posto');
   if (f.weekend) tips.push('scegliere tutti i weekend');
   if (f.origin) tips.push('includere entrambi gli aeroporti');
   if (f.directOnly || f.stopsOnly) tips.push('mostrare tutti i voli');
@@ -63,6 +64,7 @@ function readFilters() {
     weekend: d.get('weekend') || undefined,
     airline: d.get('airline') || undefined,
     maxPrice: Number(d.get('max')),
+    minStay: Number(d.get('stay')) || 0,
     perDest: d.get('perDest') === 'on',
   };
 }
@@ -95,6 +97,7 @@ function filtersSummary(f) {
   if (f.weekend) parts.push(`weekend ${fmtWeekend(f.weekend)}`);
   if (f.airline) parts.push(f.airline);
   parts.push(`fino a ${f.maxPrice} €`);
+  if (f.minStay) parts.push(`almeno ${f.minStay} h sul posto`);
   return parts.join(' · ');
 }
 
@@ -168,6 +171,7 @@ function renderPass(it) {
 function render() {
   const f = readFilters();
   $('max-out').textContent = `${f.maxPrice} €`;
+  $('stay-out').textContent = f.minStay ? `almeno ${f.minStay} h` : 'qualsiasi';
   $('filters-summary').textContent = filtersSummary(f);
   let its = applyFilters(all, f);
   const under = applyFilters(all, { ...f, maxPrice: Math.min(f.maxPrice, ALERT_THRESHOLD - 0.01) }).length;

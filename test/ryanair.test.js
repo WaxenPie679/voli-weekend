@@ -8,15 +8,17 @@ import { buildRyanairQueries, parseRyanair, fetchRyanair } from '../src/sources/
 const fixture = JSON.parse(readFileSync(new URL('./fixtures/ryanair-roundtrip.json', import.meta.url)));
 const weekends = upcomingWeekends(DateTime.fromISO('2026-11-02T10:00Z'));
 
-test('32 query: 2 aeroporti × 8 weekend × venerdì/sabato', () => {
+test('96 query: 2 aeroporti × 8 weekend × venerdì/sabato × 3 fasce di ritorno', () => {
   const q = buildRyanairQueries(weekends);
-  assert.equal(q.length, 32);
+  assert.equal(q.length, 96);
   const u = new URL(q[0].url);
   assert.equal(u.searchParams.get('departureAirportIataCode'), 'BRI');
   assert.equal(u.searchParams.get('outboundDepartureDateFrom'), '2026-11-06');
   assert.equal(u.searchParams.get('outboundDepartureTimeFrom'), '18:00');
   assert.equal(u.searchParams.get('inboundDepartureDateFrom'), '2026-11-08');
   assert.equal(u.searchParams.get('priceValueTo'), '200');
+  const bands = q.slice(0, 3).map((x) => new URL(x.url).searchParams);
+  assert.deepEqual(bands.map((p) => [p.get('inboundDepartureTimeFrom'), p.get('inboundDepartureTimeTo')]), [['00:00', '11:59'], ['12:00', '17:59'], ['18:00', '23:59']]);
   assert.equal(u.searchParams.get('currency'), 'EUR');
   assert.equal(q[0].origin, 'BRI');
   assert.equal(q[0].weekend, '2026-11-06');
@@ -48,7 +50,7 @@ test('fetchRyanair rifiuta su HTTP 500', async () => {
 test('fetchRyanair unisce i risultati di tutte le query', async () => {
   const fetchImpl = async () => new Response(JSON.stringify(fixture), { status: 200 });
   const its = await fetchRyanair(weekends.slice(0, 1), { fetchImpl, pauseMs: 0 });
-  assert.equal(its.length, fixture.fares.length * 4);
+  assert.equal(its.length, fixture.fares.length * 12);
 });
 
 test('di sabato non interroga il venerdì già passato', () => {
@@ -57,5 +59,5 @@ test('di sabato non interroga il venerdì già passato', () => {
   const days = q.map((x) => new URL(x.url).searchParams.get('outboundDepartureDateFrom'));
   assert.ok(!days.includes('2026-11-06'));
   assert.ok(days.includes('2026-11-07'));
-  assert.equal(q.length, 30);
+  assert.equal(q.length, 90);
 });
