@@ -6,8 +6,14 @@ set -euo pipefail
 cd "$1"
 git config user.name "github-actions[bot]"
 git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+# File temporanei di una scrittura interrotta (run.js scrive <file>.tmp e poi rinomina): mai nel commit
+find . -path ./.git -prune -o -type f -name '*.tmp' -print -delete
 git add -A
 if git diff --cached --quiet; then echo "nessuna modifica da pubblicare"; exit 0; fi
+# Ogni file del giorno nuovo o cambiato deve essere un gzip integro, altrimenti niente pubblicazione
+while IFS= read -r f; do
+  if ! gzip -t "$f" 2>/dev/null; then echo "file compresso danneggiato, pubblicazione annullata: $f" >&2; exit 1; fi
+done < <(git diff --cached --name-only --diff-filter=AM -- '*.csv.gz')
 msg="Storico $(date -u +%F)"
 git commit -q -m "$msg"
 for attempt in 1 2 3; do

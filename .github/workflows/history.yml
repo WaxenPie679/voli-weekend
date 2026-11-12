@@ -25,6 +25,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: bash scripts/prepare-history.sh
+      # Sotto il timeout del job (75): così il passo di pubblicazione ha tempo di girare
       - run: node src/history/run.js --dir ./history
+        timeout-minutes: 65
       - if: always()
         run: bash scripts/publish-history.sh ./history
