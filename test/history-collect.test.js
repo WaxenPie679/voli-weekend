@@ -129,3 +129,35 @@ test('fetchRetry: 429 poi 200 → risultato; 404 → errore subito', async () =>
   assert.equal(m, 1);
   await assert.rejects(fetchRetry(async () => status(429), 'https://x/y', undefined, { baseMs: 0 }), (e) => e.rateLimited === true);
 });
+
+test('collectRyanair: risposta 200 con forma inattesa ({}) → richiesta fallita, nessuna copertura', async () => {
+  const { fetchImpl } = ryanairFake(['TRN'], (u) => (u.includes('/BRI/TRN/') && u.includes('2026-12-01') ? json({}) : null));
+  const r = await collectRyanair('2026-11-12', { fetchImpl, pauseMs: false, log: () => {} });
+  assert.deepEqual(r.meta.missing, ['BRI-TRN 2026-12']);
+  assert.ok(!r.coverage.some((c) => c.origin === 'BRI' && c.from.startsWith('2026-12')));
+  assert.deepEqual([r.meta.routesOk, r.meta.requestsFailed, r.meta.requestsOk], [0, 1, 23]);
+});
+
+test('collectWizz: risposta 200 senza elenchi voli ({}) → finestra fallita, nessuna copertura', async () => {
+  const { fetchImpl } = wizzFake((url, init) => (init?.body?.includes('"from":"2026-12-12"') ? json({}) : null));
+  const r = await collectWizz('2026-11-12', { fetchImpl, pauseMs: false, log: () => {} });
+  assert.deepEqual(r.meta.missing, ['BRI-BUD 2026-12-12', 'BUD-BRI 2026-12-12']);
+  assert.equal(r.coverage.length, 24);
+  assert.equal(r.meta.requestsFailed, 1);
+});
+
+test('collectRyanair: elenco BRI ok ma BDS in errore → routesExpected 0 e routes vuoto', async () => {
+  const { fetchImpl } = ryanairFake(['TRN'], (u) => (u.includes('/airport/BDS') ? status(500) : null));
+  const r = await collectRyanair('2026-11-12', { fetchImpl, pauseMs: false, log: () => {} });
+  assert.equal(r.meta.routesExpected, 0);
+  assert.deepEqual(r.routes, []);
+  assert.match(r.meta.stoppedReason, /elenco tratte/);
+});
+
+test('collectRyanair: maxRoutes limita tratte e routesExpected', async () => {
+  const { fetchImpl, calls } = ryanairFake(['TRN', 'MXP']);
+  const r = await collectRyanair('2026-11-12', { fetchImpl, pauseMs: false, maxRoutes: 1, log: () => {} });
+  assert.equal(r.meta.routesExpected, 1);
+  assert.equal(r.routes.length, 1);
+  assert.equal(calls.filter((u) => u.includes('cheapestPerDay')).length, 24);
+});

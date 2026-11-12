@@ -84,6 +84,7 @@ export async function collectRyanair(today, { fetchImpl = fetch, pauseMs = true,
           const json = await fetchRetry(fetchImpl,
             `https://www.ryanair.com/api/farfnd/v4/oneWayFares/${from}/${to}/cheapestPerDay?outboundMonthOfDate=${m.param}&currency=EUR`,
             undefined, { baseMs: retryBaseMs });
+          if (!Array.isArray(json?.outbound?.fares)) throw new Error('risposta non valida');
           observations.push(...parseRyanairDays(json, from, to, today));
           coverage.push({ airline: 'ryanair', origin: from, dest: to, from: m.from, to: m.to });
           meta.requestsOk++;
