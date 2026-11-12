@@ -1,4 +1,4 @@
-import { test } from 'node:test';
+import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import { collectRyanair, collectWizz, fetchRetry } from '../src/history/collect.js';
 
@@ -160,4 +160,84 @@ test('collectRyanair: maxRoutes limita tratte e routesExpected', async () => {
   assert.equal(r.meta.routesExpected, 1);
   assert.equal(r.routes.length, 1);
   assert.equal(calls.filter((u) => u.includes('cheapestPerDay')).length, 24);
+});
+
+test('collectRyanair: mese con fares [] → nessuna osservazione né copertura, ma richiesta riuscita', async () => {
+  const { fetchImpl } = ryanairFake(['TRN'], (u) => (u.includes('/BRI/TRN/') && u.includes('2027-02-01') ? json({ outbound: { fares: [] } }) : null));
+  const r = await collectRyanair('2026-11-12', { fetchImpl, pauseMs: false, log: () => {} });
+  assert.ok(!r.coverage.some((c) => c.origin === 'BRI' && c.from.startsWith('2027-02')));
+  assert.equal(r.coverage.length, 23);
+  assert.equal(r.observations.length, 23);
+  assert.deepEqual(r.meta.missing, []);
+  assert.deepEqual([r.meta.routesOk, r.meta.requestsFailed, r.meta.requestsOk], [1, 0, 24]);
+});
+
+test('collectWizz: una direzione con elenco vuoto → copertura solo per l’altra, nessun errore', async () => {
+  const { fetchImpl } = wizzFake((url, init) => {
+    if (!init?.body?.includes('"from":"2026-12-12"')) return null;
+    return json({ outboundFlights: [], returnFlights: [wDay('2026-12-12')] });
+  });
+  const r = await collectWizz('2026-11-12', { fetchImpl, pauseMs: false, log: () => {} });
+  const win = r.coverage.filter((c) => c.from === '2026-12-12');
+  assert.deepEqual(win.map((c) => `${c.origin}-${c.dest}`), ['BUD-BRI']);
+  assert.equal(r.coverage.length, 25);
+  assert.deepEqual([r.meta.routesOk, r.meta.requestsFailed, r.meta.requestsOk], [1, 0, 13]);
+  assert.deepEqual(r.meta.missing, []);
+});
+
+test('collectRyanair: 10 errori di fila → fermata, il resto in missing; un successo azzera il conto', async () => {
+  // 9 errori, un successo, poi errori: si ferma al 10° errore dopo il successo
+  let n = 0;
+  const { fetchImpl } = ryanairFake(['TRN', 'MXP'], (u) => {
+    if (!u.includes('cheapestPerDay')) return null;
+    n++;
+    return n === 10 ? null : status(500);
+  });
+  const r = await collectRyanair('2026-11-12', { fetchImpl, pauseMs: false, log: () => {} });
+  assert.equal(r.meta.stoppedReason, 'troppi errori consecutivi');
+  assert.deepEqual([r.meta.requestsOk, r.meta.requestsFailed], [1, 19]);
+  assert.equal(n, 20);
+  assert.ok(r.meta.missing.includes('BRI-MXP'));
+  assert.ok(r.meta.missing.includes('TRN-BRI 2027-10'));
+  assert.equal(r.observations.length, 1);
+});
+
+test('collectWizz: errori di rete di fila → fermata per troppi errori consecutivi', async () => {
+  const { fetchImpl } = wizzFake((url) => (url.includes('search/timetable') ? Promise.reject(new Error('ECONNRESET')) : null));
+  const r = await collectWizz('2026-11-12', { fetchImpl, pauseMs: false, log: () => {} });
+  assert.equal(r.meta.stoppedReason, 'troppi errori consecutivi');
+  assert.equal(r.meta.requestsFailed, 10);
+  assert.equal(r.meta.missing.length, 26);
+});
+
+test('collectRyanair: tempo scaduto a metà → fermata «tempo», dati parziali tenuti, resto in missing', async () => {
+  let clock = 1000;
+  mock.method(Date, 'now', () => clock);
+  try {
+    const { fetchImpl } = ryanairFake(['TRN', 'MXP'], (u) => { if (u.includes('cheapestPerDay')) clock += 10; return null; });
+    const r = await collectRyanair('2026-11-12', { fetchImpl, pauseMs: false, log: () => {}, deadline: 1000 + 50 });
+    assert.equal(r.meta.stoppedReason, 'tempo');
+    assert.equal(r.meta.requestsOk, 5);
+    assert.equal(r.observations.length, 5);
+    assert.equal(r.coverage.length, 5);
+    assert.ok(r.meta.missing.includes('BRI-TRN 2027-04'));
+    assert.ok(r.meta.missing.includes('BRI-MXP'));
+    assert.equal(r.meta.routesOk, 0);
+  } finally { mock.restoreAll(); }
+});
+
+test('collectWizz: scadenza già passata → nessuna richiesta timetable, tratta intera in missing', async () => {
+  const { fetchImpl, bodies } = wizzFake();
+  const r = await collectWizz('2026-11-12', { fetchImpl, pauseMs: false, log: () => {}, deadline: Date.now() - 1 });
+  assert.equal(bodies.length, 0);
+  assert.equal(r.meta.stoppedReason, 'tempo');
+  assert.deepEqual(r.meta.missing, ['BRI-BUD']);
+  assert.deepEqual([r.meta.routesExpected, r.meta.routesOk], [1, 0]);
+});
+
+test('fetchRetry: ogni chiamata riceve un segnale con tempo massimo; scaduto → errore', async () => {
+  let seen;
+  const hang = (url, init) => { seen = init.signal; return new Promise((_, reject) => init.signal.addEventListener('abort', () => reject(init.signal.reason))); };
+  await assert.rejects(fetchRetry(hang, 'https://x/y', { method: 'POST' }, { baseMs: 0, timeoutMs: 20 }), (e) => e.name === 'TimeoutError');
+  assert.ok(seen instanceof AbortSignal);
 });

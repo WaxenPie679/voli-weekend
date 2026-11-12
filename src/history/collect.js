@@ -12,14 +12,22 @@ import { parseRyanairRoutes, parseRyanairDays, parseWizzDays } from './observe.j
 const MONTHS = 12;
 const WIZZ_WINDOW_DAYS = 30;
 const WIZZ_HORIZON_DAYS = 365;
+const FETCH_TIMEOUT_MS = 20000;
+/** Richieste fallite di fila dopo cui la compagnia si ferma (blocco prolungato). */
+const MAX_CONSECUTIVE_FAILURES = 10;
+
+/** `fetchImpl` con un tempo massimo per ogni chiamata (risposta e corpo compresi). */
+const withTimeout = (fetchImpl, timeoutMs) => (url, init) => fetchImpl(url, { ...init, signal: AbortSignal.timeout(timeoutMs) });
 
 /**
  * Scarica un JSON; su HTTP 429 attende baseMs × 2^tentativo e riprova.
  * Esauriti i tentativi lancia un errore con `rateLimited = true`; gli altri status non ok lanciano subito.
+ * Ogni chiamata ha un tempo massimo di `timeoutMs`: scaduto, lancia (conta come richiesta fallita).
  */
-export async function fetchRetry(fetchImpl, url, init, { retries = 3, baseMs = 30000 } = {}) {
+export async function fetchRetry(fetchImpl, url, init, { retries = 3, baseMs = 30000, timeoutMs = FETCH_TIMEOUT_MS } = {}) {
+  const timed = withTimeout(fetchImpl, timeoutMs);
   for (let attempt = 0; ; attempt++) {
-    const res = await fetchImpl(url, init);
+    const res = await timed(url, init);
     if (res.ok) return res.json();
     if (res.status !== 429) throw new Error(`HTTP ${res.status} ${url.split('?')[0]}`);
     if (attempt >= retries) {
@@ -35,6 +43,26 @@ const emptyMeta = () => ({ routesExpected: 0, routesOk: 0, requestsOk: 0, reques
 
 /** Pausa tra richieste: nessuna se `pauseMs` è falso. */
 const pause = (pauseMs, min, max) => (pauseMs ? jitter(min, max) : undefined);
+
+/**
+ * Tiene il conto degli errori di fila e del tempo: `check()` ferma la compagnia (stoppedReason) se il
+ * tempo è finito; `failed()` la ferma dopo MAX_CONSECUTIVE_FAILURES errori di fila; `ok()` azzera il conto.
+ */
+function stopper(meta, deadline) {
+  let streak = 0;
+  return {
+    check() {
+      if (!meta.stoppedReason && deadline != null && Date.now() >= deadline) meta.stoppedReason = 'tempo';
+      return meta.stoppedReason;
+    },
+    ok() { streak = 0; meta.requestsOk++; },
+    failed(err) {
+      meta.requestsFailed++;
+      if (err.rateLimited) meta.stoppedReason = '429';
+      else if (++streak >= MAX_CONSECUTIVE_FAILURES) meta.stoppedReason = 'troppi errori consecutivi';
+    },
+  };
+}
 
 const summary = (name, meta, log) =>
   log(`storico ${name}: ${meta.routesOk}/${meta.routesExpected} tratte complete, richieste ok ${meta.requestsOk}, fallite ${meta.requestsFailed}` +
@@ -54,10 +82,11 @@ function ryanairMonths(today) {
  * Raccoglie i prezzi giornalieri Ryanair (andata e ritorno di ogni tratta diretta da BRI/BDS), 12 mesi.
  * @returns {Promise<{observations:Obs[], coverage:Coverage[], routes:RouteInfo[], meta:AirlineMeta}>}
  */
-export async function collectRyanair(today, { fetchImpl = fetch, pauseMs = true, log = console.log, maxRoutes = Infinity, retryBaseMs = 30000 } = {}) {
+export async function collectRyanair(today, { fetchImpl = fetch, pauseMs = true, log = console.log, maxRoutes = Infinity, retryBaseMs = 30000, deadline = null } = {}) {
   const observations = [];
   const coverage = [];
   const meta = emptyMeta();
+  const stop = stopper(meta, deadline);
   const routes = [];
   try {
     for (const origin of CONSTRAINTS.origins) {
@@ -74,26 +103,28 @@ export async function collectRyanair(today, { fetchImpl = fetch, pauseMs = true,
   const months = ryanairMonths(today);
 
   for (const route of chosen) {
-    if (meta.stoppedReason) { meta.missing.push(`${route.origin}-${route.code}`); continue; }
+    if (stop.check()) { meta.missing.push(`${route.origin}-${route.code}`); continue; }
     let routeOk = true;
     const legs = [[route.origin, route.code], [route.code, route.origin]];
     for (const [from, to] of legs) {
       for (const m of months) {
-        if (meta.stoppedReason) { routeOk = false; meta.missing.push(`${from}-${to} ${m.month}`); continue; }
+        if (stop.check()) { routeOk = false; meta.missing.push(`${from}-${to} ${m.month}`); continue; }
         try {
           const json = await fetchRetry(fetchImpl,
             `https://www.ryanair.com/api/farfnd/v4/oneWayFares/${from}/${to}/cheapestPerDay?outboundMonthOfDate=${m.param}&currency=EUR`,
             undefined, { baseMs: retryBaseMs });
           if (!Array.isArray(json?.outbound?.fares)) throw new Error('risposta non valida');
-          observations.push(...parseRyanairDays(json, from, to, today));
-          coverage.push({ airline: 'ryanair', origin: from, dest: to, from: m.from, to: m.to });
-          meta.requestsOk++;
+          // Mese senza voli (tratte stagionali): richiesta riuscita, ma nessuna copertura
+          if (json.outbound.fares.length > 0) {
+            observations.push(...parseRyanairDays(json, from, to, today));
+            coverage.push({ airline: 'ryanair', origin: from, dest: to, from: m.from, to: m.to });
+          }
+          stop.ok();
         } catch (err) {
           routeOk = false;
-          meta.requestsFailed++;
           meta.missing.push(`${from}-${to} ${m.month}`);
           log(`ryanair ${from}→${to} ${m.month}: ${err.message}`);
-          if (err.rateLimited) meta.stoppedReason = '429';
+          stop.failed(err);
         }
         if (!meta.stoppedReason) await pause(pauseMs, 500, 1000);
       }
@@ -120,14 +151,15 @@ function wizzWindows(today) {
  * Raccoglie i prezzi giornalieri Wizz: una richiesta per tratta e finestra, andata e ritorno insieme.
  * @returns {Promise<{observations:Obs[], coverage:Coverage[], routes:RouteInfo[], meta:AirlineMeta}>}
  */
-export async function collectWizz(today, { fetchImpl = fetch, pauseMs = true, log = console.log, maxRoutes = Infinity, retryBaseMs = 30000 } = {}) {
+export async function collectWizz(today, { fetchImpl = fetch, pauseMs = true, log = console.log, maxRoutes = Infinity, retryBaseMs = 30000, deadline = null } = {}) {
   const observations = [];
   const coverage = [];
   const meta = emptyMeta();
+  const stop = stopper(meta, deadline);
   let base;
   let routes;
   try {
-    base = `https://be.wizzair.com/${await wizzVersion({ fetchImpl })}/Api`;
+    base = `https://be.wizzair.com/${await wizzVersion({ fetchImpl: withTimeout(fetchImpl, FETCH_TIMEOUT_MS) })}/Api`;
     const map = await fetchRetry(fetchImpl, `${base}/asset/map?languageCode=it-it`, undefined, { baseMs: retryBaseMs });
     routes = parseWizzRoutes(map, CONSTRAINTS.origins).map((r) => ({ airline: 'wizz', origin: r.origin, code: r.code, city: r.city, country: r.country }));
   } catch (err) {
@@ -140,14 +172,14 @@ export async function collectWizz(today, { fetchImpl = fetch, pauseMs = true, lo
   const windows = wizzWindows(today);
 
   for (const route of chosen) {
-    if (meta.stoppedReason) { meta.missing.push(`${route.origin}-${route.code}`); continue; }
+    if (stop.check()) { meta.missing.push(`${route.origin}-${route.code}`); continue; }
     let routeOk = true;
     for (const win of windows) {
       const lost = () => {
         routeOk = false;
         meta.missing.push(`${route.origin}-${route.code} ${win.from}`, `${route.code}-${route.origin} ${win.from}`);
       };
-      if (meta.stoppedReason) { lost(); continue; }
+      if (stop.check()) { lost(); continue; }
       try {
         const body = {
           flightList: [
@@ -159,19 +191,18 @@ export async function collectWizz(today, { fetchImpl = fetch, pauseMs = true, lo
         const tt = await fetchRetry(fetchImpl, `${base}/search/timetable`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
         }, { baseMs: retryBaseMs });
-        const out = parseWizzDays(tt.outboundFlights, route.origin, route.code, today);
-        const back = parseWizzDays(tt.returnFlights, route.code, route.origin, today);
-        observations.push(...out, ...back);
-        coverage.push(
-          { airline: 'wizz', origin: route.origin, dest: route.code, from: win.from, to: win.to },
-          { airline: 'wizz', origin: route.code, dest: route.origin, from: win.from, to: win.to },
-        );
-        meta.requestsOk++;
+        const directions = [[tt.outboundFlights, route.origin, route.code], [tt.returnFlights, route.code, route.origin]];
+        const parsed = directions.map(([list, from, to]) => parseWizzDays(list, from, to, today));
+        // Direzione con elenco vuoto: nessuna copertura per quella direzione, ma non è un errore
+        directions.forEach(([list, from, to], i) => {
+          observations.push(...parsed[i]);
+          if (list.length > 0) coverage.push({ airline: 'wizz', origin: from, dest: to, from: win.from, to: win.to });
+        });
+        stop.ok();
       } catch (err) {
-        meta.requestsFailed++;
         lost();
         log(`wizz ${route.origin}↔${route.code} ${win.from}: ${err.message}`);
-        if (err.rateLimited) meta.stoppedReason = '429';
+        stop.failed(err);
       }
       if (!meta.stoppedReason) await pause(pauseMs, 500, 1500);
     }

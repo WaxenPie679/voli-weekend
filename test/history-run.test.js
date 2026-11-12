@@ -1,6 +1,6 @@
 import { test, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, rm, readFile, writeFile, mkdir } from 'node:fs/promises';
+import { mkdtemp, rm, readFile, writeFile, mkdir, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -95,4 +95,62 @@ test('runHistory: elenco non scaricato → notListed vuoto, tratte note intatte'
   await runHistory(dir, { now: NOW.plus({ days: 1 }), collectors: fakeCollectors([], { routes: [], meta: dead }), log: () => {} });
   assert.deepEqual((await json('2026/11/2026-11-13.meta.json')).airlines.ryanair.notListed, []);
   assert.equal((await json('routes.json'))['ryanair|BRI|TRN'].lastSeen, '2026-11-12');
+});
+
+test('runHistory stesso giorno, stesso volo con prezzo nuovo → nel file solo l’ultimo prezzo', async () => {
+  await runHistory(dir, { now: NOW, collectors: fakeCollectors([obsA]), log: () => {} });
+  await runHistory(dir, { now: NOW.plus({ hours: 2 }), collectors: fakeCollectors([{ ...obsA, price: 45 }]), log: () => {} });
+  assert.deepEqual(await rows('2026/11/2026-11-12.csv.gz'), [{ ...obsA, price: 45 }]);
+  assert.equal((await json('2026/11/2026-11-12.meta.json')).rowsWritten, 1);
+});
+
+test('runHistory: file del giorno troncato → errore che ne riporta il nome', async () => {
+  await runHistory(dir, { now: NOW, collectors: fakeCollectors([obsA, obsB]), log: () => {} });
+  const buf = await rd('2026/11/2026-11-12.csv.gz');
+  await writeFile(join(dir, '2026/11/2026-11-12.csv.gz'), buf.subarray(0, buf.length - 10));
+  await assert.rejects(
+    runHistory(dir, { now: NOW.plus({ days: 1 }), collectors: fakeCollectors([obsA]), log: () => {} }),
+    /2026-11-12\.csv\.gz/,
+  );
+});
+
+test('runHistory: nessun file .tmp lasciato nella cartella', async () => {
+  await runHistory(dir, { now: NOW, collectors: fakeCollectors([obsA]), log: () => {} });
+  const all = await readdir(dir, { recursive: true });
+  assert.deepEqual(all.filter((f) => f.endsWith('.tmp')), []);
+  assert.ok(all.some((f) => f.endsWith('2026-11-12.csv.gz')));
+});
+
+test('runHistory: compagnie in parallelo con la stessa scadenza; l’errore di una non perde l’altra', async () => {
+  const started = [];
+  let release;
+  const gate = new Promise((r) => { release = r; });
+  const collectors = {
+    // Ryanair attende che Wizz sia partita: in sequenza resterebbe bloccata
+    ryanair: async (today, opts) => { started.push(['ryanair', opts.deadline]); await gate; return { observations: [obsA], coverage: [], routes: [routeTrn], meta: okMeta }; },
+    wizz: async (today, opts) => { started.push(['wizz', opts.deadline]); release(); throw new Error('rete assente'); },
+  };
+  const code = await runHistory(dir, { now: NOW, collectors, log: () => {}, deadline: 12345 });
+  assert.equal(code, 0);
+  assert.deepEqual(started.map(([, d]) => d), [12345, 12345]);
+  assert.deepEqual(await rows('2026/11/2026-11-12.csv.gz'), [obsA]);
+  assert.equal((await json('2026/11/2026-11-12.meta.json')).airlines.wizz.stoppedReason, 'rete assente');
+});
+
+test('runHistory: scadenza predefinita a 55 minuti dall’avvio', async () => {
+  let got;
+  const t0 = Date.now();
+  const collectors = { ...fakeCollectors([obsA]), ryanair: async (today, opts) => { got = opts.deadline; return { observations: [], coverage: [], routes: [], meta: okMeta }; } };
+  await runHistory(dir, { now: NOW, collectors, log: () => {} });
+  assert.ok(got >= t0 + 55 * 60000 && got <= Date.now() + 55 * 60000);
+});
+
+test('runHistory: i voli già partiti restano fuori dal confronto', async () => {
+  const past = { ...obsA, date: '2026-11-13' };
+  await runHistory(dir, { now: NOW, collectors: fakeCollectors([past, obsB]), log: () => {} });
+  // Il 14 il volo del 13 è passato: non torna come «nessun_volo» anche se l'intervallo è coperto
+  const cov = { airline: 'ryanair', origin: 'BRI', dest: 'TRN', from: '2026-11-01', to: '2026-12-31' };
+  const collectors = { ...fakeCollectors([]), ryanair: async () => ({ observations: [obsB], coverage: [cov], routes: [routeTrn], meta: okMeta }) };
+  await runHistory(dir, { now: NOW.plus({ days: 2 }), collectors, log: () => {} });
+  assert.equal(existsSync(join(dir, '2026/11/2026-11-14.csv.gz')), false);
 });
