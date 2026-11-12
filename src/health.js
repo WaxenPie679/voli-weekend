@@ -8,6 +8,7 @@ import { sendTelegram } from './telegram.js';
 
 export const WEBAPP_URL = 'https://waxenpie679.github.io/voli-weekend/';
 export const DATA_URL = 'https://raw.githubusercontent.com/WaxenPie679/voli-weekend/data/';
+export const HISTORY_URL = 'https://raw.githubusercontent.com/WaxenPie679/voli-weekend/history/';
 const WEBAPP_FILES = ['', 'app.js', 'view.js', 'config.js', 'notify.js', 'style.css', 'sw.js', 'manifest.webmanifest'];
 
 // Soglie per modalità: i diretti girano ogni 15 minuti, gli scali ogni 4 ore (e una ricerca Google dura a lungo).
@@ -40,6 +41,32 @@ export function checkData(file, mode, now) {
   for (const it of file.itineraries ?? []) if (it.source in counts) counts[it.source]++;
   if (!file.itineraries?.length) problems.push('nessun volo nei dati');
   else for (const [n, c] of Object.entries(counts)) if (!c) problems.push(`${n}: nessun volo nei dati (formato delle risposte cambiato?)`);
+  return problems;
+}
+
+const HISTORY_MAX_AGE_HOURS = 30;
+const HISTORY_MIN_COVERAGE = 0.5;
+const HISTORY_AIRLINES = ['ryanair', 'wizz'];
+
+// Sotto la metà delle tratte attese; una compagnia assente nel meta o senza elenco tratte vale 0
+const lowCoverage = (meta, airline) => {
+  const a = meta.airlines?.[airline];
+  return !a?.routesExpected || a.routesOk / a.routesExpected < HISTORY_MIN_COVERAGE;
+};
+
+/** Problemi della raccolta storica: `metas` dal più recente, solo quelli trovati. */
+export function checkHistory(metas, now) {
+  if (!metas.length) return ['nessuna raccolta trovata negli ultimi giorni'];
+  const problems = [];
+  const age = hoursSince(metas[0].finishedAt, now);
+  if (age > HISTORY_MAX_AGE_HOURS) problems.push(`storico fermo da ${fmtHours(age)} (ultima raccolta ${metas[0].finishedAt.slice(0, 16)} UTC)`);
+  const [last, prev] = metas;
+  const consecutive = prev && Math.round(DateTime.fromISO(last.day).diff(DateTime.fromISO(prev.day), 'days').days) === 1;
+  if (consecutive) {
+    for (const name of HISTORY_AIRLINES) {
+      if (lowCoverage(last, name) && lowCoverage(prev, name)) problems.push(`${name}: meno di metà delle tratte raccolte per due giorni di fila (${prev.day}, ${last.day})`);
+    }
+  }
   return problems;
 }
 
@@ -122,6 +149,19 @@ async function dataProblems(mode, now, fetchImpl) {
   return checkData(await res.json(), mode, now);
 }
 
+/** Scarica i meta di oggi, ieri e l'altro ieri (data di Roma); 404 = giorno senza raccolta. */
+async function historyProblems(now, fetchImpl) {
+  const metas = [];
+  for (let i = 0; i < 3; i++) {
+    const day = DateTime.fromISO(todayRome(now)).minus({ days: i }).toISODate();
+    const res = await fetchImpl(`${HISTORY_URL}${day.slice(0, 4)}/${day}.meta.json`, { cache: 'no-store' });
+    if (res.status === 404) continue;
+    if (!res.ok) throw new Error(`meta ${day} non raggiungibile: HTTP ${res.status}`);
+    metas.push(await res.json());
+  }
+  return checkHistory(metas, now);
+}
+
 async function telegramProblems(env, fetchImpl) {
   if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return ['mancano TELEGRAM_BOT_TOKEN o TELEGRAM_CHAT_ID'];
   const res = await fetchImpl(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/getMe`);
@@ -138,6 +178,7 @@ export function allChecks({ now = DateTime.now(), env = process.env, fetchImpl =
     'Ricerche scali (GitHub)': () => workflowProblems('connections', now, env, fetchImpl),
     'Ryanair risponde': () => probeRyanair(now, fetchImpl),
     'Wizz risponde': () => probeWizz(now, fetchImpl),
+    'Storico prezzi': () => historyProblems(now, fetchImpl),
     'Bot Telegram': () => telegramProblems(env, fetchImpl),
   };
 }

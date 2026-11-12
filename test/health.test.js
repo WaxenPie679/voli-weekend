@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { DateTime } from 'luxon';
-import { checkData, checkRuns, checkWebapp, runChecks, formatReport } from '../src/health.js';
+import { checkData, checkRuns, checkWebapp, checkHistory, runChecks, formatReport } from '../src/health.js';
 
 const NOW = DateTime.fromISO('2026-11-02T08:00:00Z');
 const ago = (h) => NOW.minus({ hours: h }).toUTC().toISO();
@@ -69,4 +69,27 @@ test('formatReport: elenca i controlli con ✅ e ❌ e i dettagli dei problemi',
   assert.match(text, /✅ Webapp/);
   assert.match(text, /❌ Wizz/);
   assert.match(text, /HTTP &lt;403&gt;/);
+});
+
+const meta = (day, finishedH, r = [10, 10], w = [5, 5]) => ({ day, finishedAt: ago(finishedH),
+  airlines: { ryanair: { routesExpected: r[0], routesOk: r[1] }, wizz: { routesExpected: w[0], routesOk: w[1] } } });
+
+test('checkHistory: raccolta recente e completa → nessun problema', () => {
+  assert.deepEqual(checkHistory([meta('2026-11-02', 4)], NOW), []);
+});
+test('checkHistory: nessuna raccolta da più di 30 ore', () => {
+  assert.match(checkHistory([meta('2026-11-01', 31)], NOW)[0], /storico.*31 ore/i);
+  assert.match(checkHistory([], NOW)[0], /nessuna raccolta/i);
+});
+test('checkHistory: meno di metà tratte per 2 giorni di fila → problema; per 1 giorno → no', () => {
+  assert.match(checkHistory([meta('2026-11-02', 4, [10, 4]), meta('2026-11-01', 28, [10, 3])], NOW).join('\n'), /ryanair/);
+  assert.deepEqual(checkHistory([meta('2026-11-02', 4, [10, 4]), meta('2026-11-01', 28)], NOW), []);
+});
+test('checkHistory: elenco tratte vuoto (routesExpected 0) conta come sotto la metà', () => {
+  assert.match(checkHistory([meta('2026-11-02', 4, [0, 0]), meta('2026-11-01', 28, [0, 0])], NOW).join('\n'), /ryanair/);
+});
+test('checkHistory: compagnia assente nel meta conta come 0 tratte; giorni non consecutivi non contano', () => {
+  const noWizz = (day, h) => ({ day, finishedAt: ago(h), airlines: { ryanair: { routesExpected: 10, routesOk: 10 } } });
+  assert.match(checkHistory([noWizz('2026-11-02', 4), noWizz('2026-11-01', 28)], NOW).join('\n'), /wizz/);
+  assert.deepEqual(checkHistory([meta('2026-11-02', 4, [10, 1]), meta('2026-10-31', 52, [10, 1])], NOW), []);
 });
