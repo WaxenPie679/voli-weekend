@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { DateTime } from 'luxon';
-import { checkData, checkRuns, checkWebapp, checkHistory, runChecks, formatReport } from '../src/health.js';
+import { checkData, checkRuns, checkWebapp, checkHistory, allChecks, HISTORY_URL, runChecks, formatReport } from '../src/health.js';
 
 const NOW = DateTime.fromISO('2026-11-02T08:00:00Z');
 const ago = (h) => NOW.minus({ hours: h }).toUTC().toISO();
@@ -92,4 +92,21 @@ test('checkHistory: compagnia assente nel meta conta come 0 tratte; giorni non c
   const noWizz = (day, h) => ({ day, finishedAt: ago(h), airlines: { ryanair: { routesExpected: 10, routesOk: 10 } } });
   assert.match(checkHistory([noWizz('2026-11-02', 4), noWizz('2026-11-01', 28)], NOW).join('\n'), /wizz/);
   assert.deepEqual(checkHistory([meta('2026-11-02', 4, [10, 1]), meta('2026-10-31', 52, [10, 1])], NOW), []);
+});
+
+test('checkHistory: routesOk non numerico → copertura bassa; meta senza finishedAt → problema chiaro', () => {
+  const bad = (day) => ({ day, finishedAt: ago(4), airlines: { ryanair: { routesExpected: 10 }, wizz: { routesExpected: 5, routesOk: 5 } } });
+  assert.match(checkHistory([bad('2026-11-02'), bad('2026-11-01')], NOW).join('\n'), /ryanair/);
+  assert.match(checkHistory([{ day: '2026-11-02', airlines: {} }], NOW)[0], /non ha l'ora di fine/);
+});
+
+test("allChecks 'Storico prezzi': scarica i meta in YYYY/MM/ e salta i 404", async () => {
+  const asked = [];
+  const fetchImpl = async (url) => {
+    asked.push(url);
+    if (url === `${HISTORY_URL}2026/11/2026-11-02.meta.json`) return { ok: true, status: 200, json: async () => meta('2026-11-02', 4) };
+    return { ok: false, status: 404 };
+  };
+  assert.deepEqual(await allChecks({ now: NOW, env: {}, fetchImpl })['Storico prezzi'](), []);
+  assert.deepEqual(asked, ['2026/11/2026-11-02', '2026/11/2026-11-01', '2026/10/2026-10-31'].map((d) => `${HISTORY_URL}${d.slice(0, 8)}${d.slice(8)}.meta.json`));
 });

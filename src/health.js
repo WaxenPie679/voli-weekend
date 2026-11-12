@@ -51,15 +51,15 @@ const HISTORY_AIRLINES = ['ryanair', 'wizz'];
 // Sotto la metà delle tratte attese; una compagnia assente nel meta o senza elenco tratte vale 0
 const lowCoverage = (meta, airline) => {
   const a = meta.airlines?.[airline];
-  return !a?.routesExpected || a.routesOk / a.routesExpected < HISTORY_MIN_COVERAGE;
+  return !a?.routesExpected || !(a.routesOk / a.routesExpected >= HISTORY_MIN_COVERAGE);
 };
 
 /** Problemi della raccolta storica: `metas` dal più recente, solo quelli trovati. */
 export function checkHistory(metas, now) {
   if (!metas.length) return ['nessuna raccolta trovata negli ultimi giorni'];
   const problems = [];
-  const age = hoursSince(metas[0].finishedAt, now);
-  if (age > HISTORY_MAX_AGE_HOURS) problems.push(`storico fermo da ${fmtHours(age)} (ultima raccolta ${metas[0].finishedAt.slice(0, 16)} UTC)`);
+  if (!metas[0].finishedAt) problems.push(`storico: la raccolta del ${metas[0].day ?? 'giorno sconosciuto'} non ha l'ora di fine (meta illeggibile)`);
+  else if (hoursSince(metas[0].finishedAt, now) > HISTORY_MAX_AGE_HOURS) problems.push(`storico fermo da ${fmtHours(hoursSince(metas[0].finishedAt, now))} (ultima raccolta ${metas[0].finishedAt.slice(0, 16)} UTC)`);
   const [last, prev] = metas;
   const consecutive = prev && Math.round(DateTime.fromISO(last.day).diff(DateTime.fromISO(prev.day), 'days').days) === 1;
   if (consecutive) {
@@ -154,7 +154,7 @@ async function historyProblems(now, fetchImpl) {
   const metas = [];
   for (let i = 0; i < 3; i++) {
     const day = DateTime.fromISO(todayRome(now)).minus({ days: i }).toISODate();
-    const res = await fetchImpl(`${HISTORY_URL}${day.slice(0, 4)}/${day}.meta.json`, { cache: 'no-store' });
+    const res = await fetchImpl(`${HISTORY_URL}${day.slice(0, 4)}/${day.slice(5, 7)}/${day}.meta.json`, { cache: 'no-store' });
     if (res.status === 404) continue;
     if (!res.ok) throw new Error(`meta ${day} non raggiungibile: HTTP ${res.status}`);
     metas.push(await res.json());
