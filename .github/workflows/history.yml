@@ -1,0 +1,30 @@
+name: Storico prezzi (Ryanair, Wizz)
+
+on:
+  schedule:
+    # Minuto non tondo, vedi direct.yml
+    - cron: '41 3 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: history
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: bash scripts/prepare-history.sh
+      - run: node src/history/run.js --dir ./history
+      - if: always()
+        run: bash scripts/publish-history.sh ./history

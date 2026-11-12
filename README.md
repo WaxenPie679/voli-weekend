@@ -13,6 +13,7 @@ I voli weekend più economici da **Bari (BRI)** e **Brindisi (BDS)**, verso qual
 |---|---|---|
 | Ryanair + Wizz Air (diretti) | GitHub Actions `direct.yml` | ogni 15 minuti (ai minuti :07, :22, :37, :52) |
 | Google Voli (scali e altre compagnie) | GitHub Actions `connections.yml` | ogni 4 ore |
+| Storico prezzi (Ryanair, Wizz) | GitHub Actions `history.yml`, branch `history` (un commit al giorno) | ogni giorno alle 03:41 UTC |
 | Dati | branch `data` (`direct.json`, `connections.json`) | a ogni ricerca |
 | Webapp | GitHub Pages, oppure in locale su http://127.0.0.1:5190 | sempre |
 | Avvisi | bot Telegram, un riepilogo per giro con i voli nuovi o ribassati sotto 80 € | a ogni ricerca |
@@ -37,6 +38,7 @@ Apri l'indirizzo GitHub Pages in Safari → Condividi → **Aggiungi alla scherm
 npm install
 npm test                          # tutti i test
 npm run direct                    # ricerca Ryanair + Wizz in ./data
+npm run history                   # raccolta storico prezzi in ./history
 npm run connections               # ricerca Google Voli in ./data (richiede: npx playwright install chromium)
 ```
 

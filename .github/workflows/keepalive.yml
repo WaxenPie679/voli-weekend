@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          for wf in direct.yml connections.yml health.yml keepalive.yml; do
+          for wf in direct.yml connections.yml health.yml history.yml keepalive.yml; do
             gh api -X PUT "repos/$GITHUB_REPOSITORY/actions/workflows/$wf/enable"
           done
         env:
