@@ -59,11 +59,11 @@ Branch `history`: `YYYY/MM/YYYY-MM-DD.csv.gz` con solo i cambiamenti del giorno 
 ### 7.1 Flusso
 
 1. Il workflow `history.yml`, dopo la raccolta e prima della pubblicazione, esegue un nuovo passo «riepilogo» (`node src/history/summary.js --dir ./history`).
-2. Il passo rigioca tutti i file giornalieri e scrive nella cartella `summary/` del branch `history`:
+2. Il passo rigioca tutti i file giornalieri e scrive il riepilogo, pubblicato sul branch separato `summary` (un solo commit sostituito ogni notte, come il branch `data`: così lo storico non cresce di qualche MB al giorno):
    - `summary/index.json`: elenco tratte con dati (origine, destinazione, città e paese presi da `routes.json`, compagnie), giorni raccolti, primo e ultimo giorno, ora di calcolo;
    - `summary/<ORIGINE>-<DESTINAZIONE>.json`: un file per coppia di aeroporti in quella direzione (es. andata `BDS-TRN.json`, ritorno `TRN-BDS.json`; Bari e Brindisi verso Torino sono file diversi), con entrambe le compagnie se volano entrambe.
 3. Se il passo fallisce, la pubblicazione dei dati del giorno avviene comunque (il riepilogo resta quello del giorno prima) e il log lo dice. *Scelta di Claude:* il riepilogo si scrive in una cartella temporanea `summary.tmp/` e solo a calcolo finito sostituisce `summary/`; se qualcosa va storto la cartella temporanea si cancella, così non si pubblicano mai file a metà. La cartella di lavoro `./history` contiene già tutti i file giornalieri (l'ultimo commit di `history` ha l'albero completo), quindi non serve cambiare `prepare-history.sh`.
-4. La pagina `web/storico.html` legge `index.json`, poi il file della tratta scelta, da `https://raw.githubusercontent.com/WaxenPie679/voli-weekend/history/summary/` (con `?sample=1` legge dati di esempio locali, come la pagina principale).
+4. La pagina `web/storico.html` legge `index.json`, poi il file della tratta scelta, da `https://raw.githubusercontent.com/WaxenPie679/voli-weekend/summary/` (con `?sample=1` legge dati di esempio locali, come la pagina principale).
 
 ### 7.2 Cosa contiene il riepilogo di una tratta
 
