@@ -32,3 +32,10 @@ test('file inesistente → 404', async () => {
 test('la porta 5180 di SMOT è rifiutata', () => {
   assert.throws(() => createServer({ port: 5180 }), /5180/);
 });
+
+test('serve la pagina Storico prezzi', async () => {
+  const res = await fetch(`${base}/storico.html`);
+  assert.equal(res.status, 200);
+  assert.match(res.headers.get('content-type'), /text\/html/);
+  assert.match(await res.text(), /Storico prezzi/);
+});

@@ -246,3 +246,68 @@ h1 { font-size: var(--fs-title); line-height: 1.2; font-weight: 500; letter-spac
   border: 1px solid var(--control); border-radius: var(--radius-control); padding: 8px; resize: none; background: var(--ground);
 }
 .sheet-actions { display: flex; gap: 8px; margin-top: 14px; }
+
+/* Pagina «Storico prezzi» */
+:root { --wizz: #b0127a; }
+.topnav { display: flex; align-items: center; gap: 16px; }
+.topbar-inner:has(.sources) .sources { margin-left: auto; }
+.nav-link { color: var(--text); font-weight: 500; font-size: 13px; text-decoration: none; white-space: nowrap; padding: 6px 0; }
+.nav-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.history-filters { margin-bottom: 20px; }
+.dest-field select { width: 220px; }
+.loading-note { color: var(--muted); padding: 24px 0; }
+.history { display: grid; gap: var(--gap); }
+.history-head { display: grid; gap: 4px; margin-bottom: 4px; }
+.route-title { font-size: 16px; font-weight: 500; line-height: 1.3; }
+.rise { display: grid; gap: 2px; color: var(--text); max-width: 70ch; }
+.rise b { font-weight: 500; }
+.chart-card { background: var(--surface); border-radius: var(--radius-card); padding: 18px 24px 16px; display: grid; gap: 10px; min-width: 0; }
+.chart-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
+.chart-head h3 { margin: 0; font-size: 16px; font-weight: 500; }
+.chart-sub, .chart-note { font-size: var(--fs-small); color: var(--muted); max-width: 80ch; }
+.chart-note:empty { display: none; }
+.legend { list-style: none; margin: 0; padding: 0; display: flex; gap: 14px; font-size: var(--fs-small); color: var(--muted); }
+.key, .tip-row { display: inline-flex; align-items: center; gap: 6px; }
+.swatch { width: 12px; height: 3px; border-radius: 2px; background: var(--c); flex: none; }
+.ryanair { --c: var(--hue); }
+.wizz { --c: var(--wizz); }
+.departure-field select { width: 200px; }
+.chart { position: relative; min-width: 0; }
+.chart-svg { display: block; width: 100%; height: auto; overflow: visible; touch-action: pan-y; font-size: 11px; cursor: crosshair; }
+.chart-svg:focus { outline: none; }
+.chart-svg:focus-visible { outline: 2px solid var(--hue); outline-offset: 2px; border-radius: 2px; }
+.chart-svg .grid line { stroke: var(--raised); stroke-width: 1; }
+.chart-svg .axis line { stroke: var(--control); stroke-width: 1; }
+.chart-svg .tick { fill: var(--muted); }
+.chart-svg .tick.y { text-anchor: end; dominant-baseline: middle; }
+.chart-svg .tick.x, .chart-svg .axis-label { text-anchor: middle; }
+.chart-svg .tick.x.end { text-anchor: end; }
+.chart-svg .axis-label { fill: var(--muted); }
+.chart-svg .series .line { fill: none; stroke: var(--c); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.chart-svg .series .band { fill: var(--c); fill-opacity: .12; stroke: none; }
+.chart-svg .series .dot { fill: var(--c); stroke: var(--surface); stroke-width: 1.5; }
+.chart-svg .rise-line { stroke: var(--c); stroke-width: 1.2; stroke-dasharray: 4 3; }
+.chart-svg .rise-label { fill: var(--c); text-anchor: end; font-size: 11px; }
+.chart-svg .guide { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 2; pointer-events: none; }
+.chart-tip {
+  position: absolute; top: 0; z-index: 2; pointer-events: none; display: grid; gap: 2px;
+  padding: 8px 10px; border-radius: var(--radius-control); background: var(--accent); color: #fff; font-size: var(--fs-small); white-space: nowrap;
+}
+.chart-tip .tip-title { font-weight: 500; }
+.chart-tip .ryanair { --c: #8fb6ec; }
+.chart-tip .wizz { --c: #f08cc9; }
+.chart-empty { color: var(--muted); padding: 16px 0; }
+
+@media (max-width: 720px) {
+  .topnav { gap: 12px; }
+  /* Con il link allo storico la barra non sta in 375 px: marchio e link sopra, fonti sotto */
+  .topbar-inner:has(.sources) { flex-wrap: wrap; height: auto; min-height: 48px; padding-top: 8px; padding-bottom: 8px; row-gap: 6px; }
+  .topbar-inner:has(.sources) .topnav { order: 2; }
+  .topbar-inner:has(.sources) .sources { order: 3; flex-basis: 100%; margin-left: 0; }
+  .history-filters { padding: 0; margin-bottom: 16px; }
+  .history-filters .seg-field { flex: 1 1 calc(50% - 6px); }
+  .history-filters .field { flex: 1 1 100%; }
+  .dest-field select, .departure-field select { width: 100%; height: 44px; }
+  .chart-card { padding: 16px; }
+  .chart-tip { white-space: normal; max-width: 100%; }
+}

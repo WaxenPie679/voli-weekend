@@ -26,6 +26,7 @@ export function riseText(rise, reliability) {
 }
 
 export function scale(d0, d1, r0, r1) {
+  if (d0 === d1) return () => (r0 + r1) / 2; // un solo valore (es. un giorno di storico): al centro
   return (v) => r0 + ((v - d0) / (d1 - d0)) * (r1 - r0);
 }
 

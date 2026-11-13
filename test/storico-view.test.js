@@ -31,6 +31,12 @@ test('scale lineare', () => {
   assert.equal(scale(0, 10, 200, 100)(2), 180);
 });
 
+test('scale con dominio di un solo valore → metà del range, mai NaN', () => {
+  const s = scale(5, 5, 100, 200);
+  assert.equal(s(5), 150);
+  assert.equal(s(7), 150);
+});
+
 test('priceDomain', () => {
   assert.deepEqual(priceDomain([32, 61]), [30, 70]);
   assert.deepEqual(priceDomain([50]), [40, 60]);
