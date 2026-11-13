@@ -136,7 +136,8 @@ export function buildSummary(days, routes, { generatedAt }) {
       info = routes[`${a}|${from}|${to}`] ?? routes[`${a}|${to}|${from}`];
       if (info) break;
     }
-    const city = info?.city ?? to;
+    // senza dati sulla tratta: codice dell'aeroporto estero (le basi di casa sono BRI e BDS)
+    const city = info?.city ?? (to === 'BRI' || to === 'BDS' ? from : to);
     const country = info?.country ?? '';
     const perAirline = {};
     for (const a of airlines) {

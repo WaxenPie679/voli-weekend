@@ -124,3 +124,9 @@ test('buildSummary: settimane oltre 52 confluiscono nella 52', () => {
   const c = buildSummary(days, routes, opts).files.get('BDS-TRN').airlines.ryanair.curve;
   assert.deepEqual(c, [[52, 40, 35, 45, 2]]);
 });
+
+test('buildSummary: tratta di ritorno assente da routes usa l\'aeroporto estero', () => {
+  const days = [{ day: '2026-11-12', rows: [row('ryanair', 'TRN', 'BDS', '2026-11-20', 'prezzo', 30)] }];
+  const { index } = buildSummary(days, {}, opts);
+  assert.deepEqual(index.routes, [{ from: 'TRN', to: 'BDS', city: 'TRN', country: '', airlines: ['ryanair'] }]);
+});
