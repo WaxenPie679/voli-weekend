@@ -149,7 +149,7 @@ const NOW = DateTime.fromISO('2026-11-13T03:00:00Z');
 test('writeSummary: scrive index e file di tratta, senza resti', async () => {
   const dir = await makeDir();
   try {
-    const res = await writeSummary(dir, { now: NOW, log: () => {} });
+    const res = await writeSummary(dir, { out: join(dir, 'summary'), now: NOW, log: () => {} });
     const index = JSON.parse(await readFile(join(dir, 'summary', 'index.json'), 'utf8'));
     const file = JSON.parse(await readFile(join(dir, 'summary', 'BDS-TRN.json'), 'utf8'));
     assert.equal(index.generatedAt, '2026-11-13T03:00:00.000Z');
@@ -166,7 +166,7 @@ test('writeSummary: la cartella summary viene sostituita intera', async () => {
   try {
     await mkdir(join(dir, 'summary'));
     await writeFile(join(dir, 'summary', 'VECCHIO-XXX.json'), '{}');
-    await writeSummary(dir, { now: NOW, log: () => {} });
+    await writeSummary(dir, { out: join(dir, 'summary'), now: NOW, log: () => {} });
     assert.deepEqual((await readdir(join(dir, 'summary'))).sort(), ['BDS-TRN.json', 'index.json']);
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
@@ -174,10 +174,10 @@ test('writeSummary: la cartella summary viene sostituita intera', async () => {
 test('writeSummary: con un file corrotto rifiuta e lascia intatto il riepilogo precedente', async () => {
   const dir = await makeDir();
   try {
-    await writeSummary(dir, { now: NOW, log: () => {} });
+    await writeSummary(dir, { out: join(dir, 'summary'), now: NOW, log: () => {} });
     const before = await readFile(join(dir, 'summary', 'index.json'), 'utf8');
     await writeFile(join(dir, '2026', '11', '2026-11-13.csv.gz'), 'non gzip');
-    await assert.rejects(writeSummary(dir, { now: NOW, log: () => {} }), /2026-11-13\.csv\.gz/);
+    await assert.rejects(writeSummary(dir, { out: join(dir, 'summary'), now: NOW, log: () => {} }), /2026-11-13\.csv\.gz/);
     assert.equal(await readFile(join(dir, 'summary', 'index.json'), 'utf8'), before);
     assert.ok(!existsSync(join(dir, 'summary.tmp')));
   } finally { await rm(dir, { recursive: true, force: true }); }

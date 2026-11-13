@@ -12,7 +12,7 @@
     "serve": "node scripts/serve.js",
     "direct": "node src/run.js direct --data ./data",
     "history": "node src/history/run.js --dir ./history",
-    "summary": "node src/history/summary.js --dir ./history",
+    "summary": "node src/history/summary.js --dir ./history --out ./summary",
     "connections": "node src/run.js connections --data ./data"
   },
   "dependencies": {

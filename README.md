@@ -39,7 +39,7 @@ npm install
 npm test                          # tutti i test
 npm run direct                    # ricerca Ryanair + Wizz in ./data
 npm run history                   # raccolta storico prezzi in ./history
-npm run summary                   # riepilogo per tratta in ./history/summary/ (curve e voli per i grafici)
+npm run summary                   # riepilogo per tratta in ./summary (pubblicato sul branch `summary`, rifatto ogni notte)
 npm run connections               # ricerca Google Voli in ./data (richiede: npx playwright install chromium)
 ```
 

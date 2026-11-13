@@ -169,14 +169,15 @@ export function buildSummary(days, routes, { generatedAt }) {
 }
 
 /**
- * Legge lo storico in `dir` e riscrive la cartella `summary/` (index.json + un file per tratta).
- * Si scrive prima in `summary.tmp/` e solo a lavoro finito si sostituisce `summary/`: in caso di
+ * Legge lo storico in `dir` e riscrive la cartella `out` (index.json + un file per tratta).
+ * Si scrive prima in `<out>.tmp/` e solo a lavoro finito si sostituisce `out`: in caso di
  * errore il riepilogo precedente resta intatto.
  * @returns {Promise<{routes:number, bytes:number}>}
  */
-export async function writeSummary(dir, { now = DateTime.now(), log = console.log } = {}) {
-  const tmp = join(dir, 'summary.tmp');
-  const final = join(dir, 'summary');
+export async function writeSummary(dir, { out, now = DateTime.now(), log = console.log } = {}) {
+  if (!out) throw new Error('writeSummary: manca la cartella di destinazione (out)');
+  const tmp = `${out}.tmp`;
+  const final = out;
   try {
     const days = [];
     for (const f of await listDayFiles(dir)) days.push({ day: f.name.slice(0, 10), rows: await readDayFile(dir, f.path) });
@@ -204,9 +205,9 @@ export async function writeSummary(dir, { now = DateTime.now(), log = console.lo
 }
 
 if (process.argv[1]?.endsWith('history/summary.js')) {
-  const i = process.argv.indexOf('--dir');
+  const arg = (name) => { const i = process.argv.indexOf(name); return i > 0 ? process.argv[i + 1] : undefined; };
   try {
-    await writeSummary((i > 0 && process.argv[i + 1]) || './history');
+    await writeSummary(arg('--dir') ?? './history', { out: arg('--out') });
   } catch (err) {
     console.error(`riepilogo fallito: ${err.message}`);
     process.exitCode = 1;

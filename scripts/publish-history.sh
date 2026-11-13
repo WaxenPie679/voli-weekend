@@ -8,8 +8,6 @@ git config user.name "github-actions[bot]"
 git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 # File temporanei di una scrittura interrotta (run.js scrive <file>.tmp e poi rinomina): mai nel commit
 find . -path ./.git -prune -o -type f -name '*.tmp' -print -exec rm -f {} +
-# Cartella del riepilogo lasciata a metà da un passo ucciso (summary.js la sostituisce solo a lavoro finito)
-rm -rf summary.tmp
 git add -A
 if git diff --cached --quiet; then echo "nessuna modifica da pubblicare"; exit 0; fi
 # Ogni file del giorno nuovo o cambiato deve essere un gzip integro, altrimenti niente pubblicazione
