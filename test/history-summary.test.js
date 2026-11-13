@@ -100,6 +100,24 @@ test('buildSummary: orario del volo = quello dell\'ultima riga vista', () => {
   assert.deepEqual(fl, [['2026-11-20', [['2026-11-12', 'prezzo', 30], ['2026-11-14', 'prezzo', 35]], '10:05-11:55']]);
 });
 
+test('buildSummary: riga con solo l\'orario cambiato aggiorna l\'orario e non duplica i cambi', () => {
+  const days = [
+    { day: '2026-11-12', rows: [{ ...row('ryanair', 'BDS', 'TRN', '2026-11-20', 'prezzo', 30), time: '' }] },
+    { day: '2026-11-13', rows: [{ ...row('ryanair', 'BDS', 'TRN', '2026-11-20', 'prezzo', 30), time: '10:05-11:55' }] },
+  ];
+  const fl = buildSummary(days, routes, opts).files.get('BDS-TRN').airlines.ryanair.flights;
+  assert.deepEqual(fl, [['2026-11-20', [['2026-11-12', 'prezzo', 30]], '10:05-11:55']]);
+});
+
+test('buildSummary: volo con prezzo poi nessun_volo con orario vuoto -> orario vuoto', () => {
+  const days = [
+    { day: '2026-11-12', rows: [{ ...row('ryanair', 'BDS', 'TRN', '2026-11-20', 'prezzo', 30), time: '10:05-11:55' }] },
+    { day: '2026-11-13', rows: [{ ...row('ryanair', 'BDS', 'TRN', '2026-11-20', 'nessun_volo'), time: '' }] },
+  ];
+  const fl = buildSummary(days, routes, opts).files.get('BDS-TRN').airlines.ryanair.flights;
+  assert.deepEqual(fl, [['2026-11-20', [['2026-11-12', 'prezzo', 30], ['2026-11-13', 'nessun_volo', null]], '']]);
+});
+
 test('buildSummary: volo senza orario (formato vecchio) ha orario vuoto', () => {
   const days = [{ day: '2026-11-12', rows: [row('ryanair', 'BDS', 'TRN', '2026-11-20', 'prezzo', 30)] }];
   const fl = buildSummary(days, routes, opts).files.get('BDS-TRN').airlines.ryanair.flights;

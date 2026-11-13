@@ -106,7 +106,10 @@ export function buildSummary(days, routes, { generatedAt }) {
       const fd = fa.get(r.airline);
       if (!fd.has(r.date)) fd.set(r.date, { cambi: [], orario: '' });
       const fv = fd.get(r.date);
-      fv.cambi.push([day, r.state, r.price ?? null]);
+      const prev = fv.cambi[fv.cambi.length - 1];
+      const price = r.price ?? null;
+      // una riga col solo orario cambiato non è un cambio di stato/prezzo
+      if (!prev || prev[1] !== r.state || prev[2] !== price) fv.cambi.push([day, r.state, price]);
       fv.orario = r.time ?? ''; // l'orario è quello dell'ultima riga vista
     }
     for (const r of state.values()) {

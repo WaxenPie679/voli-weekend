@@ -291,7 +291,7 @@ function interact(f, pick, keys, onSelect) {
     const tw = f.tip.offsetWidth;
     f.tip.style.left = `${Math.min(Math.max(px - tw / 2, 0), box.width - tw)}px`;
   };
-  const hide = () => { f.guide.setAttribute('visibility', 'hidden'); f.tip.hidden = true; };
+  const hide = () => { last = null; f.guide.setAttribute('visibility', 'hidden'); f.tip.hidden = true; };
   const fromEvent = (e) => {
     const box = f.root.getBoundingClientRect();
     return ((e.clientX - box.left) / box.width) * f.W;
@@ -416,7 +416,7 @@ function renderWeek() {
     }
     parts.push(list);
   }
-  if (unavailable > 0) parts.push(html('p', 'week-unavailable', `${unavailable} ${unavailable === 1 ? 'volo esaurito' : 'voli esauriti'}`));
+  if (unavailable > 0) parts.push(html('p', 'week-unavailable', `${unavailable} ${unavailable === 1 ? 'volo non prenotabile (esaurito o da verificare)' : 'voli non prenotabili (esauriti o da verificare)'}`));
   box.replaceChildren(...parts);
   note.textContent = rows.length ? 'Prezzi della raccolta di stanotte: sul sito della compagnia vedi quello di adesso.' : '';
 }
