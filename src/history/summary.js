@@ -1,5 +1,8 @@
+import { readFile, writeFile, mkdir, rename, rm } from 'node:fs/promises';
+import { join } from 'node:path';
 import { DateTime } from 'luxon';
 import { obsKey } from './store.js';
+import { listDayFiles, readDayFile } from './run.js';
 
 /** @typedef {import('./observe.js').Obs} Obs */
 /** [settimana, mediana, p25, p75, n] */
@@ -163,4 +166,49 @@ export function buildSummary(days, routes, { generatedAt }) {
     : a.city < b.city ? -1 : a.city > b.city ? 1 : a.to < b.to ? -1 : a.to > b.to ? 1 : 0));
 
   return { index: { generatedAt, firstDay, lastDay, daysCollected, reliability: rel, routes: indexRoutes }, files };
+}
+
+/**
+ * Legge lo storico in `dir` e riscrive la cartella `summary/` (index.json + un file per tratta).
+ * Si scrive prima in `summary.tmp/` e solo a lavoro finito si sostituisce `summary/`: in caso di
+ * errore il riepilogo precedente resta intatto.
+ * @returns {Promise<{routes:number, bytes:number}>}
+ */
+export async function writeSummary(dir, { now = DateTime.now(), log = console.log } = {}) {
+  const tmp = join(dir, 'summary.tmp');
+  const final = join(dir, 'summary');
+  try {
+    const days = [];
+    for (const f of await listDayFiles(dir)) days.push({ day: f.name.slice(0, 10), rows: await readDayFile(dir, f.path) });
+    let routes = {};
+    try { routes = JSON.parse(await readFile(join(dir, 'routes.json'), 'utf8')); } catch (err) { if (err.code !== 'ENOENT') throw err; }
+    const { index, files } = buildSummary(days, routes, { generatedAt: now.toUTC().toISO() });
+    await rm(tmp, { recursive: true, force: true });
+    await mkdir(tmp, { recursive: true });
+    let bytes = 0;
+    const put = async (name, obj) => {
+      const data = JSON.stringify(obj);
+      bytes += Buffer.byteLength(data);
+      await writeFile(join(tmp, name), data);
+    };
+    await put('index.json', index);
+    for (const [key, file] of files) await put(`${key}.json`, file);
+    await rm(final, { recursive: true, force: true });
+    await rename(tmp, final);
+    log(`riepilogo: ${files.size} tratte, ${Math.round(bytes / 1024)} KB`);
+    return { routes: files.size, bytes };
+  } catch (err) {
+    await rm(tmp, { recursive: true, force: true });
+    throw err;
+  }
+}
+
+if (process.argv[1]?.endsWith('history/summary.js')) {
+  const i = process.argv.indexOf('--dir');
+  try {
+    await writeSummary((i > 0 && process.argv[i + 1]) || './history');
+  } catch (err) {
+    console.error(`riepilogo fallito: ${err.message}`);
+    process.exitCode = 1;
+  }
 }

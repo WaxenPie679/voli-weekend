@@ -1,6 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { quantile, reliability, risePoint, buildSummary } from '../src/history/summary.js';
+import { mkdtemp, rm, readFile, writeFile, mkdir, readdir } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { DateTime } from 'luxon';
+import { quantile, reliability, risePoint, buildSummary, writeSummary } from '../src/history/summary.js';
+import { encodeCsv } from '../src/history/store.js';
 
 const row = (airline, origin, dest, date, state, price = null) => ({ airline, origin, dest, date, state, price });
 const hist = (...vals) => new Map(vals.map((v) => [v, 1]));
@@ -129,4 +135,50 @@ test('buildSummary: tratta di ritorno assente da routes usa l\'aeroporto estero'
   const days = [{ day: '2026-11-12', rows: [row('ryanair', 'TRN', 'BDS', '2026-11-20', 'prezzo', 30)] }];
   const { index } = buildSummary(days, {}, opts);
   assert.deepEqual(index.routes, [{ from: 'TRN', to: 'BDS', city: 'TRN', country: '', airlines: ['ryanair'] }]);
+});
+
+async function makeDir() {
+  const dir = await mkdtemp(join(tmpdir(), 'riepilogo-'));
+  await mkdir(join(dir, '2026', '11'), { recursive: true });
+  await writeFile(join(dir, '2026', '11', '2026-11-12.csv.gz'), encodeCsv([row('ryanair', 'BDS', 'TRN', '2026-11-20', 'prezzo', 30)]));
+  await writeFile(join(dir, 'routes.json'), JSON.stringify(routes));
+  return dir;
+}
+const NOW = DateTime.fromISO('2026-11-13T03:00:00Z');
+
+test('writeSummary: scrive index e file di tratta, senza resti', async () => {
+  const dir = await makeDir();
+  try {
+    const res = await writeSummary(dir, { now: NOW, log: () => {} });
+    const index = JSON.parse(await readFile(join(dir, 'summary', 'index.json'), 'utf8'));
+    const file = JSON.parse(await readFile(join(dir, 'summary', 'BDS-TRN.json'), 'utf8'));
+    assert.equal(index.generatedAt, '2026-11-13T03:00:00.000Z');
+    assert.deepEqual(index.routes.map((r) => `${r.from}-${r.to}`), ['BDS-TRN']);
+    assert.equal(file.city, 'Torino');
+    assert.ok(!existsSync(join(dir, 'summary.tmp')));
+    assert.equal(res.routes, 1);
+    assert.ok(res.bytes > 0);
+  } finally { await rm(dir, { recursive: true, force: true }); }
+});
+
+test('writeSummary: la cartella summary viene sostituita intera', async () => {
+  const dir = await makeDir();
+  try {
+    await mkdir(join(dir, 'summary'));
+    await writeFile(join(dir, 'summary', 'VECCHIO-XXX.json'), '{}');
+    await writeSummary(dir, { now: NOW, log: () => {} });
+    assert.deepEqual((await readdir(join(dir, 'summary'))).sort(), ['BDS-TRN.json', 'index.json']);
+  } finally { await rm(dir, { recursive: true, force: true }); }
+});
+
+test('writeSummary: con un file corrotto rifiuta e lascia intatto il riepilogo precedente', async () => {
+  const dir = await makeDir();
+  try {
+    await writeSummary(dir, { now: NOW, log: () => {} });
+    const before = await readFile(join(dir, 'summary', 'index.json'), 'utf8');
+    await writeFile(join(dir, '2026', '11', '2026-11-13.csv.gz'), 'non gzip');
+    await assert.rejects(writeSummary(dir, { now: NOW, log: () => {} }), /2026-11-13\.csv\.gz/);
+    assert.equal(await readFile(join(dir, 'summary', 'index.json'), 'utf8'), before);
+    assert.ok(!existsSync(join(dir, 'summary.tmp')));
+  } finally { await rm(dir, { recursive: true, force: true }); }
 });

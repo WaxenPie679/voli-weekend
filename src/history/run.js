@@ -11,7 +11,7 @@ const COLLECT_MINUTES = 55;
 const byKey = (a, b) => (obsKey(a) < obsKey(b) ? -1 : obsKey(a) > obsKey(b) ? 1 : 0);
 
 /** Percorsi (relativi alla cartella) dei file giornalieri, ordinati per data. */
-async function listDayFiles(dir) {
+export async function listDayFiles(dir) {
   const out = [];
   for (const year of await readdir(dir).catch(() => [])) {
     if (!/^\d{4}$/.test(year)) continue;
@@ -43,7 +43,7 @@ async function writeAtomic(path, data) {
 }
 
 /** Legge un file giornaliero; se è illeggibile lancia un errore che ne riporta il percorso. */
-async function readDayFile(dir, rel) {
+export async function readDayFile(dir, rel) {
   try {
     return decodeCsv(await readFile(join(dir, rel)));
   } catch (err) {

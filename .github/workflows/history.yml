@@ -28,5 +28,10 @@ jobs:
       # Sotto il timeout del job (75): così il passo di pubblicazione ha tempo di girare
       - run: node src/history/run.js --dir ./history
         timeout-minutes: 65
+      # Riepilogo per i grafici: se fallisce, i dati del giorno si pubblicano lo stesso
+      - if: always()
+        run: node src/history/summary.js --dir ./history
+        timeout-minutes: 5
+        continue-on-error: true
       - if: always()
         run: bash scripts/publish-history.sh ./history
