@@ -1,5 +1,5 @@
 import { HISTORY_BASE_URL } from './config.js';
-import { statusLine, riseText, scale, priceDomain, curvePaths, stepPoints, upcomingDepartures, routeLabel } from './storico-view.js';
+import { isReadyIndex, statusLine, riseText, scale, priceDomain, curvePaths, stepPoints, upcomingDepartures, routeLabel } from './storico-view.js';
 
 const $ = (id) => document.getElementById(id);
 const form = $('choice');
@@ -99,12 +99,13 @@ async function loadIndex() {
   try {
     const fresh = await getJson('index.json');
     if (seq !== loadSeq) return;
+    if (!isReadyIndex(fresh)) throw new Error('indice vuoto');
     index = fresh;
   } catch (err) {
     if (seq !== loadSeq) return;
     form.hidden = true;
     $('status').textContent = 'Storico non disponibile.';
-    const notReady = /HTTP 404/.test(err.message);
+    const notReady = /HTTP 404|indice vuoto/.test(err.message);
     showMessage(
       notReady ? 'Lo storico non è ancora pronto' : 'Storico non raggiungibile',
       notReady
@@ -114,11 +115,17 @@ async function loadIndex() {
     );
     return;
   }
-  routes.clear();
-  $('status').textContent = statusLine(index);
-  form.hidden = false;
-  fillDestinations(restoreChoice());
-  showRoute();
+  try {
+    routes.clear();
+    $('status').textContent = statusLine(index);
+    form.hidden = false;
+    fillDestinations(restoreChoice());
+    await showRoute();
+  } catch {
+    form.hidden = true;
+    $('status').textContent = 'Storico non disponibile.';
+    showMessage('Storico non leggibile', 'I dati dello storico non sono nel formato atteso. Riprova più tardi.', loadIndex);
+  }
 }
 
 async function showRoute() {
@@ -143,7 +150,11 @@ async function showRoute() {
     routes.set(key, file);
     if (seq !== loadSeq) return; // la scelta è cambiata mentre scaricavo
   }
-  renderRoute(route, file);
+  try {
+    renderRoute(route, file);
+  } catch {
+    showMessage('Tratta non leggibile', 'I prezzi di questa tratta non sono nel formato atteso. Riprova più tardi.', showRoute);
+  }
 }
 
 function showMessage(title, text, retry) {

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { RELIABILITY_LABEL, statusLine, riseText, scale, priceDomain, curvePaths, stepPoints, upcomingDepartures, routeLabel } from '../web/storico-view.js';
+import { RELIABILITY_LABEL, isReadyIndex, statusLine, riseText, scale, priceDomain, curvePaths, stepPoints, upcomingDepartures, routeLabel } from '../web/storico-view.js';
 
 test('RELIABILITY_LABEL', () => {
   assert.deepEqual(RELIABILITY_LABEL, { prima: 'prima stima', crescita: 'in crescita', affidabile: 'affidabile' });
@@ -75,4 +75,15 @@ test('routeLabel', () => {
   assert.equal(routeLabel({ from: 'BDS', to: 'TRN', city: 'Torino' }), 'Brindisi → Torino');
   assert.equal(routeLabel({ from: 'TRN', to: 'BDS', city: 'Torino' }), 'Torino → Brindisi');
   assert.equal(routeLabel({ from: 'BRI', to: 'BGY', city: 'Milano' }), 'Bari → Milano');
+});
+
+test('isReadyIndex: serve un giorno di partenza e almeno una tratta', () => {
+  const ok = { firstDay: '2026-11-12', daysCollected: 2, routes: [{ from: 'BRI', to: 'BUD' }] };
+  assert.equal(isReadyIndex(ok), true);
+  assert.equal(isReadyIndex({ firstDay: null, daysCollected: 0, routes: [] }), false);
+  assert.equal(isReadyIndex({ ...ok, firstDay: null }), false);
+  assert.equal(isReadyIndex({ ...ok, routes: [] }), false);
+  assert.equal(isReadyIndex({ ...ok, routes: undefined }), false);
+  assert.equal(isReadyIndex(null), false);
+  assert.equal(isReadyIndex([]), false);
 });

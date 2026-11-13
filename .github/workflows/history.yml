@@ -34,9 +34,11 @@ jobs:
         run: node src/history/summary.js --dir ./history --out ./summary
         timeout-minutes: 5
         continue-on-error: true
-      - if: always()
+      - id: publish_history
+        if: always()
         run: bash scripts/publish-history.sh ./history
-      # Il riepilogo va sul branch `summary` (un solo commit orfano, sostituito ogni notte)
-      - if: always() && steps.summary.outcome == 'success'
+      # Il riepilogo va sul branch `summary` (un solo commit orfano, sostituito ogni notte),
+      # solo se anche i dati del giorno sono stati pubblicati: non deve mostrare un giorno assente da `history`
+      - if: always() && steps.summary.outcome == 'success' && steps.publish_history.outcome == 'success'
         run: bash scripts/publish-summary.sh ./summary
         timeout-minutes: 5

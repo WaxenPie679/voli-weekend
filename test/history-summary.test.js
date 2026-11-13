@@ -182,3 +182,22 @@ test('writeSummary: con un file corrotto rifiuta e lascia intatto il riepilogo p
     assert.ok(!existsSync(join(dir, 'summary.tmp')));
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
+
+test('writeSummary: senza file giornalieri rifiuta e lascia intatto il riepilogo precedente', async () => {
+  const dir = await makeDir();
+  const empty = await mkdtemp(join(tmpdir(), 'vuota-'));
+  try {
+    const out = join(dir, 'summary');
+    await writeSummary(dir, { out, now: NOW, log: () => {} });
+    const before = await readFile(join(out, 'index.json'), 'utf8');
+    // cartella mancante
+    await assert.rejects(writeSummary(join(empty, 'non-esiste'), { out, now: NOW, log: () => {} }), /nessun file giornaliero in /);
+    // cartella vuota
+    await assert.rejects(writeSummary(empty, { out, now: NOW, log: () => {} }), /nessun file giornaliero in /);
+    assert.equal(await readFile(join(out, 'index.json'), 'utf8'), before);
+    assert.ok(!existsSync(`${out}.tmp`));
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+    await rm(empty, { recursive: true, force: true });
+  }
+});

@@ -179,8 +179,11 @@ export async function writeSummary(dir, { out, now = DateTime.now(), log = conso
   const tmp = `${out}.tmp`;
   const final = out;
   try {
+    const dayFiles = await listDayFiles(dir);
+    // Senza dati (es. la preparazione dello storico è fallita) un riepilogo vuoto sovrascriverebbe quello buono
+    if (!dayFiles.length) throw new Error(`nessun file giornaliero in ${dir}`);
     const days = [];
-    for (const f of await listDayFiles(dir)) days.push({ day: f.name.slice(0, 10), rows: await readDayFile(dir, f.path) });
+    for (const f of dayFiles) days.push({ day: f.name.slice(0, 10), rows: await readDayFile(dir, f.path) });
     let routes = {};
     try { routes = JSON.parse(await readFile(join(dir, 'routes.json'), 'utf8')); } catch (err) { if (err.code !== 'ENOENT') throw err; }
     const { index, files } = buildSummary(days, routes, { generatedAt: now.toUTC().toISO() });

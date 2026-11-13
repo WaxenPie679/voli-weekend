@@ -12,6 +12,11 @@ const timeFmt = new Intl.DateTimeFormat('it-IT', { timeZone: 'Europe/Rome', hour
 const dayMs = (d) => Date.UTC(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8, 10));
 const num = (n) => String(Math.round(n * 100) / 100);
 
+/** L'indice è usabile solo con almeno un giorno raccolto e una tratta: altrimenti lo storico «non è pronto». */
+export function isReadyIndex(index) {
+  return Boolean(index && typeof index.firstDay === 'string' && Array.isArray(index.routes) && index.routes.length);
+}
+
 export function statusLine(index) {
   const from = dayFmt.format(new Date(dayMs(index.firstDay))).replace('.', '');
   const n = index.daysCollected;
