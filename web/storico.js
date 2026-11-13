@@ -1,5 +1,5 @@
 import { HISTORY_BASE_URL } from './config.js';
-import { isReadyIndex, statusLine, riseText, scale, priceDomain, curvePaths, stepPoints, upcomingDepartures, routeLabel } from './storico-view.js';
+import { isReadyIndex, statusLine, riseText, scale, priceDomain, curvePaths, stepPoints, upcomingDepartures, routeLabel, weekRange, weekFlights, timeText, searchUrl } from './storico-view.js';
 
 const $ = (id) => document.getElementById(id);
 const form = $('choice');
@@ -11,7 +11,7 @@ const DAY_MS = 86400000;
 
 let index = null;
 const routes = new Map(); // "BRI-BUD" → file della tratta
-let current = null; // { route, file, departure }
+let current = null; // { route, file, codes, departure, node, week }
 let loadSeq = 0; // ogni caricamento ha il suo numero: le risposte arrivate tardi per una scelta vecchia si scartano
 
 // --- Formattazione ---
@@ -213,9 +213,10 @@ function renderRoute(route, file) {
   select.disabled = !departures.length;
   select.addEventListener('change', () => { current.departure = select.value; drawSteps(); });
 
-  current = { route, file, codes, departure, node };
+  current = { route, file, codes, departure, node, week: null }; // nuova tratta: nessuna settimana scelta
   content.replaceChildren(node);
   drawAll();
+  renderWeek();
 }
 
 function drawAll() {
@@ -270,9 +271,11 @@ function frame(host, { xDomain, yDomain, xTicks, xLabel, label }) {
  * Tocco, passaggio del mouse e frecce: `pick(x)` sceglie il punto più vicino alla x dell'svg
  * e restituisce { x, title, rows } oppure null; `keys` è l'elenco ordinato dei punti per le frecce.
  */
-function interact(f, pick, keys) {
+function interact(f, pick, keys, onSelect) {
   let pos = null;
+  let last = null; // ultimo punto mostrato: Invio lo sceglie
   const show = (hit) => {
+    last = hit;
     if (!hit) { hide(); return; }
     f.guide.setAttribute('x1', hit.x);
     f.guide.setAttribute('x2', hit.x);
@@ -297,7 +300,9 @@ function interact(f, pick, keys) {
   f.root.addEventListener('pointerdown', (e) => show(pick(fromEvent(e))));
   f.root.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') hide(); });
   f.root.addEventListener('blur', hide);
+  if (onSelect) f.root.addEventListener('click', (e) => { const hit = pick(fromEvent(e)); show(hit); if (hit) onSelect(hit); });
   f.root.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && onSelect && last) { e.preventDefault(); onSelect(last); return; }
     if (!keys.length || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
     e.preventDefault();
     if (e.key === 'Home') pos = 0;
@@ -339,17 +344,81 @@ function drawCurve() {
     if (curve.length === 1) svg('circle', { cx: f.sx(curve[0][0]), cy: f.sy(curve[0][1]), r: 4, class: 'dot' }, g);
   }
 
-  const weeks = [...new Set(codes.flatMap((c) => (file.airlines[c].curve ?? []).map((r) => r[0])))].sort((a, b) => b - a);
+  // Fascia della settimana scelta, sotto le curve
+  const weekPx = Math.abs(f.sx(0) - f.sx(1));
+  const band = svg('rect', { y: f.m.top, height: f.H - f.m.bottom - f.m.top, width: weekPx, class: 'week-band', visibility: 'hidden' });
+  f.root.insertBefore(band, f.plot);
+  const mark = (week) => {
+    if (week == null) { band.setAttribute('visibility', 'hidden'); return; }
+    // Alle estremità (0 e 52 settimane) la fascia resta dentro l'area del grafico
+    const x0 = Math.max(f.m.left, f.sx(week) - weekPx / 2);
+    const x1 = Math.min(f.W - f.m.right, f.sx(week) + weekPx / 2);
+    band.setAttribute('x', x0);
+    band.setAttribute('width', x1 - x0);
+    band.setAttribute('visibility', 'visible');
+  };
+  mark(current.week);
+
+  // Ogni settimana si può toccare, anche dove la curva non ha punti
+  const weeks = Array.from({ length: 53 }, (_, i) => 52 - i);
   const pick = (x) => {
-    if (!weeks.length) return null;
-    const week = weeks.reduce((best, w) => (Math.abs(f.sx(w) - x) < Math.abs(f.sx(best) - x) ? w : best), weeks[0]);
+    const week = Math.min(52, Math.max(0, Math.round((f.sx(0) - x) / weekPx)));
     const rows = codes.map((c) => {
       const r = (file.airlines[c].curve ?? []).find((row) => row[0] === week);
       return r ? [c, `${AIRLINES[c]} ${fmtPrice(r[1])} · ${Math.round(r[2])}–${Math.round(r[3])} € · ${r[4]} ${r[4] === 1 ? 'prezzo' : 'prezzi'}`] : null;
     }).filter(Boolean);
-    return { x: f.sx(week), title: weeksText(week), rows };
+    return { x: f.sx(week), title: weeksText(week), rows, week };
   };
-  interact(f, pick, weeks.map((w) => f.sx(w)));
+  interact(f, pick, weeks.map((w) => f.sx(w)), (hit) => {
+    current.week = hit.week;
+    mark(hit.week);
+    renderWeek();
+  });
+}
+
+// --- Voli della settimana scelta ---
+const weekTitle = (w) => (w === 0 ? 'Voli che partono entro 6 giorni' : `Voli che partono tra ${w} ${w === 1 ? 'settimana' : 'settimane'}`);
+
+function renderWeek() {
+  const { route, file, node, week } = current;
+  const box = node.querySelector('.week-flights');
+  const note = node.querySelector('.week-note');
+  if (week == null) {
+    box.replaceChildren(html('p', 'week-hint', 'Tocca una settimana per vedere i voli che partono in quel periodo.'));
+    note.textContent = '';
+    return;
+  }
+  const year = file.lastDay.slice(0, 4);
+  const [from, to] = weekRange(file.lastDay, week);
+  const { rows, unavailable } = weekFlights(file, file.lastDay, week);
+  const head = html('div', 'week-head');
+  head.append(html('h4', null, weekTitle(week)), html('p', 'week-range', `${fmtDeparture(from, year)} – ${fmtDeparture(to, year)}`));
+  const parts = [head];
+  if (!rows.length) parts.push(html('p', 'week-empty', 'Nessun volo con prezzo in questa settimana.'));
+  else {
+    const min = Math.min(...rows.map((r) => r.price));
+    const list = html('ul', 'week-list');
+    for (const r of rows) {
+      const li = html('li', `week-row ${r.airline}`);
+      const info = html('p', 'week-info');
+      const bits = [fmtDeparture(r.date, year), timeText(r.time)].filter(Boolean).join(' · ');
+      const name = html('span', 'week-airline');
+      name.append(html('span', 'swatch'), document.createTextNode(AIRLINES[r.airline] ?? r.airline));
+      info.append(document.createTextNode(`${bits} · `), name);
+      const price = html('span', `week-price${r.price === min ? ' lowest' : ''}`, fmtPrice(r.price));
+      const link = html('a', 'btn-secondary week-search', 'Cerca');
+      link.href = searchUrl(r.airline, route.from, route.to, r.date);
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.setAttribute('aria-label', `Cerca il volo ${AIRLINES[r.airline] ?? r.airline} del ${fmtDeparture(r.date, year)}`);
+      li.append(info, price, link);
+      list.append(li);
+    }
+    parts.push(list);
+  }
+  if (unavailable > 0) parts.push(html('p', 'week-unavailable', `${unavailable} ${unavailable === 1 ? 'volo esaurito' : 'voli esauriti'}`));
+  box.replaceChildren(...parts);
+  note.textContent = rows.length ? 'Prezzi della raccolta di stanotte: sul sito della compagnia vedi quello di adesso.' : '';
 }
 
 // --- Grafico «I singoli voli» ---

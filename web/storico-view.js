@@ -87,3 +87,46 @@ export function routeLabel(route) {
   const name = (c) => HOME[c] ?? c;
   return HOME[route.from] ? `${name(route.from)} → ${route.city}` : `${route.city} → ${name(route.to)}`;
 }
+
+const isoDay = (t) => new Date(t).toISOString().slice(0, 10);
+const AIRLINE_ORDER = ['ryanair', 'wizz'];
+
+/** Settimana N (0..52) dall'ultimo giorno raccolto: partenze da lastDay+7N a lastDay+7N+6. */
+export function weekRange(lastDay, w) {
+  const start = dayMs(lastDay) + 7 * w * DAY_MS;
+  return [isoDay(start), isoDay(start + 6 * DAY_MS)];
+}
+
+/**
+ * Voli che partono nella settimana N con il prezzo attuale (ultimo cambio).
+ * Partenze con stato attuale esaurito/da_verificare: non in elenco, solo contate in `unavailable`.
+ */
+export function weekFlights(file, lastDay, w) {
+  const [from, to] = weekRange(lastDay, w);
+  const rows = [];
+  let unavailable = 0;
+  for (const [airline, data] of Object.entries(file?.airlines ?? {})) {
+    for (const [date, changes, time] of data?.flights ?? []) {
+      if (date < from || date > to || !changes?.length) continue;
+      const last = changes[changes.length - 1];
+      if (last[1] === 'prezzo' && last[2] != null) rows.push({ date, airline, time: time ?? '', price: last[2] });
+      else if (last[1] === 'esaurito' || last[1] === 'da_verificare') unavailable++;
+    }
+  }
+  const rank = (a) => (AIRLINE_ORDER.includes(a) ? AIRLINE_ORDER.indexOf(a) : AIRLINE_ORDER.length);
+  rows.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : rank(a.airline) - rank(b.airline) || a.airline.localeCompare(b.airline)));
+  return { rows, unavailable };
+}
+
+/** Orario salvato → testo: Ryanair «10:05-11:55» → «10:05 → 11:55»; Wizz «15:20 21:40» → «15:20 · 21:40». */
+export function timeText(time) {
+  if (!time) return '';
+  if (time.includes('-')) return time.split('-').join(' → ');
+  return time.split(' ').filter(Boolean).join(' · ');
+}
+
+/** Pagina di ricerca della compagnia con tratta e data già compilate (sola andata, 1 adulto). */
+export function searchUrl(airline, from, to, date) {
+  if (airline === 'wizz') return `https://wizzair.com/it-it/booking/select-flight/${from}/${to}/${date}/null/1/0/0/null`;
+  return `https://www.ryanair.com/it/it/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=${date}&isReturn=false&originIata=${from}&destinationIata=${to}`;
+}

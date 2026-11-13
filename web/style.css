@@ -298,6 +298,21 @@ h1 { font-size: var(--fs-title); line-height: 1.2; font-weight: 500; letter-spac
 .chart-tip .ryanair { --c: #8fb6ec; }
 .chart-tip .wizz { --c: #f08cc9; }
 .chart-empty { color: var(--muted); padding: 16px 0; }
+.chart-svg .week-band { fill: var(--text); fill-opacity: .07; pointer-events: none; }
+[data-chart="curve"] .chart-svg { cursor: pointer; }
+.week-flights { border-top: 1px solid var(--border); padding-top: 12px; display: grid; gap: 8px; }
+.week-hint, .week-empty, .week-unavailable { color: var(--muted); }
+.week-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; }
+.week-head h4 { margin: 0; font-size: var(--fs-body); font-weight: 500; }
+.week-range { color: var(--muted); font-size: var(--fs-small); }
+.week-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.week-row { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--raised); }
+.week-row:last-child { border-bottom: 0; }
+.week-info { margin: 0; min-width: 0; }
+.week-airline { display: inline-flex; align-items: center; gap: 6px; }
+.week-price { font-weight: 500; white-space: nowrap; }
+.week-price.lowest { color: var(--hue); font-weight: 700; }
+.week-search { height: 32px; font-size: 13px; }
 
 @media (max-width: 720px) {
   .topnav { gap: 12px; }
@@ -311,4 +326,7 @@ h1 { font-size: var(--fs-title); line-height: 1.2; font-weight: 500; letter-spac
   .dest-field select, .departure-field select { width: 100%; height: 44px; }
   .chart-card { padding: 16px; }
   .chart-tip { white-space: normal; max-width: 100%; }
+  .week-row { grid-template-columns: 1fr auto; gap: 4px 12px; padding: 8px 0; }
+  .week-info { grid-column: 1 / -1; }
+  .week-search { height: 44px; padding: 0 18px; }
 }

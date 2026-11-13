@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { RELIABILITY_LABEL, isReadyIndex, statusLine, riseText, scale, priceDomain, curvePaths, stepPoints, upcomingDepartures, routeLabel } from '../web/storico-view.js';
+import { RELIABILITY_LABEL, isReadyIndex, statusLine, riseText, scale, priceDomain, curvePaths, stepPoints, upcomingDepartures, routeLabel, weekRange, weekFlights, timeText, searchUrl } from '../web/storico-view.js';
 
 test('RELIABILITY_LABEL', () => {
   assert.deepEqual(RELIABILITY_LABEL, { prima: 'prima stima', crescita: 'in crescita', affidabile: 'affidabile' });
@@ -86,4 +86,67 @@ test('isReadyIndex: serve un giorno di partenza e almeno una tratta', () => {
   assert.equal(isReadyIndex({ ...ok, routes: undefined }), false);
   assert.equal(isReadyIndex(null), false);
   assert.equal(isReadyIndex([]), false);
+});
+
+test('weekRange: settimana N = da lastDay+7N a lastDay+7N+6', () => {
+  assert.deepEqual(weekRange('2026-11-13', 0), ['2026-11-13', '2026-11-19']);
+  assert.deepEqual(weekRange('2026-11-13', 6), ['2026-12-25', '2026-12-31']);
+  assert.deepEqual(weekRange('2026-12-28', 1), ['2027-01-04', '2027-01-10']);
+});
+
+test('weekFlights: righe della settimana con il prezzo attuale, esauriti solo contati', () => {
+  const file = {
+    airlines: {
+      wizz: {
+        flights: [
+          ['2026-12-26', [['2026-11-12', 'prezzo', 60], ['2026-11-13', 'prezzo', 49.99]], '15:20 21:40'],
+          ['2026-12-25', [['2026-11-12', 'prezzo', 30]], ''],
+          ['2026-12-28', [['2026-11-12', 'prezzo', 30], ['2026-11-13', 'esaurito', null]], ''],
+          ['2027-01-01', [['2026-11-12', 'prezzo', 10]], ''], // fuori settimana
+        ],
+      },
+      ryanair: {
+        flights: [
+          ['2026-12-25', [['2026-11-13', 'prezzo', 42.96]], '10:05-11:55'],
+          ['2026-12-24', [['2026-11-13', 'prezzo', 20]], ''], // fuori settimana
+          ['2026-12-31', [['2026-11-13', 'da_verificare', null]], ''],
+          ['2026-12-30', [['2026-11-13', 'prezzo', 55]]], // senza orario (formato vecchio)
+        ],
+      },
+    },
+  };
+  assert.deepEqual(weekFlights(file, '2026-11-13', 6), {
+    rows: [
+      { date: '2026-12-25', airline: 'ryanair', time: '10:05-11:55', price: 42.96 },
+      { date: '2026-12-25', airline: 'wizz', time: '', price: 30 },
+      { date: '2026-12-26', airline: 'wizz', time: '15:20 21:40', price: 49.99 },
+      { date: '2026-12-30', airline: 'ryanair', time: '', price: 55 },
+    ],
+    unavailable: 2,
+  });
+});
+
+test('weekFlights: settimana vuota e compagnie assenti', () => {
+  const file = { airlines: { ryanair: { flights: [['2026-11-14', [['2026-11-13', 'prezzo', 20]], '']] } } };
+  assert.deepEqual(weekFlights(file, '2026-11-13', 10), { rows: [], unavailable: 0 });
+  assert.deepEqual(weekFlights({ airlines: {} }, '2026-11-13', 0), { rows: [], unavailable: 0 });
+  assert.deepEqual(weekFlights(file, '2026-11-13', 0).rows.length, 1);
+});
+
+test('timeText', () => {
+  assert.equal(timeText('10:05-11:55'), '10:05 → 11:55');
+  assert.equal(timeText('15:20 21:40'), '15:20 · 21:40');
+  assert.equal(timeText(''), '');
+  assert.equal(timeText(undefined), '');
+});
+
+test('searchUrl: Ryanair sola andata e Wizz selezione volo', () => {
+  assert.equal(
+    searchUrl('ryanair', 'BRI', 'BUD', '2026-12-25'),
+    'https://www.ryanair.com/it/it/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-25&isReturn=false&originIata=BRI&destinationIata=BUD',
+  );
+  assert.equal(
+    searchUrl('wizz', 'BUD', 'BRI', '2026-12-26'),
+    'https://wizzair.com/it-it/booking/select-flight/BUD/BRI/2026-12-26/null/1/0/0/null',
+  );
 });
