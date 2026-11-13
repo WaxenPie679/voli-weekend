@@ -6,11 +6,12 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DateTime } from 'luxon';
 import { runHistory } from '../src/history/run.js';
+import { gzipSync, gunzipSync } from 'node:zlib';
 import { decodeCsv, obsKey } from '../src/history/store.js';
 
 const NOW = DateTime.fromISO('2026-11-12T04:00:00Z');
-const obsA = { airline: 'ryanair', origin: 'BRI', dest: 'TRN', date: '2026-12-05', state: 'prezzo', price: 40 };
-const obsB = { airline: 'ryanair', origin: 'BRI', dest: 'TRN', date: '2026-12-06', state: 'prezzo', price: 50 };
+const obsA = { airline: 'ryanair', origin: 'BRI', dest: 'TRN', date: '2026-12-05', state: 'prezzo', price: 40, time: '' };
+const obsB = { airline: 'ryanair', origin: 'BRI', dest: 'TRN', date: '2026-12-06', state: 'prezzo', price: 50, time: '' };
 assert.ok(obsKey(obsA) < obsKey(obsB));
 
 const okMeta = { routesExpected: 1, routesOk: 1, requestsOk: 24, requestsFailed: 0, missing: [], stoppedReason: null };
@@ -24,6 +25,7 @@ function fakeCollectors(obs, { routes = [routeTrn], meta = okMeta } = {}) {
   };
 }
 
+const gunzipHeader = (buf) => gunzipSync(buf).toString().split('\n')[0];
 let dir;
 beforeEach(async () => { dir = await mkdtemp(join(tmpdir(), 'storico-')); });
 afterEach(async () => { await rm(dir, { recursive: true, force: true }); });
@@ -153,4 +155,24 @@ test('runHistory: i voli già partiti restano fuori dal confronto', async () => 
   const collectors = { ...fakeCollectors([]), ryanair: async () => ({ observations: [obsB], coverage: [cov], routes: [routeTrn], meta: okMeta }) };
   await runHistory(dir, { now: NOW.plus({ days: 2 }), collectors, log: () => {} });
   assert.equal(existsSync(join(dir, '2026/11/2026-11-14.csv.gz')), false);
+});
+
+test('runHistory: giorno precedente in formato vecchio (6 colonne) + giro con orari → file di oggi con orari, nessun nessun_volo in più', async () => {
+  await mkdir(join(dir, '2026/11'), { recursive: true });
+  await writeFile(join(dir, '2026/11/2026-11-11.csv.gz'), gzipSync(
+    'compagnia,origine,destinazione,data_partenza,stato,prezzo\nryanair,BRI,TRN,2026-12-05,prezzo,40\nryanair,BRI,TRN,2026-12-06,prezzo,50\n'));
+  const withTime = [{ ...obsA, time: '10:05-11:55' }, { ...obsB, time: '06:00-07:45' }];
+  await runHistory(dir, { now: NOW, collectors: fakeCollectors(withTime), log: () => {} });
+  const today = await rows('2026/11/2026-11-12.csv.gz');
+  assert.deepEqual(today, withTime);
+  assert.equal(today.filter((r) => r.state === 'nessun_volo').length, 0);
+  // il file vecchio non viene riscritto
+  assert.ok((await rd('2026/11/2026-11-11.csv.gz')).length > 0);
+  assert.equal(gunzipHeader(await rd('2026/11/2026-11-11.csv.gz')), 'compagnia,origine,destinazione,data_partenza,stato,prezzo');
+});
+
+test('runHistory stesso giorno, orario cambiato → nel file del giorno l’orario nuovo', async () => {
+  await runHistory(dir, { now: NOW, collectors: fakeCollectors([{ ...obsA, time: '10:05-11:55' }]), log: () => {} });
+  await runHistory(dir, { now: NOW.plus({ hours: 2 }), collectors: fakeCollectors([{ ...obsA, time: '06:00-07:45' }]), log: () => {} });
+  assert.deepEqual((await rows('2026/11/2026-11-12.csv.gz')).map((r) => r.time), ['06:00-07:45']);
 });

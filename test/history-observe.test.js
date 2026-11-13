@@ -12,11 +12,30 @@ test('parseRyanairDays: prezzo, esaurito, nessun volo; salta i giorni passati', 
     { day: '2026-11-15', price: null, soldOut: false, unavailable: false },
   ] } };
   assert.deepEqual(parseRyanairDays(json, 'BDS', 'TRN', '2026-11-12'), [
-    { airline: 'ryanair', origin: 'BDS', dest: 'TRN', date: '2026-11-12', state: 'prezzo', price: 35.51 },
-    { airline: 'ryanair', origin: 'BDS', dest: 'TRN', date: '2026-11-13', state: 'esaurito', price: null },
-    { airline: 'ryanair', origin: 'BDS', dest: 'TRN', date: '2026-11-14', state: 'nessun_volo', price: null },
-    { airline: 'ryanair', origin: 'BDS', dest: 'TRN', date: '2026-11-15', state: 'nessun_volo', price: null },
+    { airline: 'ryanair', origin: 'BDS', dest: 'TRN', date: '2026-11-12', state: 'prezzo', price: 35.51, time: '' },
+    { airline: 'ryanair', origin: 'BDS', dest: 'TRN', date: '2026-11-13', state: 'esaurito', price: null, time: '' },
+    { airline: 'ryanair', origin: 'BDS', dest: 'TRN', date: '2026-11-14', state: 'nessun_volo', price: null, time: '' },
+    { airline: 'ryanair', origin: 'BDS', dest: 'TRN', date: '2026-11-15', state: 'nessun_volo', price: null, time: '' },
   ]);
+});
+
+test('parseRyanairDays: orario partenza-arrivo del volo, anche se esaurito; senza date', () => {
+  const f = (day, extra) => ({ day, price: { value: 42.96 }, soldOut: false, unavailable: false, ...extra });
+  const json = { outbound: { fares: [
+    f('2026-12-01', { departureDate: '2026-12-01T10:05:00', arrivalDate: '2026-12-01T11:55:00' }),
+    f('2026-12-02', { soldOut: true, departureDate: '2026-12-02T06:00:00', arrivalDate: '2026-12-02T07:45:00' }),
+    f('2026-12-03', {}),
+    f('2026-12-04', { soldOut: true }),
+  ] } };
+  assert.deepEqual(parseRyanairDays(json, 'BDS', 'TRN', '2026-12-01').map((o) => [o.date, o.state, o.time]), [
+    ['2026-12-01', 'prezzo', '10:05-11:55'], ['2026-12-02', 'esaurito', '06:00-07:45'],
+    ['2026-12-03', 'prezzo', ''], ['2026-12-04', 'esaurito', '']]);
+});
+
+test('parseWizzDays: orari di partenza ordinati e separati da spazio; vuoti se nessuna partenza', () => {
+  const day = (d, deps) => ({ departureDate: `${d}T00:00:00`, price: { amount: 50 }, departureDates: deps });
+  const list = [day('2026-11-06', ['2026-11-06T21:40:00', '2026-11-06T15:20:00']), day('2026-11-07', []), day('2026-11-08', undefined)];
+  assert.deepEqual(parseWizzDays(list, 'BRI', 'BUD', '2026-11-01').map((o) => o.time), ['15:20 21:40', '', '']);
 });
 
 test('parseWizzDays: prezzo, da verificare con prezzo indicativo, zero senza voli', () => {
