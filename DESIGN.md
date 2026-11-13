@@ -158,6 +158,9 @@ An achromatic ledger: ink and cool greys do all the structural work, and a singl
 - **Control Stroke** (control-stroke): select borders, the day ticks on the stay axis, and the neutral source-freshness dot.
 - **Muted Ink** (muted-ink): labels, legends, origin IATA code, route arrow, country, leg metadata, stay-axis day names. Holds above 5:1 on both card stock and apron.
 
+### Chart series (Storico prezzi only)
+- **Wizz Magenta** (#b0127a, token `--wizz`): the Wizz Air series in the history charts, beside Price Blue for Ryanair. The one exception to the One Voice Rule: two airlines on the same price chart must be told apart at a glance, and a magenta far from the blue stays readable on card stock (above 6:1). Never used outside chart lines, bands, dots and their legend swatches.
+
 ### Tertiary (status)
 - **Stale Amber** (stale-amber): the freshness dot of a source whose data is stale.
 - **Stale Ink** (stale-ink) on **Stale Wash** (stale-wash): stale source labels and the stale-data note under the title. Status only; never decorative.

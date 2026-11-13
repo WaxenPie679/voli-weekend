@@ -12,6 +12,7 @@ const DAY_MS = 86400000;
 let index = null;
 const routes = new Map(); // "BRI-BUD" → file della tratta
 let current = null; // { route, file, departure }
+let loadSeq = 0; // ogni caricamento ha il suo numero: le risposte arrivate tardi per una scelta vecchia si scartano
 
 // --- Formattazione ---
 const fmtPrice = (n) => `${n.toLocaleString('it-IT', { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 })} €`;
@@ -53,9 +54,9 @@ function restoreChoice() {
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem(STORE_KEY)); } catch { /* storage non disponibile */ }
   if (!saved) return null;
-  for (const name of ['base', 'dir']) {
-    const input = form.querySelector(`input[name="${name}"][value="${saved[name]}"]`);
-    if (input) input.checked = true;
+  // Confronto diretto con i radio: un valore manomesso nel browser non finisce in un selettore
+  for (const input of form.querySelectorAll('input[type="radio"]')) {
+    if (saved[input.name] === input.value) input.checked = true;
   }
   return saved.dest ?? null;
 }
@@ -93,10 +94,14 @@ async function getJson(name) {
 
 async function loadIndex() {
   $('status').textContent = 'Carico lo storico…';
+  const seq = ++loadSeq;
   content.replaceChildren(html('p', 'loading-note', 'Un momento…'));
   try {
-    index = await getJson('index.json');
+    const fresh = await getJson('index.json');
+    if (seq !== loadSeq) return;
+    index = fresh;
   } catch (err) {
+    if (seq !== loadSeq) return;
     form.hidden = true;
     $('status').textContent = 'Storico non disponibile.';
     const notReady = /HTTP 404/.test(err.message);
@@ -117,6 +122,7 @@ async function loadIndex() {
 }
 
 async function showRoute() {
+  const seq = ++loadSeq;
   const route = selectedRoute();
   if (!route) {
     current = null;
@@ -130,12 +136,12 @@ async function showRoute() {
     try {
       file = await getJson(`${key}.json`);
     } catch {
+      if (seq !== loadSeq) return; // nel frattempo è stata scelta un'altra tratta
       showMessage('Tratta non raggiungibile', 'Non riesco a scaricare i prezzi di questa tratta. Controlla la connessione e riprova.', showRoute);
       return;
     }
     routes.set(key, file);
-    const now = selectedRoute();
-    if (!now || `${now.from}-${now.to}` !== key) return; // la scelta è cambiata mentre scaricavo
+    if (seq !== loadSeq) return; // la scelta è cambiata mentre scaricavo
   }
   renderRoute(route, file);
 }
@@ -294,7 +300,7 @@ function interact(f, pick, keys) {
 function drawCurve() {
   const { file, codes, node } = current;
   const host = node.querySelector('[data-chart="curve"]');
-  const values = codes.flatMap((c) => file.airlines[c].curve.flatMap((r) => [r[1], r[2], r[3]]));
+  const values = codes.flatMap((c) => (file.airlines[c].curve ?? []).flatMap((r) => [r[1], r[2], r[3]]));
   const f = frame(host, {
     xDomain: [52, 0],
     yDomain: priceDomain(values),
@@ -304,12 +310,15 @@ function drawCurve() {
   });
 
   for (const code of codes) {
-    const { curve, rise } = file.airlines[code];
+    const { rise } = file.airlines[code];
+    const curve = file.airlines[code].curve ?? [];
     const g = svg('g', { class: `series ${code}` }, f.plot);
     if (rise != null) {
       const x = f.sx(rise);
       svg('line', { x1: x, x2: x, y1: f.m.top, y2: f.H - f.m.bottom, class: 'rise-line' }, g);
-      const t = svg('text', { x: x - 4, y: f.m.top + 10, class: 'rise-label' }, g);
+      // Nella metà sinistra l'etichetta va a destra della linea, così resta dentro il grafico
+      const left = x < (f.m.left + f.W - f.m.right) / 2;
+      const t = svg('text', { x: left ? x + 4 : x - 4, y: f.m.top + 10, class: `rise-label${left ? ' start' : ''}` }, g);
       t.textContent = 'inizia a salire';
     }
     if (!curve.length) continue;
@@ -319,12 +328,12 @@ function drawCurve() {
     if (curve.length === 1) svg('circle', { cx: f.sx(curve[0][0]), cy: f.sy(curve[0][1]), r: 4, class: 'dot' }, g);
   }
 
-  const weeks = [...new Set(codes.flatMap((c) => file.airlines[c].curve.map((r) => r[0])))].sort((a, b) => b - a);
+  const weeks = [...new Set(codes.flatMap((c) => (file.airlines[c].curve ?? []).map((r) => r[0])))].sort((a, b) => b - a);
   const pick = (x) => {
     if (!weeks.length) return null;
     const week = weeks.reduce((best, w) => (Math.abs(f.sx(w) - x) < Math.abs(f.sx(best) - x) ? w : best), weeks[0]);
     const rows = codes.map((c) => {
-      const r = file.airlines[c].curve.find((row) => row[0] === week);
+      const r = (file.airlines[c].curve ?? []).find((row) => row[0] === week);
       return r ? [c, `${AIRLINES[c]} ${fmtPrice(r[1])} · ${Math.round(r[2])}–${Math.round(r[3])} € · ${r[4]} ${r[4] === 1 ? 'prezzo' : 'prezzi'}`] : null;
     }).filter(Boolean);
     return { x: f.sx(week), title: weeksText(week), rows };

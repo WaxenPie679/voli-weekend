@@ -275,6 +275,8 @@ function loadingState() {
   list.replaceChildren(...Array.from({ length: 3 }, () => tpl.content.firstElementChild.cloneNode(true)));
 }
 
+// Con i dati di esempio anche lo storico apre i suoi dati di esempio
+if (new URLSearchParams(location.search).has('sample')) $('history-link').href = 'storico.html?sample=1';
 restoreFilters();
 form.addEventListener('input', () => { shown = PAGE_SIZE; saveFilters(); render(); });
 form.addEventListener('submit', (e) => e.preventDefault());

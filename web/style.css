@@ -288,6 +288,7 @@ h1 { font-size: var(--fs-title); line-height: 1.2; font-weight: 500; letter-spac
 .chart-svg .series .dot { fill: var(--c); stroke: var(--surface); stroke-width: 1.5; }
 .chart-svg .rise-line { stroke: var(--c); stroke-width: 1.2; stroke-dasharray: 4 3; }
 .chart-svg .rise-label { fill: var(--c); text-anchor: end; font-size: 11px; }
+.chart-svg .rise-label.start { text-anchor: start; }
 .chart-svg .guide { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 2; pointer-events: none; }
 .chart-tip {
   position: absolute; top: 0; z-index: 2; pointer-events: none; display: grid; gap: 2px;
