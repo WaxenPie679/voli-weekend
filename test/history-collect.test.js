@@ -241,3 +241,11 @@ test('fetchRetry: ogni chiamata riceve un segnale con tempo massimo; scaduto →
   await assert.rejects(fetchRetry(hang, 'https://x/y', { method: 'POST' }, { baseMs: 0, timeoutMs: 20 }), (e) => e.name === 'TimeoutError');
   assert.ok(seen instanceof AbortSignal);
 });
+
+test('fetchRetry: 503 (blocco temporaneo di Wizz) si riprova come il 429', async () => {
+  let n = 0;
+  const flaky = async () => (++n < 3 ? status(503) : json({ ok: 1 }));
+  assert.deepEqual(await fetchRetry(flaky, 'https://x/y', undefined, { baseMs: 0 }), { ok: 1 });
+  assert.equal(n, 3);
+  await assert.rejects(fetchRetry(async () => status(503), 'https://x/y', undefined, { baseMs: 0 }), (e) => e.rateLimited === true && /HTTP 503/.test(e.message));
+});

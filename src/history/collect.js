@@ -12,6 +12,8 @@ import { parseRyanairRoutes, parseRyanairDays, parseWizzDays } from './observe.j
 const MONTHS = 12;
 const WIZZ_WINDOW_DAYS = 30;
 const WIZZ_HORIZON_DAYS = 365;
+/** Status che significano «rallenta»: si riprova dopo una pausa invece di contare un errore. */
+const THROTTLE_STATUS = new Set([429, 503]);
 const FETCH_TIMEOUT_MS = 20000;
 /** Richieste fallite di fila dopo cui la compagnia si ferma (blocco prolungato). */
 const MAX_CONSECUTIVE_FAILURES = 10;
@@ -20,7 +22,8 @@ const MAX_CONSECUTIVE_FAILURES = 10;
 const withTimeout = (fetchImpl, timeoutMs) => (url, init) => fetchImpl(url, { ...init, signal: AbortSignal.timeout(timeoutMs) });
 
 /**
- * Scarica un JSON; su HTTP 429 attende baseMs × 2^tentativo e riprova.
+ * Scarica un JSON; su HTTP 429 o 503 (Wizz blocca per circa un minuto con 503 se si va troppo veloci)
+ * attende baseMs × 2^tentativo e riprova.
  * Esauriti i tentativi lancia un errore con `rateLimited = true`; gli altri status non ok lanciano subito.
  * Ogni chiamata ha un tempo massimo di `timeoutMs`: scaduto, lancia (conta come richiesta fallita).
  */
@@ -29,9 +32,9 @@ export async function fetchRetry(fetchImpl, url, init, { retries = 3, baseMs = 3
   for (let attempt = 0; ; attempt++) {
     const res = await timed(url, init);
     if (res.ok) return res.json();
-    if (res.status !== 429) throw new Error(`HTTP ${res.status} ${url.split('?')[0]}`);
+    if (!THROTTLE_STATUS.has(res.status)) throw new Error(`HTTP ${res.status} ${url.split('?')[0]}`);
     if (attempt >= retries) {
-      const err = new Error(`HTTP 429 ${url.split('?')[0]}`);
+      const err = new Error(`HTTP ${res.status} ${url.split('?')[0]}`);
       err.rateLimited = true;
       throw err;
     }
@@ -204,7 +207,8 @@ export async function collectWizz(today, { fetchImpl = fetch, pauseMs = true, lo
         log(`wizz ${route.origin}↔${route.code} ${win.from}: ${err.message}`);
         stop.failed(err);
       }
-      if (!meta.stoppedReason) await pause(pauseMs, 500, 1500);
+      // Wizz blocca oltre ~45 richieste al minuto: una ogni 2,5–3,5 s (~20 al minuto) resta sotto il limite
+      if (!meta.stoppedReason) await pause(pauseMs, 2500, 3500);
     }
     if (routeOk) meta.routesOk++;
   }
