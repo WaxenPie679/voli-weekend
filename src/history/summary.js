@@ -90,7 +90,7 @@ export function buildSummary(days, routes, { generatedAt }) {
   const dayNum = dayNumberFactory();
   const state = new Map(); // obsKey -> Obs, aggiornato giorno per giorno
   const hists = new Map(); // tratta -> compagnia -> settimana -> Map(prezzo -> conteggio)
-  const flights = new Map(); // tratta -> compagnia -> Map(data -> [[giorno, stato, prezzo]])
+  const flights = new Map(); // tratta -> compagnia -> Map(data -> {cambi: [[giorno, stato, prezzo]], orario})
   const airlinesOf = new Map(); // tratta -> Set compagnie
 
   for (const { day, rows } of sorted) {
@@ -104,8 +104,10 @@ export function buildSummary(days, routes, { generatedAt }) {
       const fa = flights.get(rk);
       if (!fa.has(r.airline)) fa.set(r.airline, new Map());
       const fd = fa.get(r.airline);
-      if (!fd.has(r.date)) fd.set(r.date, []);
-      fd.get(r.date).push([day, r.state, r.price ?? null]);
+      if (!fd.has(r.date)) fd.set(r.date, { cambi: [], orario: '' });
+      const fv = fd.get(r.date);
+      fv.cambi.push([day, r.state, r.price ?? null]);
+      fv.orario = r.time ?? ''; // l'orario è quello dell'ultima riga vista
     }
     for (const r of state.values()) {
       if (r.state !== 'prezzo' || r.date < day) continue;
@@ -156,7 +158,8 @@ export function buildSummary(days, routes, { generatedAt }) {
       }
       const fl = [...(flights.get(rk)?.get(a) ?? [])]
         .filter(([date]) => date >= cutoff)
-        .sort((x, y) => (x[0] < y[0] ? -1 : x[0] > y[0] ? 1 : 0));
+        .sort((x, y) => (x[0] < y[0] ? -1 : x[0] > y[0] ? 1 : 0))
+        .map(([date, v]) => [date, v.cambi, v.orario]);
       perAirline[a] = { curve, rise: risePoint(curve, rel), flights: fl };
     }
     indexRoutes.push({ from, to, city, country, airlines });

@@ -85,10 +85,25 @@ test('buildSummary: curve, voli, indice', () => {
   assert.deepEqual(f.airlines.ryanair.curve, [[1, 32.5, 31.25, 33.75, 2], [5, 60, 60, 60, 2]]);
   assert.equal(f.airlines.ryanair.rise, null);
   assert.deepEqual(f.airlines.ryanair.flights.find(([d]) => d === '2026-11-20'),
-    ['2026-11-20', [['2026-11-12', 'prezzo', 30], ['2026-11-13', 'prezzo', 35]]]);
+    ['2026-11-20', [['2026-11-12', 'prezzo', 30], ['2026-11-13', 'prezzo', 35]], '']);
   assert.deepEqual(f.airlines.wizz.curve, []);
-  assert.deepEqual(f.airlines.wizz.flights, [['2026-11-20', [['2026-11-12', 'esaurito', null]]]]);
+  assert.deepEqual(f.airlines.wizz.flights, [['2026-11-20', [['2026-11-12', 'esaurito', null]], '']]);
   assert.ok(files.has('TRN-BDS'));
+});
+
+test('buildSummary: orario del volo = quello dell\'ultima riga vista', () => {
+  const days = [
+    { day: '2026-11-12', rows: [{ ...row('ryanair', 'BDS', 'TRN', '2026-11-20', 'prezzo', 30), time: '' }] },
+    { day: '2026-11-14', rows: [{ ...row('ryanair', 'BDS', 'TRN', '2026-11-20', 'prezzo', 35), time: '10:05-11:55' }] },
+  ];
+  const fl = buildSummary(days, routes, opts).files.get('BDS-TRN').airlines.ryanair.flights;
+  assert.deepEqual(fl, [['2026-11-20', [['2026-11-12', 'prezzo', 30], ['2026-11-14', 'prezzo', 35]], '10:05-11:55']]);
+});
+
+test('buildSummary: volo senza orario (formato vecchio) ha orario vuoto', () => {
+  const days = [{ day: '2026-11-12', rows: [row('ryanair', 'BDS', 'TRN', '2026-11-20', 'prezzo', 30)] }];
+  const fl = buildSummary(days, routes, opts).files.get('BDS-TRN').airlines.ryanair.flights;
+  assert.deepEqual(fl, [['2026-11-20', [['2026-11-12', 'prezzo', 30]], '']]);
 });
 
 test('buildSummary: giorni saltati usano lo stato rigiocato', () => {
