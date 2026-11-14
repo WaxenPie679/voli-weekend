@@ -201,6 +201,23 @@ test('roundTrips: vista lungo usa venerdì e lunedì', () => {
   assert.equal(t.total, 30);
 });
 
+test('roundTrips: weekend lungo sceglie il giovedì se è il più economico', () => {
+  const out = mk([fl('2026-12-10', 5), fl('2026-12-11', 20), fl('2026-12-12', 35)]);
+  const t = find(roundTrips(out, base().back, '2026-11-14', 'lungo'), '2026-12-12');
+  assert.equal(t.out.date, '2026-12-10');
+  assert.equal(t.total, 15);
+});
+
+test('roundTrips: Wizz venerdì "06:10 18:30" valido nel weekend; Ryanair senza orario solo nel lungo', () => {
+  const wizz = mk([], [fl('2026-12-11', 12, '06:10 18:30')]);
+  const tw = find(roundTrips(wizz, base().back, '2026-11-14', 'weekend'), '2026-12-12');
+  assert.equal(tw.out.date, '2026-12-11');
+  assert.equal(tw.total, 37);
+  const ry = mk([fl('2026-12-11', 12, '')]);
+  assert.equal(find(roundTrips(ry, base().back, '2026-11-14', 'weekend'), '2026-12-12').total, null);
+  assert.equal(find(roundTrips(ry, base().back, '2026-11-14', 'lungo'), '2026-12-12').out.date, '2026-12-11');
+});
+
 test('roundTrips: venerdì sera valido nel weekend', () => {
   const out = mk([fl('2026-12-11', 20, '19:00-20:50')]);
   const t = find(roundTrips(out, base().back, '2026-11-14', 'weekend'), '2026-12-12');

@@ -157,7 +157,7 @@ async function showRoute() {
     showMessage('Tratta non leggibile', 'I prezzi di questa tratta non sono nel formato atteso. Riprova più tardi.', showRoute);
     return;
   }
-  if (current?.trip.status === 'loading') loadPartner(seq);
+  if (current?.trip.status === 'loading') loadPartner(seq).catch(() => {});
 }
 
 function showMessage(title, text, retry) {
@@ -545,8 +545,19 @@ async function loadPartner(seq) {
   }
   if (seq !== loadSeq || !current) return;
   current.trip.status = ok ? 'ok' : 'missing';
-  drawTrips();
-  renderTrip();
+  try {
+    drawTrips();
+    renderTrip();
+  } catch {
+    current.trip.status = 'missing';
+    current.trip.list = null;
+    try {
+      const card = current.node.querySelector('[data-chart="trips"]').closest('.chart-card');
+      card.querySelector('.trip-best').replaceChildren();
+      card.querySelector('.trip-detail').replaceChildren();
+      card.querySelector('[data-chart="trips"]').replaceChildren(html('p', 'chart-empty', MISSING_TEXT));
+    } catch { /* carta non più presente */ }
+  }
 }
 
 function setupTripMode(node) {
@@ -617,7 +628,7 @@ function drawTrips() {
   const totals = trips.map((x) => x.total).filter((v) => v != null);
   const monthOf = (d) => new Date(dayMs(d)).toLocaleDateString('it-IT', { month: 'short', timeZone: 'UTC' }).replace('.', '');
   const f = frame(host, {
-    xDomain: [0, 52],
+    xDomain: [-0.5, 52.5], // mezza barra di margine: prima e ultima restano dentro il grafico
     yDomain: priceDomain([0, ...totals]), // le barre partono da zero: altezze confrontabili
     xTicks: (narrow) => {
       // Tacca al primo sabato di ogni mese; su schermo stretto un mese sì e uno no
