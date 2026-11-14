@@ -57,10 +57,11 @@ export function parseRyanair(json, origin, weekend, seenAt) {
   });
 }
 
-export async function fetchRyanair(weekends, { fetchImpl = fetch, pauseMs = 500 } = {}) {
+/** `today` (AAAA-MM-GG, default oggi a Roma) serve ai test per non dipendere dalla data reale. */
+export async function fetchRyanair(weekends, { fetchImpl = fetch, pauseMs = 500, today = todayRome() } = {}) {
   const seenAt = new Date().toISOString();
   const all = [];
-  for (const q of buildRyanairQueries(weekends, todayRome())) {
+  for (const q of buildRyanairQueries(weekends, today)) {
     const json = await fetchJson(fetchImpl, q.url, { headers: { Accept: 'application/json' } });
     all.push(...parseRyanair(json, q.origin, q.weekend, seenAt));
     if (pauseMs) await jitter(pauseMs * 0.4, pauseMs);

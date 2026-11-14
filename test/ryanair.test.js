@@ -44,12 +44,12 @@ test('parseRyanair converte le tariffe in itinerari', () => {
 
 test('fetchRyanair rifiuta su HTTP 500', async () => {
   const fetchImpl = async () => new Response('x', { status: 500 });
-  await assert.rejects(fetchRyanair(weekends.slice(0, 1), { fetchImpl, pauseMs: 0 }));
+  await assert.rejects(fetchRyanair(weekends.slice(0, 1), { fetchImpl, pauseMs: 0, today: '2026-11-02' }));
 });
 
 test('fetchRyanair unisce i risultati di tutte le query', async () => {
   const fetchImpl = async () => new Response(JSON.stringify(fixture), { status: 200 });
-  const its = await fetchRyanair(weekends.slice(0, 1), { fetchImpl, pauseMs: 0 });
+  const its = await fetchRyanair(weekends.slice(0, 1), { fetchImpl, pauseMs: 0, today: '2026-11-02' });
   assert.equal(its.length, fixture.fares.length * 12);
 });
 
