@@ -130,3 +130,82 @@ export function searchUrl(airline, from, to, date) {
   if (airline === 'wizz') return `https://wizzair.com/it-it/booking/select-flight/${from}/${to}/${date}/null/1/0/0/null`;
   return `https://www.ryanair.com/it/it/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=${date}&isReturn=false&originIata=${from}&destinationIata=${to}`;
 }
+
+// ---- Quando partire: combinazioni andata e ritorno per weekend ----
+
+const dow = (d) => new Date(dayMs(d)).getUTCDay(); // 0 domenica … 6 sabato
+const rankAirline = (a) => (AIRLINE_ORDER.includes(a) ? AIRLINE_ORDER.indexOf(a) : AIRLINE_ORDER.length);
+
+/** 53 sabati crescenti: il primo è il primo sabato s con s + 1 giorno ≥ lastDay (weekend in corso incluso). */
+export function weekendSaturdays(lastDay) {
+  let t = dayMs(lastDay) - DAY_MS;
+  while (new Date(t).getUTCDay() !== 6) t += DAY_MS;
+  return Array.from({ length: 53 }, (_, i) => isoDay(t + 7 * i * DAY_MS));
+}
+
+/** Partenza di venerdì sera: Ryanair se la partenza è ≥ 18:00, Wizz se almeno una partenza lo è; orario vuoto → no. */
+export function fridayEvening(airline, time) {
+  if (!time) return false;
+  const first = airline === 'ryanair' ? [time.split('-')[0]] : time.split(' ').filter(Boolean);
+  return first.some((h) => h >= '18:00');
+}
+
+/** Giorni utili di un weekend (identificato dal sabato): andata e ritorno. */
+export function weekendDays(saturday, mode) {
+  const at = (n) => isoDay(dayMs(saturday) + n * DAY_MS);
+  return mode === 'lungo'
+    ? { out: [at(-2), at(-1), at(0)], back: [at(1), at(2)] }
+    : { out: [at(-1), at(0)], back: [at(1)] };
+}
+
+/** Mappa data → gambe con prezzo di oggi (ultimo cambio con prezzo), solo partenze ≥ lastDay. */
+function legsByDate(file, lastDay) {
+  const map = new Map();
+  for (const [airline, data] of Object.entries(file?.airlines ?? {})) {
+    for (const [date, changes, time] of data?.flights ?? []) {
+      if (date < lastDay || !changes?.length) continue;
+      const last = changes[changes.length - 1];
+      if (last[1] !== 'prezzo' || last[2] == null) continue;
+      if (!map.has(date)) map.set(date, []);
+      map.get(date).push({ date, airline, time: time ?? '', price: last[2] });
+    }
+  }
+  return map;
+}
+
+/** Gamba più economica tra i giorni dati; parità: data più vicina, poi ryanair prima di wizz. */
+function cheapestLeg(map, days, accept) {
+  let best = null;
+  for (const day of days) {
+    for (const leg of map.get(day) ?? []) {
+      if (!accept(leg)) continue;
+      if (!best || leg.price < best.price || (leg.price === best.price && (leg.date < best.date || (leg.date === best.date && rankAirline(leg.airline) < rankAirline(best.airline))))) best = leg;
+    }
+  }
+  return best;
+}
+
+/** Una voce per ogni weekend: andata e ritorno più economici (indipendenti) e totale. */
+export function roundTrips(outFile, backFile, lastDay, mode) {
+  const outMap = outFile ? legsByDate(outFile, lastDay) : new Map();
+  const backMap = backFile ? legsByDate(backFile, lastDay) : new Map();
+  return weekendSaturdays(lastDay).map((saturday) => {
+    const days = weekendDays(saturday, mode);
+    // Nel weekend breve il venerdì vale solo di sera.
+    const okOut = (leg) => mode === 'lungo' || dow(leg.date) !== 5 || fridayEvening(leg.airline, leg.time);
+    const out = cheapestLeg(outMap, days.out, okOut);
+    const back = cheapestLeg(backMap, days.back, () => true);
+    if (!out || !back) return { saturday, out: null, back: null, total: null };
+    return { saturday, out, back, total: Math.round((out.price + back.price) * 100) / 100 };
+  });
+}
+
+/** Weekend con totale minimo; parità: sabato più vicino. */
+export function cheapestTrip(trips) {
+  let best = null;
+  for (const t of trips) {
+    if (t.total == null) continue;
+    if (!best || t.total < best.total || (t.total === best.total && t.saturday < best.saturday)) best = t;
+  }
+  return best;
+}

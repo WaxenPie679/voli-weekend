@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { RELIABILITY_LABEL, isReadyIndex, statusLine, riseText, scale, priceDomain, curvePaths, stepPoints, upcomingDepartures, routeLabel, weekRange, weekFlights, timeText, searchUrl } from '../web/storico-view.js';
+import { RELIABILITY_LABEL, isReadyIndex, statusLine, riseText, scale, priceDomain, curvePaths, stepPoints, upcomingDepartures, routeLabel, weekRange, weekFlights, timeText, searchUrl, weekendSaturdays, fridayEvening, weekendDays, roundTrips, cheapestTrip } from '../web/storico-view.js';
 
 test('RELIABILITY_LABEL', () => {
   assert.deepEqual(RELIABILITY_LABEL, { prima: 'prima stima', crescita: 'in crescita', affidabile: 'affidabile' });
@@ -149,4 +149,102 @@ test('searchUrl: Ryanair sola andata e Wizz selezione volo', () => {
     searchUrl('wizz', 'BUD', 'BRI', '2026-12-26'),
     'https://wizzair.com/it-it/booking/select-flight/BUD/BRI/2026-12-26/null/1/0/0/null',
   );
+});
+
+// ---- Quando partire: combinazioni andata e ritorno ----
+const fl = (date, price, time = '10:00-11:00', state = 'prezzo') => [date, [['2026-11-14', state, price]], time];
+const mk = (ryanair = [], wizz = []) => ({ airlines: { ryanair: { flights: ryanair }, wizz: { flights: wizz } } });
+
+test('weekendSaturdays: 53 sabati, weekend in corso se domenica', () => {
+  const s = weekendSaturdays('2026-11-14');
+  assert.equal(s.length, 53);
+  assert.equal(s[0], '2026-11-14');
+  assert.equal(s[1], '2026-11-21');
+  assert.equal(s[52], '2027-11-13');
+  assert.equal(weekendSaturdays('2026-11-15')[0], '2026-11-14');
+  assert.equal(weekendSaturdays('2026-11-16')[0], '2026-11-21');
+});
+
+test('fridayEvening', () => {
+  assert.equal(fridayEvening('ryanair', '19:05-21:00'), true);
+  assert.equal(fridayEvening('ryanair', '17:55-19:40'), false);
+  assert.equal(fridayEvening('wizz', '06:10 18:30'), true);
+  assert.equal(fridayEvening('wizz', '06:10 12:00'), false);
+  assert.equal(fridayEvening('ryanair', ''), false);
+});
+
+test('weekendDays', () => {
+  assert.deepEqual(weekendDays('2026-12-12', 'weekend'), { out: ['2026-12-11', '2026-12-12'], back: ['2026-12-13'] });
+  assert.deepEqual(weekendDays('2026-12-12', 'lungo'), { out: ['2026-12-10', '2026-12-11', '2026-12-12'], back: ['2026-12-13', '2026-12-14'] });
+});
+
+const base = () => ({
+  out: mk([fl('2026-12-11', 20, '07:00-08:50')], [fl('2026-12-12', 35, '09:00 10:00')]),
+  back: mk([fl('2026-12-13', 25), fl('2026-12-14', 10)]),
+});
+const find = (trips, sat) => trips.find((t) => t.saturday === sat);
+
+test('roundTrips: vista weekend scarta il venerdì mattina', () => {
+  const { out, back } = base();
+  const t = find(roundTrips(out, back, '2026-11-14', 'weekend'), '2026-12-12');
+  assert.equal(t.total, 60);
+  assert.equal(t.out.airline, 'wizz');
+  assert.equal(t.back.airline, 'ryanair');
+  assert.equal(t.back.date, '2026-12-13');
+});
+
+test('roundTrips: vista lungo usa venerdì e lunedì', () => {
+  const { out, back } = base();
+  const t = find(roundTrips(out, back, '2026-11-14', 'lungo'), '2026-12-12');
+  assert.equal(t.out.date, '2026-12-11');
+  assert.equal(t.back.date, '2026-12-14');
+  assert.equal(t.total, 30);
+});
+
+test('roundTrips: venerdì sera valido nel weekend', () => {
+  const out = mk([fl('2026-12-11', 20, '19:00-20:50')]);
+  const t = find(roundTrips(out, base().back, '2026-11-14', 'weekend'), '2026-12-12');
+  assert.equal(t.total, 45);
+});
+
+test('roundTrips: ultimo cambio esaurito -> ignorata; senza ritorno tutto null', () => {
+  const out = mk([['2026-12-12', [['2026-11-14', 'prezzo', 30], ['2026-11-15', 'esaurito', null]], '10:00-11:00']]);
+  const t = find(roundTrips(out, base().back, '2026-11-14', 'weekend'), '2026-12-12');
+  assert.deepEqual([t.out, t.back, t.total], [null, null, null]);
+  const t2 = find(roundTrips(mk([fl('2026-12-12', 30)]), mk(), '2026-11-14', 'weekend'), '2026-12-12');
+  assert.deepEqual([t2.out, t2.back, t2.total], [null, null, null]);
+});
+
+test('roundTrips: partenze prima di lastDay ignorate', () => {
+  const out = mk([fl('2026-11-14', 30)]);
+  const back = mk([fl('2026-11-15', 20)]);
+  const t = roundTrips(out, back, '2026-11-15', 'weekend')[0];
+  assert.equal(t.saturday, '2026-11-14');
+  assert.equal(t.total, null);
+  assert.equal(t.out, null);
+});
+
+test('roundTrips: parità di prezzo -> data più vicina, poi ryanair', () => {
+  const out = mk([fl('2026-12-12', 30), fl('2026-12-11', 30, '19:00-20:00')], [fl('2026-12-11', 30, '19:00 20:00')]);
+  const t = find(roundTrips(out, base().back, '2026-11-14', 'weekend'), '2026-12-12');
+  assert.equal(t.out.date, '2026-12-11');
+  assert.equal(t.out.airline, 'ryanair');
+});
+
+test('roundTrips: file del ritorno assente', () => {
+  const trips = roundTrips(base().out, null, '2026-11-14', 'weekend');
+  assert.equal(trips.length, 53);
+  assert.ok(trips.every((t) => t.total === null && t.out === null && t.back === null));
+});
+
+test('cheapestTrip', () => {
+  const trips = [
+    { saturday: '2026-11-14', out: null, back: null, total: null },
+    { saturday: '2026-11-21', out: {}, back: {}, total: 50 },
+    { saturday: '2026-11-28', out: {}, back: {}, total: 40 },
+    { saturday: '2026-12-05', out: {}, back: {}, total: 40 },
+  ];
+  assert.equal(cheapestTrip(trips).saturday, '2026-11-28');
+  assert.equal(cheapestTrip([trips[0]]), null);
+  assert.equal(cheapestTrip([]), null);
 });
