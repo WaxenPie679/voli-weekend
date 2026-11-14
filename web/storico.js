@@ -1,17 +1,18 @@
 import { HISTORY_BASE_URL } from './config.js';
-import { isReadyIndex, statusLine, riseText, scale, priceDomain, curvePaths, stepPoints, upcomingDepartures, routeLabel, weekRange, weekFlights, timeText, searchUrl } from './storico-view.js';
+import { isReadyIndex, statusLine, riseText, scale, priceDomain, curvePaths, stepPoints, upcomingDepartures, routeLabel, weekRange, weekFlights, timeText, searchUrl, weekendDays, roundTrips, cheapestTrip } from './storico-view.js';
 
 const $ = (id) => document.getElementById(id);
 const form = $('choice');
 const content = $('content');
 const STORE_KEY = 'voli-weekend-storico';
+const TRIP_KEY = 'voli-weekend-storico-trip';
 const AIRLINES = { ryanair: 'Ryanair', wizz: 'Wizz Air' };
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const DAY_MS = 86400000;
 
 let index = null;
 const routes = new Map(); // "BRI-BUD" → file della tratta
-let current = null; // { route, file, codes, departure, node, week }
+let current = null; // { route, file, codes, departure, node, week, trip }
 let loadSeq = 0; // ogni caricamento ha il suo numero: le risposte arrivate tardi per una scelta vecchia si scartano
 
 // --- Formattazione ---
@@ -154,7 +155,9 @@ async function showRoute() {
     renderRoute(route, file);
   } catch {
     showMessage('Tratta non leggibile', 'I prezzi di questa tratta non sono nel formato atteso. Riprova più tardi.', showRoute);
+    return;
   }
+  if (current?.trip.status === 'loading') loadPartner(seq);
 }
 
 function showMessage(title, text, retry) {
@@ -213,16 +216,20 @@ function renderRoute(route, file) {
   select.disabled = !departures.length;
   select.addEventListener('change', () => { current.departure = select.value; drawSteps(); });
 
-  current = { route, file, codes, departure, node, week: null }; // nuova tratta: nessuna settimana scelta
+  // nuova tratta: nessuna settimana e nessun weekend scelti
+  current = { route, file, codes, departure, node, week: null, trip: tripState(route) };
+  setupTripMode(node);
   content.replaceChildren(node);
   drawAll();
   renderWeek();
+  renderTrip();
 }
 
 function drawAll() {
   if (!current) return;
   drawCurve();
   drawSteps();
+  drawTrips();
 }
 
 // --- Struttura comune dei grafici ---
@@ -493,6 +500,216 @@ function drawSteps() {
   note.textContent = longest <= 1
     ? 'Per ora c\'è un solo giorno di prezzi per questo volo: la linea si allunga ogni giorno.'
     : 'Prezzo dello stesso volo giorno per giorno, da quando è entrato nello storico.';
+}
+
+// --- Grafico «Quando partire» ---
+const HOMES = ['BRI', 'BDS'];
+const TRIP_NOTE = 'Prezzi della raccolta di stanotte: sul sito della compagnia vedi quello di adesso.';
+const MISSING_TEXT = 'Ritorno non disponibile per questa tratta.';
+
+function readTripMode() {
+  try {
+    const saved = localStorage.getItem(TRIP_KEY);
+    if (saved === 'weekend' || saved === 'lungo') return saved;
+  } catch { /* storage non disponibile */ }
+  return 'weekend';
+}
+
+function saveTripMode(mode) {
+  try { localStorage.setItem(TRIP_KEY, mode); } catch { /* storage non disponibile */ }
+}
+
+/**
+ * Stato della carta per la tratta scelta: l'andata parte sempre da Bari/Brindisi,
+ * qualunque direzione sia selezionata. `status`: ok, loading (manca il file dell'altra direzione), missing.
+ */
+function tripState(route) {
+  const home = HOMES.includes(route.from) ? route.from : route.to;
+  const dest = home === route.from ? route.to : route.from;
+  const outKey = `${home}-${dest}`;
+  const backKey = `${dest}-${home}`;
+  const otherKey = `${route.from}-${route.to}` === outKey ? backKey : outKey;
+  const listed = index.routes.some((r) => `${r.from}-${r.to}` === otherKey);
+  const status = routes.has(otherKey) ? 'ok' : listed ? 'loading' : 'missing';
+  return { home, dest, outKey, backKey, otherKey, status, mode: readTripMode(), saturday: null, list: null };
+}
+
+/** Scarica il file dell'altra direzione; risposte arrivate dopo un cambio di tratta si scartano. */
+async function loadPartner(seq) {
+  const { otherKey } = current.trip;
+  let ok = true;
+  try {
+    routes.set(otherKey, await getJson(`${otherKey}.json`));
+  } catch {
+    ok = false;
+  }
+  if (seq !== loadSeq || !current) return;
+  current.trip.status = ok ? 'ok' : 'missing';
+  drawTrips();
+  renderTrip();
+}
+
+function setupTripMode(node) {
+  const mode = readTripMode();
+  for (const input of node.querySelectorAll('input[name="trip-mode"]')) {
+    input.checked = input.value === mode;
+    input.addEventListener('change', () => {
+      if (!input.checked) return;
+      current.trip.mode = input.value;
+      saveTripMode(input.value);
+      drawTrips(); // il sabato scelto resta: cambia solo la combinazione
+      renderTrip();
+    });
+  }
+}
+
+/** Combinazioni del weekend per la vista scelta; null se mancano i dati. */
+function tripList() {
+  const t = current.trip;
+  if (t.status !== 'ok') return null;
+  const outFile = routes.get(t.outKey) ?? null;
+  const backFile = routes.get(t.backKey) ?? null;
+  const lastDay = outFile?.lastDay ?? backFile?.lastDay ?? index.lastDay;
+  return { lastDay, trips: roundTrips(outFile, backFile, lastDay, t.mode) };
+}
+
+/** «ven 11 dic – dom 13 dic»: dal primo giorno di andata all'ultimo di ritorno. */
+function weekendText(saturday, mode, year) {
+  const { out, back } = weekendDays(saturday, mode);
+  return `${fmtDeparture(out[0], year)} – ${fmtDeparture(back[back.length - 1], year)}`;
+}
+
+/** «13–14 dic» se nello stesso mese, altrimenti «31 gen – 1 feb». */
+function spanText(a, b) {
+  if (a.slice(0, 7) === b.slice(0, 7)) return `${+a.slice(8, 10)}–${fmtDay(b)}`;
+  return `${fmtDay(a)} – ${fmtDay(b)}`;
+}
+
+function drawTrips() {
+  const t = current.trip;
+  const card = current.node.querySelector('[data-chart="trips"]').closest('.chart-card');
+  const host = card.querySelector('[data-chart="trips"]');
+  const best = card.querySelector('.trip-best');
+  const empty = (text) => {
+    t.list = null;
+    best.replaceChildren();
+    host.replaceChildren(html('p', 'chart-empty', text));
+  };
+  if (t.status === 'loading') { empty('Carico il ritorno…'); return; }
+  let data = null;
+  try {
+    data = tripList();
+  } catch {
+    t.status = 'missing'; // file dell'altra direzione non nel formato atteso
+  }
+  if (!data) { empty(MISSING_TEXT); return; }
+  const { lastDay, trips } = data;
+  t.list = { lastDay, trips };
+  const cheapest = cheapestTrip(trips);
+  if (!cheapest) { empty('Nessuna combinazione con prezzo per ora.'); return; }
+
+  best.replaceChildren(
+    document.createTextNode(`Il più economico: ${spanText(cheapest.out.date, cheapest.back.date)} · `),
+    html('b', 'trip-best-price', fmtPrice(cheapest.total)),
+  );
+
+  const year = lastDay.slice(0, 4);
+  const totals = trips.map((x) => x.total).filter((v) => v != null);
+  const monthOf = (d) => new Date(dayMs(d)).toLocaleDateString('it-IT', { month: 'short', timeZone: 'UTC' }).replace('.', '');
+  const f = frame(host, {
+    xDomain: [0, 52],
+    yDomain: priceDomain([0, ...totals]), // le barre partono da zero: altezze confrontabili
+    xTicks: (narrow) => {
+      // Tacca al primo sabato di ogni mese; su schermo stretto un mese sì e uno no
+      const firsts = trips.map((x, i) => [i, x.saturday]).filter(([, s]) => +s.slice(8, 10) <= 7);
+      return firsts.filter((_, k) => !narrow || k % 2 === 0).map(([i, s]) => [i, monthOf(s)]);
+    },
+    label: `Prezzo di andata e ritorno per ogni weekend, ${t.mode === 'lungo' ? 'weekend lungo' : 'weekend'}`,
+  });
+
+  const step = Math.abs(f.sx(1) - f.sx(0));
+  const barW = step * 0.7;
+  const bars = svg('g', { class: 'trip-bars' }, f.plot);
+  trips.forEach((trip, i) => {
+    if (trip.total == null) return;
+    const y = f.sy(trip.total);
+    svg('rect', {
+      x: round1(f.sx(i) - barW / 2), y: round1(y), width: round1(barW), height: round1(Math.max(0, f.H - f.m.bottom - y)),
+      rx: Math.min(2, barW / 2), class: `trip-bar${trip.saturday === cheapest.saturday ? ' lowest' : ''}`,
+    }, bars);
+  });
+
+  // Fascia del weekend scelto, sotto le barre
+  const band = svg('rect', { y: f.m.top, height: f.H - f.m.bottom - f.m.top, width: step, class: 'week-band', visibility: 'hidden' });
+  f.root.insertBefore(band, f.plot);
+  const mark = (saturday) => {
+    const i = trips.findIndex((x) => x.saturday === saturday);
+    if (i < 0) { band.setAttribute('visibility', 'hidden'); return; }
+    band.setAttribute('x', f.sx(i) - step / 2);
+    band.setAttribute('width', step);
+    band.setAttribute('visibility', 'visible');
+  };
+  mark(t.saturday);
+
+  const pick = (x) => {
+    const i = Math.min(52, Math.max(0, Math.round((x - f.sx(0)) / step)));
+    const trip = trips[i];
+    const text = trip.total == null ? 'nessuna combinazione' : `Totale ${fmtPrice(trip.total)}`;
+    return { x: f.sx(i), title: weekendText(trip.saturday, t.mode, year), rows: [['trip', text]], saturday: trip.saturday };
+  };
+  interact(f, pick, trips.map((_, i) => f.sx(i)), (hit) => {
+    t.saturday = hit.saturday;
+    mark(hit.saturday);
+    renderTrip();
+  });
+}
+
+/** Riga di una gamba, nello stesso stile dei voli della settimana. */
+function legRow(kind, leg, from, to, year) {
+  const li = html('li', `week-row ${leg.airline}`);
+  const info = html('p', 'week-info');
+  const bits = [fmtDeparture(leg.date, year), timeText(leg.time)].filter(Boolean).join(' · ');
+  const name = html('span', 'week-airline');
+  name.append(html('span', 'swatch'), document.createTextNode(AIRLINES[leg.airline] ?? leg.airline));
+  info.append(html('b', 'trip-kind', kind), document.createTextNode(` ${bits} · `), name);
+  const price = html('span', 'week-price', fmtPrice(leg.price));
+  const link = html('a', 'btn-secondary week-search', 'Cerca');
+  link.href = searchUrl(leg.airline, from, to, leg.date);
+  link.target = '_blank';
+  link.rel = 'noopener';
+  link.setAttribute('aria-label', `Cerca il volo di ${kind.toLowerCase()} ${AIRLINES[leg.airline] ?? leg.airline} del ${fmtDeparture(leg.date, year)}`);
+  li.append(info, price, link);
+  return li;
+}
+
+function renderTrip() {
+  const t = current.trip;
+  const card = current.node.querySelector('[data-chart="trips"]').closest('.chart-card');
+  const box = card.querySelector('.trip-detail');
+  const note = card.querySelector('.trip-note');
+  note.textContent = '';
+  if (!t.list || !cheapestTrip(t.list.trips)) { box.replaceChildren(); return; }
+  const trip = t.list.trips.find((x) => x.saturday === t.saturday);
+  if (!trip) {
+    box.replaceChildren(html('p', 'week-hint', 'Tocca un weekend per vedere andata e ritorno.'));
+    return;
+  }
+  const year = t.list.lastDay.slice(0, 4);
+  const head = html('div', 'week-head');
+  head.append(html('h4', null, weekendText(trip.saturday, t.mode, year)));
+  if (trip.total == null) {
+    box.replaceChildren(head, html('p', 'week-empty', 'Nessuna combinazione con prezzo per questo weekend.'));
+    return;
+  }
+  const list = html('ul', 'week-list');
+  list.append(
+    legRow('Andata', trip.out, t.home, t.dest, year),
+    legRow('Ritorno', trip.back, t.dest, t.home, year),
+  );
+  const total = html('p', 'trip-total');
+  total.append(document.createTextNode('Totale '), html('b', 'trip-total-price', fmtPrice(trip.total)));
+  box.replaceChildren(head, list, total);
+  note.textContent = TRIP_NOTE;
 }
 
 // --- Avvio ---

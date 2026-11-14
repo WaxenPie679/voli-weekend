@@ -313,6 +313,18 @@ h1 { font-size: var(--fs-title); line-height: 1.2; font-weight: 500; letter-spac
 .week-price { font-weight: 500; white-space: nowrap; }
 .week-price.lowest { color: var(--hue); font-weight: 700; }
 .week-search { height: 32px; font-size: 13px; }
+.trip-mode { justify-self: start; }
+.trip-best { font-weight: 500; }
+.trip-best:empty { display: none; }
+.trip-best-price, .trip-total-price { color: var(--hue); font-weight: 500; }
+.chart-svg .trip-bar { fill: var(--hue); fill-opacity: .35; pointer-events: none; }
+.chart-svg .trip-bar.lowest { fill-opacity: 1; }
+[data-chart="trips"] .chart-svg { cursor: pointer; }
+.chart-tip .trip { --c: #8fb6ec; }
+.trip-detail { border-top: 1px solid var(--border); padding-top: 12px; display: grid; gap: 8px; }
+.trip-detail:empty { display: none; }
+.trip-kind { font-weight: 500; }
+.trip-total { margin: 0; text-align: right; }
 
 @media (max-width: 720px) {
   .topnav { gap: 12px; }
@@ -329,4 +341,5 @@ h1 { font-size: var(--fs-title); line-height: 1.2; font-weight: 500; letter-spac
   .week-row { grid-template-columns: 1fr auto; gap: 4px 12px; padding: 8px 0; }
   .week-info { grid-column: 1 / -1; }
   .week-search { height: 44px; padding: 0 18px; }
+  .trip-mode { justify-self: stretch; }
 }
