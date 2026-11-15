@@ -148,6 +148,7 @@ Il modulo «Segui una tratta» propone gli aeroporti con completamento automatic
 - Formato preciso del corpo della issue e sua lettura, con errori chiari nel commento.
 - Come ottenere l'elenco degli aeroporti per il completamento automatico (file statico generato o elenchi tratte già pubblicati).
 - Come verificare se Wizz cambia prezzo con `adultCount` > 1. Se sì, usare le persone nella richiesta Wizz.
+  - **Verificato il 2026-11-15** (BRI→BUD, 1–10 luglio 2027): sì, Wizz restituisce un prezzo a persona più alto con `adultCount: 6` (es. 55,99 → 65,99 €; 69,99 → 89,99 €). Ryanair `cheapestPerDay` invece ignora il numero di persone. Usare le persone nella richiesta Wizz è un compito a parte, non incluso in questa versione.
 - Link di prenotazione con il numero di persone già impostato, dove la compagnia lo permette.
 - Permessi del workflow (`issues: write` per commentare e chiudere) e aggiornamento di `keepalive.yml` e `health.yml` (avviso se `tracking.yml` non gira da più di ~6 ore).
 - Nomi di moduli e funzioni, test con `node --test`, testi in italiano.
