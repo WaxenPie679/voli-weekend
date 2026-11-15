@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Tratte seguite · Voli Weekend</title>
+  <meta name="description" content="Le tratte che segui: prezzo migliore di oggi, andamento e quando conviene comprare.">
+  <meta name="theme-color" content="#f2f4f7">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Voli Weekend">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="./" aria-label="Voli Weekend, offerte">
+        <svg class="brand-mark" viewBox="0 0 28 20" aria-hidden="true">
+          <path d="M3 1h22a2 2 0 0 1 2 2v4.2a2.8 2.8 0 0 0 0 5.6V17a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-4.2a2.8 2.8 0 0 0 0-5.6V3a2 2 0 0 1 2-2Z" fill="currentColor"/>
+          <path d="M19 4.5v11" stroke="#fff" stroke-width="1.4" stroke-dasharray="1.6 1.6"/>
+          <path d="M6.5 12.5 13.5 7.5M10.6 7.4l2.9.1-.2 2.9" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Voli Weekend</span>
+      </a>
+      <nav class="topnav" aria-label="Pagine">
+        <a class="nav-link" id="back-link" href="./">Offerte</a>
+        <a class="nav-link" id="history-link" href="storico.html">Storico prezzi</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="title-row title-actions">
+      <h1>Tratte seguite</h1>
+      <a class="btn-secondary follow-open" href="#follow">+ Segui una tratta</a>
+      <p class="finding" id="status" aria-live="polite">Carico le tratte…</p>
+    </div>
+
+    <div id="content"></div>
+
+    <details class="follow" id="follow">
+      <summary>Segui una tratta</summary>
+      <form class="follow-form" id="follow-form" novalidate>
+        <p class="follow-intro">Scegli tratta e date: il prezzo migliore viene controllato ogni 2 ore e ricevi un messaggio quando scende.</p>
+        <datalist id="airports"></datalist>
+        <div class="follow-row">
+          <label class="field text-field">
+            <span>Da</span>
+            <input name="da" list="airports" autocomplete="off" autocapitalize="words" placeholder="Bari (BRI)" value="Bari (BRI)">
+          </label>
+          <label class="field text-field">
+            <span>A</span>
+            <input name="a" list="airports" autocomplete="off" autocapitalize="words" placeholder="Città o codice">
+          </label>
+        </div>
+        <div class="follow-row">
+          <fieldset class="seg-field">
+            <legend>Viaggio</legend>
+            <div class="seg">
+              <label><input type="radio" name="tipo" value="ar" checked><span>Andata e ritorno</span></label>
+              <label><input type="radio" name="tipo" value="solo"><span>Solo andata</span></label>
+            </div>
+          </fieldset>
+          <fieldset class="seg-field">
+            <legend>Date</legend>
+            <div class="seg">
+              <label><input type="radio" name="date" value="finestra" checked><span>Finestra</span></label>
+              <label><input type="radio" name="date" value="precise"><span>Date precise</span></label>
+            </div>
+          </fieldset>
+        </div>
+
+        <div class="follow-row" data-mode="precise" hidden>
+          <label class="field text-field">
+            <span>Andata</span>
+            <input type="date" name="andata">
+          </label>
+          <label class="field text-field" data-roundtrip>
+            <span>Ritorno</span>
+            <input type="date" name="ritorno">
+          </label>
+        </div>
+
+        <div class="follow-block" data-mode="finestra">
+          <fieldset class="seg-field">
+            <legend>Mesi</legend>
+            <div class="check-grid months" id="months"></div>
+          </fieldset>
+          <fieldset class="seg-field">
+            <legend>Giorni di partenza</legend>
+            <div class="check-grid days">
+              <label class="chip"><input type="checkbox" name="giorni" value="1"><span>lun</span></label>
+              <label class="chip"><input type="checkbox" name="giorni" value="2"><span>mar</span></label>
+              <label class="chip"><input type="checkbox" name="giorni" value="3"><span>mer</span></label>
+              <label class="chip"><input type="checkbox" name="giorni" value="4"><span>gio</span></label>
+              <label class="chip"><input type="checkbox" name="giorni" value="5"><span>ven</span></label>
+              <label class="chip"><input type="checkbox" name="giorni" value="6"><span>sab</span></label>
+              <label class="chip"><input type="checkbox" name="giorni" value="7"><span>dom</span></label>
+            </div>
+          </fieldset>
+          <div class="follow-row" data-roundtrip>
+            <label class="field num-field">
+              <span>Notti, minimo</span>
+              <input type="number" name="nottiMin" min="1" max="30" inputmode="numeric" value="2">
+            </label>
+            <label class="field num-field">
+              <span>Notti, massimo</span>
+              <input type="number" name="nottiMax" min="1" max="30" inputmode="numeric" value="3">
+            </label>
+          </div>
+        </div>
+
+        <div class="follow-row">
+          <label class="field">
+            <span>Persone</span>
+            <select name="persone">
+              <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+              <option>6</option><option>7</option><option>8</option><option>9</option>
+            </select>
+          </label>
+          <label class="field text-field name-field">
+            <span>Nome (facoltativo)</span>
+            <input name="nome" maxlength="60" placeholder="Es. Dubrovnik con gli amici">
+          </label>
+        </div>
+
+        <ul class="form-errors" id="form-errors" aria-live="polite" hidden></ul>
+        <div class="follow-actions">
+          <button class="btn-book" type="submit">Segui su GitHub</button>
+        </div>
+        <p class="follow-done" id="follow-done" aria-live="polite" hidden></p>
+      </form>
+    </details>
+  </main>
+
+  <script type="module" src="seguite.js"></script>
+</body>
+</html>

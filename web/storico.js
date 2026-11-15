@@ -726,6 +726,7 @@ function renderTrip() {
 // --- Avvio ---
 if (new URLSearchParams(location.search).has('sample')) {
   for (const a of document.querySelectorAll('.brand, #back-link')) a.href = './?sample=1';
+  $('tracking-link').href = 'seguite.html?sample=1';
 }
 
 form.addEventListener('submit', (e) => e.preventDefault());

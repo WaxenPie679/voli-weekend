@@ -1,0 +1,65 @@
+{
+  "generatedAt": "2026-11-15T09:20:00.000Z",
+  "airports": [
+    {
+      "code": "BRI",
+      "city": "Bari",
+      "country": "Italia"
+    },
+    {
+      "code": "BDS",
+      "city": "Brindisi",
+      "country": "Italia"
+    },
+    {
+      "code": "BGY",
+      "city": "Bergamo",
+      "country": "Italia"
+    },
+    {
+      "code": "BUD",
+      "city": "Budapest",
+      "country": "Ungheria"
+    },
+    {
+      "code": "CRL",
+      "city": "Bruxelles Charleroi",
+      "country": "Belgio"
+    },
+    {
+      "code": "DBV",
+      "city": "Dubrovnik",
+      "country": "Croazia"
+    },
+    {
+      "code": "KRK",
+      "city": "Cracovia",
+      "country": "Polonia"
+    },
+    {
+      "code": "MLA",
+      "city": "Malta",
+      "country": "Malta"
+    },
+    {
+      "code": "TIA",
+      "city": "Tirana",
+      "country": "Albania"
+    },
+    {
+      "code": "TRN",
+      "city": "Torino",
+      "country": "Italia"
+    },
+    {
+      "code": "VIE",
+      "city": "Vienna",
+      "country": "Austria"
+    },
+    {
+      "code": "WAW",
+      "city": "Varsavia",
+      "country": "Polonia"
+    }
+  ]
+}

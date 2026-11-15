@@ -1,0 +1,219 @@
+{
+  "generatedAt": "2026-11-15T09:20:00.000Z",
+  "items": [
+    {
+      "id": 12,
+      "url": "https://github.com/WaxenPie679/voli-weekend/issues/12",
+      "title": "Segui: Bari → Dubrovnik e ritorno · luglio 2027 · gio, ven · 5–7 notti · 6 persone",
+      "tracking": {
+        "from": "BRI",
+        "to": "DBV",
+        "roundTrip": true,
+        "mode": "finestra",
+        "months": [
+          "2027-07"
+        ],
+        "weekdays": [
+          4,
+          5
+        ],
+        "nights": [
+          5,
+          7
+        ],
+        "people": 6,
+        "name": "Dubrovnik con gli amici"
+      },
+      "hash": "a1b2c3d4",
+      "status": "attivo",
+      "errors": [],
+      "airlines": [
+        "ryanair",
+        "wizz"
+      ],
+      "best": {
+        "out": {
+          "airline": "ryanair",
+          "date": "2027-07-08",
+          "price": 28,
+          "time": "06:25-07:30"
+        },
+        "back": {
+          "airline": "ryanair",
+          "date": "2027-07-15",
+          "price": 28,
+          "time": "21:10-22:15"
+        },
+        "price": 56,
+        "nights": 7
+      },
+      "top": [
+        {
+          "out": {
+            "airline": "ryanair",
+            "date": "2027-07-08",
+            "price": 28,
+            "time": "06:25-07:30"
+          },
+          "back": {
+            "airline": "ryanair",
+            "date": "2027-07-15",
+            "price": 28,
+            "time": "21:10-22:15"
+          },
+          "price": 56,
+          "nights": 7
+        },
+        {
+          "out": {
+            "airline": "ryanair",
+            "date": "2027-07-09",
+            "price": 31,
+            "time": "06:25-07:30"
+          },
+          "back": {
+            "airline": "ryanair",
+            "date": "2027-07-14",
+            "price": 29.5,
+            "time": "21:10-22:15"
+          },
+          "price": 60.5,
+          "nights": 5
+        },
+        {
+          "out": {
+            "airline": "wizz",
+            "date": "2027-07-01",
+            "price": 34.99,
+            "time": "14:05"
+          },
+          "back": {
+            "airline": "ryanair",
+            "date": "2027-07-06",
+            "price": 28,
+            "time": "21:10-22:15"
+          },
+          "price": 62.99,
+          "nights": 5
+        },
+        {
+          "out": {
+            "airline": "ryanair",
+            "date": "2027-07-22",
+            "price": 33,
+            "time": "06:25-07:30"
+          },
+          "back": {
+            "airline": "ryanair",
+            "date": "2027-07-29",
+            "price": 33,
+            "time": "21:10-22:15"
+          },
+          "price": 66,
+          "nights": 7
+        }
+      ],
+      "checkedAt": "2026-11-15T09:20:00.000Z",
+      "sourceErrors": [],
+      "series": [
+        [
+          "2026-11-06",
+          72
+        ],
+        [
+          "2026-11-07",
+          72
+        ],
+        [
+          "2026-11-08",
+          68
+        ],
+        [
+          "2026-11-09",
+          68
+        ],
+        [
+          "2026-11-10",
+          64
+        ],
+        [
+          "2026-11-11",
+          64
+        ],
+        [
+          "2026-11-12",
+          61
+        ],
+        [
+          "2026-11-13",
+          61
+        ],
+        [
+          "2026-11-14",
+          58
+        ],
+        [
+          "2026-11-15",
+          56
+        ]
+      ],
+      "links": [
+        {
+          "label": "Ryanair",
+          "url": "https://www.ryanair.com/it/it/trip/flights/select?adults=6&teens=0&children=0&infants=0&dateOut=2027-07-08&isReturn=true&originIata=BRI&destinationIata=DBV&dateIn=2027-07-15"
+        }
+      ],
+      "commentedFor": "a1b2c3d4",
+      "alertRef": 64
+    },
+    {
+      "id": 14,
+      "url": "https://github.com/WaxenPie679/voli-weekend/issues/14",
+      "title": "Segui: Brindisi → Torino · 12 mar 2027 · 1 persona",
+      "tracking": {
+        "from": "BDS",
+        "to": "TRN",
+        "roundTrip": false,
+        "mode": "precise",
+        "out": "2027-03-12",
+        "people": 1,
+        "name": ""
+      },
+      "hash": "0f9e8d7c",
+      "status": "attivo",
+      "errors": [],
+      "airlines": [
+        "ryanair"
+      ],
+      "best": null,
+      "top": [],
+      "checkedAt": "2026-11-15T09:20:00.000Z",
+      "sourceErrors": [],
+      "series": [],
+      "links": [],
+      "commentedFor": "0f9e8d7c",
+      "alertRef": null
+    },
+    {
+      "id": 15,
+      "url": "https://github.com/WaxenPie679/voli-weekend/issues/15",
+      "title": "Segui: Bari → Budapest",
+      "tracking": null,
+      "hash": null,
+      "status": "errore",
+      "errors": [
+        "Manca «mesi»: elenca i mesi come AAAA-MM, separati da virgola.",
+        "«giorni»: «weekend» non è un giorno (usa lun mar mer gio ven sab dom)."
+      ],
+      "airlines": [],
+      "best": null,
+      "top": [],
+      "checkedAt": null,
+      "sourceErrors": [],
+      "series": [],
+      "links": [],
+      "commentedFor": null,
+      "alertRef": null
+    }
+  ]
+}
