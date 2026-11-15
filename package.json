@@ -13,7 +13,8 @@
     "direct": "node src/run.js direct --data ./data",
     "history": "node src/history/run.js --dir ./history",
     "summary": "node src/history/summary.js --dir ./history --out ./summary",
-    "connections": "node src/run.js connections --data ./data"
+    "connections": "node src/run.js connections --data ./data",
+    "tracking": "node src/tracking/run.js --data ./data"
   },
   "dependencies": {
     "luxon": "^3.7.2",
