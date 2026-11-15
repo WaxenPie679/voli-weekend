@@ -154,7 +154,7 @@ test('airports unisce le due fonti senza doppioni e sopravvive a una fonte in er
   const f = fake({ handlers: [(u) => (u.includes('airports/it/active') ? json(ryAirports) : null)] });
   const all = await mk(f).airports();
   assert.deepEqual(all.map((a) => a.code), ['BRI', 'DBV', 'TIA']);
-  assert.deepEqual(all.find((a) => a.code === 'TIA'), { code: 'TIA', city: 'Tirana', country: 'Albania' });
+  assert.deepEqual(all.find((a) => a.code === 'TIA'), { code: 'TIA', city: 'Tirana', country: 'Albania', group: 'TIA' });
   assert.equal(all.find((a) => a.code === 'DBV').city, 'Dubrovnik');
 
   const ryDown = fake({ handlers: [(u) => (u.includes('airports/it/active') ? status(500) : null)] });
@@ -163,4 +163,28 @@ test('airports unisce le due fonti senza doppioni e sopravvive a una fonte in er
   assert.deepEqual((await mk(wDown).airports()).map((a) => a.code), ['BRI', 'TIA']);
   const none = fake({ handlers: [(u) => (u.includes('airports/it/active') || u.includes('asset/map') ? status(500) : null)] });
   await assert.rejects(() => mk(none).airports());
+});
+
+test('airports: nome completo Ryanair, gruppo città, niente voci «tutti gli aeroporti» di Wizz', async () => {
+  const ryAirports = [
+    { code: 'FCO', name: 'Roma (Fiumicino)', city: { name: 'Roma', macCode: 'ROM' }, country: { name: 'Italia' } },
+    { code: 'CIA', name: 'Roma (Ciampino)', city: { name: 'Roma', macCode: 'ROM' }, country: { name: 'Italia' } },
+  ];
+  const map = { cities: [...WIZZ_MAP.cities, { ...wCity('ROM', 'Roma (tutti gli aeroporti)'), mac: 'ROM', isFakeStation: true }, { ...wCity('BUD', 'Budapest'), mac: 'BUD' }] };
+  const f = fake({ map, handlers: [(u) => (u.includes('airports/it/active') ? json(ryAirports) : null)] });
+  const all = await mk(f).airports();
+  assert.deepEqual(all.find((a) => a.code === 'FCO'), { code: 'FCO', city: 'Roma (Fiumicino)', country: 'Italia', group: 'ROM' });
+  assert.equal(all.some((a) => a.code === 'ROM'), false);
+  assert.equal(all.find((a) => a.code === 'BUD').group, 'BUD');
+});
+
+test('servedFrom: destinazioni dirette Ryanair e Wizz da un aeroporto; una fonte in errore non blocca', async () => {
+  const routes = [{ arrivalAirport: { code: 'FCO', city: { name: 'Roma' }, country: { name: 'Italia' } } }];
+  const f = fake({ handlers: [(u) => (u.includes('routes/it/airport/BRI') ? json(routes) : null)] });
+  const codes = await mk(f).servedFrom('BRI');
+  assert.ok(codes.includes('FCO'));
+  assert.ok(codes.includes('DBV') || codes.length > 1, 'include anche le destinazioni Wizz');
+  assert.equal(new Set(codes).size, codes.length);
+  const down = fake({ handlers: [(u) => (u.includes('asset/map') ? status(500) : u.includes('routes/it/airport/BRI') ? json(routes) : null)] });
+  assert.deepEqual(await mk(down).servedFrom('BRI'), ['FCO']);
 });

@@ -43,6 +43,7 @@ function fakeSources({ airlines = ['ryanair'], obs = OBS, airports = AIRPORTS } 
       if (s.failPrices) throw new Error('HTTP 503');
       return s.obs.filter((o) => o.airline === airline && o.origin === from && o.dest === to);
     },
+    async servedFrom() { return s.served ?? []; },
     async airports() { s.airportCalls++; if (s.airportList instanceof Error) throw s.airportList; return s.airportList; },
   };
   return s;
@@ -140,6 +141,26 @@ test('tratta non servita: status errore, commento una volta sola', async () => {
   assert.deepEqual(it.errors, ['Nessun volo diretto Ryanair o Wizz su questa tratta']);
   assert.equal(it.commentedFor, 'nonservita:' + it.hash);
   assert.equal(it.best, null);
+});
+
+test('tratta non servita: il messaggio suggerisce gli aeroporti serviti della stessa città', async () => {
+  const github = fakeGitHub([issue(5, BODY.replace('a: DBV', 'a: ROM'))]);
+  const sources = fakeSources({ airlines: [], airports: [...AIRPORTS, { code: 'FCO', city: 'Roma (Fiumicino)', country: 'Italia', group: 'ROM' }, { code: 'CIA', city: 'Roma (Ciampino)', country: 'Italia', group: 'ROM' }] });
+  sources.served = ['DBV', 'FCO'];
+  await run({ github, sources });
+  const [it] = (await readJson('tracking.json')).items;
+  assert.equal(it.errors.length, 1);
+  assert.ok(it.errors[0].startsWith('Nessun volo diretto Ryanair o Wizz su questa tratta'));
+  assert.ok(it.errors[0].includes('Roma (Fiumicino) (FCO)'), it.errors[0]);
+  assert.equal(it.errors[0].includes('CIA'), false);
+  assert.ok(github.comments[0].text.includes('FCO'));
+});
+
+test('airports.json senza gruppi (versione vecchia) rifatto anche se di oggi', async () => {
+  await writeFile(join(dir, 'airports.json'), JSON.stringify({ generatedAt: NOW.toUTC().toISO(), airports: [AIRPORTS[0]] }));
+  const sources = fakeSources();
+  await run({ github: fakeGitHub([]), sources });
+  assert.equal(sources.airportCalls, 1);
 });
 
 test('fonte in errore: best e checkedAt del giro prima conservati, nessun avviso', async () => {

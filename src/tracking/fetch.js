@@ -102,7 +102,16 @@ export function createSources({ fetchImpl = fetch, pauseMs = true, retryBaseMs =
       return obs;
     },
 
-    /** Aeroporti `{code, city, country}` di Ryanair e Wizz, senza doppioni (vince Ryanair), ordinati per città. Lancia se falliscono entrambe. */
+    /** Codici delle destinazioni dirette Ryanair e Wizz da `from`, senza doppioni; una fonte in errore è ignorata. */
+    async servedFrom(from) {
+      const [ry, wz] = await Promise.allSettled([
+        ryanairRoutes(from).then((rs) => rs.map((r) => r.code)),
+        wizzMap().then((map) => parseWizzRoutes(map, [from]).map((r) => r.code)),
+      ]);
+      return [...new Set([ry, wz].flatMap((r) => (r.status === 'fulfilled' ? r.value : [])))];
+    },
+
+    /** Aeroporti `{code, city, country, group}` di Ryanair e Wizz, senza doppioni (vince Ryanair), ordinati per città. Lancia se falliscono entrambe. */
     async airports() {
       const [ry, wz] = await Promise.allSettled([
         once('ry:airports', () => get(RYANAIR_AIRPORTS)),
@@ -111,11 +120,14 @@ export function createSources({ fetchImpl = fetch, pauseMs = true, retryBaseMs =
       if (ry.status === 'rejected' && wz.status === 'rejected') throw new Error(`elenco aeroporti non scaricabile: ${ry.reason.message}; ${wz.reason.message}`);
       const byCode = new Map();
       if (ry.status === 'fulfilled') {
-        for (const a of ry.value) byCode.set(a.code, { code: a.code, city: a.city?.name ?? a.code, country: a.country?.name ?? '' });
+        // Nome completo («Roma (Fiumicino)») per distinguere aeroporti della stessa città; `group` = codice città (ROM)
+        for (const a of ry.value) byCode.set(a.code, { code: a.code, city: a.name ?? a.city?.name ?? a.code, country: a.country?.name ?? '', group: a.city?.macCode ?? a.macCity?.macCode ?? a.code });
       } else log(`ryanair: elenco aeroporti non scaricabile: ${ry.reason.message}`);
       if (wz.status === 'fulfilled') {
         for (const c of wz.value.cities ?? []) {
-          if (c.iata && !byCode.has(c.iata)) byCode.set(c.iata, { code: c.iata, city: (c.shortName ?? c.iata).trim(), country: c.countryName ?? '' });
+          // Le voci «(tutti gli aeroporti)» non sono aeroporti veri: nessuna compagnia ci vola
+          if (c.isFakeStation) continue;
+          if (c.iata && !byCode.has(c.iata)) byCode.set(c.iata, { code: c.iata, city: (c.shortName ?? c.iata).trim(), country: c.countryName ?? '', group: c.mac || c.iata });
         }
       } else log(`wizz: elenco aeroporti non scaricabile: ${wz.reason.message}`);
       return [...byCode.values()].sort((a, b) => a.city.localeCompare(b.city, 'it'));

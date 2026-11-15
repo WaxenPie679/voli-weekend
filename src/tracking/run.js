@@ -11,6 +11,20 @@ import { createGitHub } from './github.js';
 
 export const PAGINA = 'https://waxenpie679.github.io/voli-weekend/seguite.html';
 export const NON_SERVITA = 'Nessun volo diretto Ryanair o Wizz su questa tratta';
+const AIRPORTS_VERSION = 2;
+
+/**
+ * Messaggio per una tratta non servita: se da `from` si vola diretti verso un altro aeroporto della stessa
+ * città di `to` (stesso `group`, es. ROM → FCO), lo suggerisce.
+ */
+async function nonServita(t, sources, names, groups) {
+  const served = await sources.servedFrom(t.from).catch(() => []);
+  const gruppo = groups[t.to] ?? t.to;
+  const vicini = served.filter((c) => c !== t.to && (groups[c] ?? c) === gruppo);
+  if (!vicini.length) return NON_SERVITA;
+  const elenco = vicini.map((c) => `${names[c] ?? c} (${c})`).join(', ');
+  return `${NON_SERVITA}. Da ${names[t.from] ?? t.from} ci sono voli diretti per ${elenco}: scrivi uno di questi codici nella riga «a:».`;
+}
 const NOMI = { ryanair: 'Ryanair', wizz: 'Wizz Air' };
 /** Data minima per rileggere un corpo ignorando le date passate (serve a riconoscere una tratta scaduta). */
 const SEMPRE = '0000-01-01';
@@ -47,9 +61,10 @@ async function updateAirports(dataDir, sources, now, today, log) {
   const path = join(dataDir, 'airports.json');
   let file = await readJson(path, null, log);
   const giorno = file?.generatedAt ? DateTime.fromISO(file.generatedAt).setZone(ZONE).toISODate() : null;
-  if (giorno !== today) {
+  // `version` 2 = voci con `group` (codice città), servono ai suggerimenti per le tratte non servite
+  if (giorno !== today || file?.version !== AIRPORTS_VERSION) {
     try {
-      file = { generatedAt: now.toUTC().toISO(), airports: await sources.airports() };
+      file = { generatedAt: now.toUTC().toISO(), version: AIRPORTS_VERSION, airports: await sources.airports() };
       await writeAtomic(path, JSON.stringify(file));
       log(`aeroporti: ${file.airports.length} scritti`);
     } catch (err) {
@@ -57,7 +72,7 @@ async function updateAirports(dataDir, sources, now, today, log) {
     }
   }
   const list = Array.isArray(file) ? file : (file?.airports ?? []);
-  return Object.fromEntries(list.map((a) => [a.code, a.city]));
+  return { names: Object.fromEntries(list.map((a) => [a.code, a.city])), groups: Object.fromEntries(list.map((a) => [a.code, a.group ?? a.code])) };
 }
 
 const testoErrori = (errors) => ['Non riesco a seguire questa tratta:', '', ...errors.map((e) => `- ${e}`), '', 'Modifica la issue per correggerla.'].join('\n');
@@ -90,7 +105,7 @@ function voce(issue, f) {
  * Una issue: lettura del corpo, eventuale chiusura, prezzi, commento.
  * @returns {Promise<{item:object|null, checked:boolean}>} `checked` vero se i prezzi di questo giro sono validi (avvisi ammessi)
  */
-async function processIssue(issue, prev, { now, today, github, sources, names, log, resetAlert }) {
+async function processIssue(issue, prev, { now, today, github, sources, names, groups, log, resetAlert }) {
   const n = issue.number;
   const body = issue.body ?? '';
   const commenta = async (text) => {
@@ -142,9 +157,10 @@ async function processIssue(issue, prev, { now, today, github, sources, names, l
     return { item, checked: false };
   }
   if (!airlines.length) {
-    Object.assign(item, { status: 'errore', errors: [NON_SERVITA], airlines: [], best: null, top: [], links: [], checkedAt: null });
+    const msg = await nonServita(t, sources, names, groups);
+    Object.assign(item, { status: 'errore', errors: [msg], airlines: [], best: null, top: [], links: [], checkedAt: null });
     const key = `nonservita:${hash}`;
-    if (item.commentedFor !== key && await commenta(testoErrori([NON_SERVITA]))) item.commentedFor = key;
+    if (item.commentedFor !== key && await commenta(testoErrori([msg]))) item.commentedFor = key;
     log(`issue #${n}: tratta non servita`);
     return { item, checked: false };
   }
@@ -198,11 +214,11 @@ export async function runTracking(dataDir, { now = DateTime.now(), github, sourc
   try { await github.ensureLabel(); } catch (err) { log(`tracking: etichetta non creata: ${err.message}`); }
 
   const today = now.setZone(ZONE).toISODate();
-  const names = await updateAirports(dataDir, sources, now, today, log);
+  const { names, groups } = await updateAirports(dataDir, sources, now, today, log);
   const prevFile = await readJson(join(dataDir, 'tracking.json'), {}, log);
   const prevById = new Map((prevFile.items ?? []).map((i) => [i.id, i]));
   const resetAlert = new Set();
-  const ctx = { now, today, github, sources, names, log, resetAlert };
+  const ctx = { now, today, github, sources, names, groups, log, resetAlert };
 
   const items = [];
   const checked = new Set();
