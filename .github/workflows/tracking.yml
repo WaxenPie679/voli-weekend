@@ -1,0 +1,41 @@
+name: Tratte seguite
+
+on:
+  schedule:
+    # Ogni 2 ore a minuto non tondo: allo scoccare dell'ora GitHub accoda più esecuzioni e le ritarda
+    - cron: '23 */2 * * *'
+  issues:
+    types: [opened, edited, closed, reopened, labeled]
+  workflow_dispatch:
+
+concurrency:
+  group: tracking
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  track:
+    # Le issue fanno partire il giro solo se hanno l'etichetta tracking
+    if: github.event_name != 'issues' || contains(github.event.issue.labels.*.name, 'tracking')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: bash scripts/prepare-data.sh
+      - run: node src/tracking/run.js --data ./data
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          PUSH_SUBSCRIPTION: ${{ secrets.PUSH_SUBSCRIPTION }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+      - if: always()
+        run: bash scripts/publish-data.sh ./data tracking.json alerts_state_tracking.json airports.json

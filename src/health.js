@@ -70,6 +70,16 @@ export function checkHistory(metas, now) {
   return problems;
 }
 
+const TRACKING_MAX_AGE_HOURS = 6;
+
+/** Problemi delle tratte seguite: file assente o senza voci va bene; fermo da più di 6 ore no. */
+export function checkTracking(file, now) {
+  if (!file?.items?.length) return [];
+  if (!file.generatedAt) return ['tratte seguite: dati senza data di aggiornamento'];
+  const age = hoursSince(file.generatedAt, now);
+  return age > TRACKING_MAX_AGE_HOURS ? [`tratte seguite ferme da ${fmtHours(age)} (ultimo controllo ${file.generatedAt.slice(0, 16)} UTC)`] : [];
+}
+
 /** Problemi delle esecuzioni di un workflow nelle ultime 24 ore. */
 export function checkRuns(workflow, runs, mode, now) {
   const lim = LIMITS[mode];
@@ -162,6 +172,14 @@ async function historyProblems(now, fetchImpl) {
   return checkHistory(metas, now);
 }
 
+/** tracking.json: 404 = nessuna tratta mai seguita; altri errori sono un problema. */
+async function trackingProblems(now, fetchImpl) {
+  const res = await fetchImpl(DATA_URL + 'tracking.json', { cache: 'no-store' });
+  if (res.status === 404) return [];
+  if (!res.ok) return [`tratte seguite non raggiungibili: HTTP ${res.status}`];
+  return checkTracking(await res.json(), now);
+}
+
 async function telegramProblems(env, fetchImpl) {
   if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return ['mancano TELEGRAM_BOT_TOKEN o TELEGRAM_CHAT_ID'];
   const res = await fetchImpl(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/getMe`);
@@ -179,6 +197,7 @@ export function allChecks({ now = DateTime.now(), env = process.env, fetchImpl =
     'Ryanair risponde': () => probeRyanair(now, fetchImpl),
     'Wizz risponde': () => probeWizz(now, fetchImpl),
     'Storico prezzi': () => historyProblems(now, fetchImpl),
+    'Tratte seguite': () => trackingProblems(now, fetchImpl),
     'Bot Telegram': () => telegramProblems(env, fetchImpl),
   };
 }

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { DateTime } from 'luxon';
-import { checkData, checkRuns, checkWebapp, checkHistory, allChecks, HISTORY_URL, runChecks, formatReport } from '../src/health.js';
+import { checkData, checkRuns, checkWebapp, checkHistory, checkTracking, allChecks, HISTORY_URL, DATA_URL, runChecks, formatReport } from '../src/health.js';
 
 const NOW = DateTime.fromISO('2026-11-02T08:00:00Z');
 const ago = (h) => NOW.minus({ hours: h }).toUTC().toISO();
@@ -109,4 +109,23 @@ test("allChecks 'Storico prezzi': scarica i meta in YYYY/MM/ e salta i 404", asy
   };
   assert.deepEqual(await allChecks({ now: NOW, env: {}, fetchImpl })['Storico prezzi'](), []);
   assert.deepEqual(asked, ['2026/11/2026-11-02', '2026/11/2026-11-01', '2026/10/2026-10-31'].map((d) => `${HISTORY_URL}${d.slice(0, 8)}${d.slice(8)}.meta.json`));
+});
+
+test('checkTracking: file assente o senza voci → nessun problema, anche se vecchio', () => {
+  assert.deepEqual(checkTracking(null, NOW), []);
+  assert.deepEqual(checkTracking({ generatedAt: ago(100), items: [] }, NOW), []);
+});
+
+test('checkTracking: 1 ora → ok; 7 ore con voci → un problema in italiano', () => {
+  assert.deepEqual(checkTracking({ generatedAt: ago(1), items: [{}] }, NOW), []);
+  const p = checkTracking({ generatedAt: ago(7), items: [{}] }, NOW);
+  assert.equal(p.length, 1);
+  assert.match(p[0], /^tratte seguite ferme da 7 ore \(ultimo controllo /);
+});
+
+test("allChecks 'Tratte seguite': 404 = assente, altri errori = problema, file vecchio = problema", async () => {
+  const run = (res) => allChecks({ now: NOW, env: {}, fetchImpl: async (url) => { assert.equal(url, `${DATA_URL}tracking.json`); return res; } })['Tratte seguite']();
+  assert.deepEqual(await run({ ok: false, status: 404 }), []);
+  assert.match((await run({ ok: false, status: 500 }))[0], /HTTP 500/);
+  assert.equal((await run({ ok: true, status: 200, json: async () => ({ generatedAt: ago(8), items: [{}] }) })).length, 1);
 });
