@@ -5,7 +5,7 @@ import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DateTime } from 'luxon';
-import { runTracking } from '../src/tracking/run.js';
+import { runTracking, cliOptions } from '../src/tracking/run.js';
 import { createGitHub } from '../src/tracking/github.js';
 import { trackingHash, bodyHash, parseTracking } from '../src/tracking/spec.js';
 
@@ -266,6 +266,28 @@ test('corpo modificato: nuova conferma, serie conservata', async () => {
   assert.equal(it.commentedFor, trackingHash(parseTracking(body2, { today: '2026-11-16' }).tracking));
 });
 
+test('corpo modificato: riferimento degli avvisi azzerato, nuovo «Ora seguo»', async () => {
+  const github = fakeGitHub([issue(1), issue(2)]);
+  const sources = fakeSources();
+  const fetchImpl = fakeTelegram();
+  await run({ github, sources, env: TG_ENV, alertDeps: { fetchImpl } });
+  assert.equal(fetchImpl.sent.length, 1);
+  // ribasso di 1 €: senza azzeramento non ci sarebbe avviso
+  sources.obs = OBS.map((o) => ({ ...o, price: o.price - 0.5 }));
+  github.issues = [issue(1, BODY.replace('persone: 2', 'persone: 3')), issue(2)];
+  await run({ github, sources, now: NOW.plus({ days: 1 }), env: TG_ENV, alertDeps: { fetchImpl } });
+  assert.equal(fetchImpl.sent.length, 2);
+  assert.match(fetchImpl.sent[1], /Ora seguo/);
+  assert.doesNotMatch(fetchImpl.sent[1], /Tratta 2|#2/);
+  const state = await readJson('alerts_state_tracking.json');
+  assert.equal(state['1'].ref, 54);
+  assert.equal(state['2'].ref, 55);
+  const [it1, it2] = (await readJson('tracking.json')).items;
+  assert.equal(it1.alertRef, 54);
+  assert.equal(it2.alertRef, 55);
+  assert.deepEqual(it1.series, [['2026-11-15', 55], ['2026-11-16', 54]]);
+});
+
 test('alertRef: riferimento dell’ultimo avviso nella voce', async () => {
   const github = fakeGitHub([issue(1)]);
   const fetchImpl = fakeTelegram();
@@ -311,6 +333,19 @@ test('elenco issue non scaricabile: uscita 1, tracking.json non toccato', async 
   await writeFile(join(dir, 'tracking.json'), '{"vecchio":true}');
   assert.equal(await run({ github, sources: fakeSources() }), 1);
   assert.equal(await readFile(join(dir, 'tracking.json'), 'utf8'), '{"vecchio":true}');
+});
+
+test('riga di comando: --issue-file richiede --data e spegne gli avvisi', () => {
+  const env = { TELEGRAM_BOT_TOKEN: 't', TELEGRAM_CHAT_ID: 'c', PUSH_SUBSCRIPTION: 's', VAPID_PRIVATE_KEY: 'v', GITHUB_TOKEN: 'g', GITHUB_REPOSITORY: 'a/b', PATH: '/bin' };
+  assert.match(cliOptions(['node', 'run.js', '--issue-file', 'x.md'], env).error, /--data/);
+  const dev = cliOptions(['node', 'run.js', '--issue-file', 'x.md', '--data', '/tmp/prova'], env);
+  assert.equal(dev.dataDir, '/tmp/prova');
+  assert.equal(dev.issueFile, 'x.md');
+  assert.deepEqual(dev.env, { GITHUB_TOKEN: 'g', GITHUB_REPOSITORY: 'a/b', PATH: '/bin' });
+  const real = cliOptions(['node', 'run.js', '--data', './data'], env);
+  assert.equal(real.env, env);
+  assert.equal(real.dataDir, './data');
+  assert.match(cliOptions(['node', 'run.js'], {}).error, /GITHUB_TOKEN/);
 });
 
 // --- github.js ---

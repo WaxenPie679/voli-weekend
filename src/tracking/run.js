@@ -90,7 +90,7 @@ function voce(issue, f) {
  * Una issue: lettura del corpo, eventuale chiusura, prezzi, commento.
  * @returns {Promise<{item:object|null, checked:boolean}>} `checked` vero se i prezzi di questo giro sono validi (avvisi ammessi)
  */
-async function processIssue(issue, prev, { now, today, github, sources, names, log }) {
+async function processIssue(issue, prev, { now, today, github, sources, names, log, resetAlert }) {
   const n = issue.number;
   const body = issue.body ?? '';
   const commenta = async (text) => {
@@ -121,8 +121,10 @@ async function processIssue(issue, prev, { now, today, github, sources, names, l
   if (isExpired(t, today)) return chiudi();
 
   const hash = trackingHash(t);
-  // Se il corpo è cambiato, i prezzi vecchi non valgono più; la serie invece resta
+  // Se il corpo è cambiato è un tracking nuovo con la stessa storia: i prezzi vecchi e il
+  // riferimento degli avvisi non valgono più, la serie invece resta
   const stessa = prev?.hash === hash;
+  if (prev?.hash && !stessa) resetAlert.add(n);
   const item = voce(issue, {
     tracking: t, hash, status: 'attivo', airlines: prev?.airlines,
     ...(stessa ? { best: prev.best, top: prev.top, checkedAt: prev.checkedAt, links: prev.links } : {}),
@@ -197,7 +199,8 @@ export async function runTracking(dataDir, { now = DateTime.now(), github, sourc
   const names = await updateAirports(dataDir, sources, now, today, log);
   const prevFile = await readJson(join(dataDir, 'tracking.json'), {}, log);
   const prevById = new Map((prevFile.items ?? []).map((i) => [i.id, i]));
-  const ctx = { now, today, github, sources, names, log };
+  const resetAlert = new Set();
+  const ctx = { now, today, github, sources, names, log, resetAlert };
 
   const items = [];
   const checked = new Set();
@@ -216,6 +219,7 @@ export async function runTracking(dataDir, { now = DateTime.now(), github, sourc
 
   // Tutte le voci passano agli avvisi (così il loro riferimento resta), ma solo quelle
   // controllate in questo giro portano un prezzo: le altre non possono far partire avvisi.
+  await forgetAlerts(dataDir, resetAlert, log);
   const alertItems = items.map((it) => ({ id: it.id, tracking: it.tracking, best: checked.has(it.id) ? it.best : null, names }));
   try {
     await sendTrackingAlerts(dataDir, alertItems, env, now, { log, ...alertDeps });
@@ -228,6 +232,42 @@ export async function runTracking(dataDir, { now = DateTime.now(), github, sourc
   await writeAtomic(join(dataDir, 'tracking.json'), JSON.stringify({ generatedAt: now.toUTC().toISO(), items }, null, 1));
   log(`tracking: ${items.length} tratte`);
   return 0;
+}
+
+/** Toglie dallo stato degli avvisi le tratte il cui corpo è cambiato: al prossimo prezzo riparte «Ora seguo». */
+async function forgetAlerts(dataDir, ids, log) {
+  if (!ids.size) return;
+  const path = join(dataDir, 'alerts_state_tracking.json');
+  const state = await readJson(path, null, log);
+  if (!state) return;
+  let changed = false;
+  for (const id of ids) if (String(id) in state) { delete state[String(id)]; changed = true; }
+  if (changed) {
+    await writeAtomic(path, JSON.stringify(state, null, 1));
+    log(`avvisi tratte: riferimento azzerato per ${[...ids].map((i) => `#${i}`).join(', ')} (corpo cambiato)`);
+  }
+}
+
+/** Variabili d'ambiente senza i canali degli avvisi (Telegram, notifica app). */
+export function withoutAlertChannels(env) {
+  return Object.fromEntries(Object.entries(env).filter(([k]) => !/^(TELEGRAM_|PUSH_|VAPID_)/.test(k)));
+}
+
+/**
+ * Opzioni della riga di comando. Con `--issue-file` (prova locale) `--data` è obbligatorio
+ * e gli avvisi non partono mai.
+ * @returns {{error:string}|{dataDir:string, issueFile?:string, env:object}}
+ */
+export function cliOptions(argv, env) {
+  const arg = (name) => { const i = argv.indexOf(name); return i > 0 ? argv[i + 1] : undefined; };
+  const issueFile = arg('--issue-file');
+  const dataDir = arg('--data');
+  if (issueFile) {
+    if (!dataDir) return { error: 'Con --issue-file serve anche --data <cartella di prova> (per non toccare i dati veri)' };
+    return { dataDir, issueFile, env: withoutAlertChannels(env) };
+  }
+  if (!env.GITHUB_TOKEN || !env.GITHUB_REPOSITORY) return { error: 'Mancano GITHUB_TOKEN o GITHUB_REPOSITORY (oppure usa --issue-file <file.md> --data <cartella>)' };
+  return { dataDir: dataDir ?? './data', env };
 }
 
 /** Issue finta per provare in locale: commenti e chiusure stampati invece che inviati. */
@@ -244,16 +284,15 @@ function fakeGitHubFromFile(body) {
 
 if (process.argv[1]?.endsWith('tracking/run.js')) {
   process.on('unhandledRejection', (err) => console.error('errore asincrono non gestito:', err?.message ?? err));
-  const arg = (name) => { const i = process.argv.indexOf(name); return i > 0 ? process.argv[i + 1] : undefined; };
-  const issueFile = arg('--issue-file');
-  const { GITHUB_TOKEN: token, GITHUB_REPOSITORY: repo } = process.env;
-  let github = null;
-  if (issueFile) github = fakeGitHubFromFile(await readFile(issueFile, 'utf8'));
-  else if (token && repo) github = createGitHub({ repo, token });
-  if (!github) {
-    console.error('Mancano GITHUB_TOKEN o GITHUB_REPOSITORY (oppure usa --issue-file <file.md>)');
+  const opts = cliOptions(process.argv, process.env);
+  if (opts.error) {
+    console.error(opts.error);
     process.exitCode = 1;
   } else {
-    process.exitCode = await runTracking(arg('--data') ?? './data', { github, sources: createSources(), env: process.env });
+    const github = opts.issueFile
+      ? fakeGitHubFromFile(await readFile(opts.issueFile, 'utf8'))
+      : createGitHub({ repo: opts.env.GITHUB_REPOSITORY, token: opts.env.GITHUB_TOKEN });
+    if (opts.issueFile) console.log('prova locale: avvisi disattivati, commenti e chiusure solo stampati');
+    process.exitCode = await runTracking(opts.dataDir, { github, sources: createSources(), env: opts.env });
   }
 }
