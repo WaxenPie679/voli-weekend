@@ -81,7 +81,7 @@ export function formatTrackingTelegram({ item: it, kind, drop }) {
   const [prenota] = bookingLinks(best, t.from, t.to, persone);
   return [
     testa,
-    persone > 1 ? `${rotta} · ${persone} persone · ${euro(best.price * persone)} in tutto` : rotta,
+    persone > 1 ? `${esc(rotta)} · ${persone} persone · ${euro(best.price * persone)} in tutto` : esc(rotta),
     tratti,
     persone > 1 && 'Per un gruppo il prezzo può essere più alto, soprattutto vicino alla partenza.',
     `<a href="${esc(PAGINA)}">Apri</a> · <a href="${esc(prenota.url)}">Prenota</a>`,

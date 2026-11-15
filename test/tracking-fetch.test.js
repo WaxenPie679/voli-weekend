@@ -42,9 +42,11 @@ test('airlinesFor: entrambe in ordine, solo Wizz, e scalo Ryanair escluso', asyn
   assert.deepEqual(await mk(g).airlinesFor('BRI', 'TIA'), ['wizz']);
 });
 
-test('airlinesFor: una compagnia non scaricabile conta come non servita, entrambe → errore', async () => {
+test('airlinesFor: un elenco non scaricabile basta per l\'errore (risultato parziale ≠ tratta non servita)', async () => {
   const ryDown = fake({ handlers: [(u) => (u.includes('searchWidget') ? status(500) : null)] });
-  assert.deepEqual(await mk(ryDown).airlinesFor('BRI', 'TIA'), ['wizz']);
+  await assert.rejects(() => mk(ryDown).airlinesFor('BRI', 'TIA'), /ryanair/);
+  const wzDown = fake({ ryanair: { BRI: [rRoute('DBV')] }, handlers: [(u) => (u.includes('asset/map') ? status(500) : null)] });
+  await assert.rejects(() => mk(wzDown).airlinesFor('BRI', 'DBV'), /wizz/);
   const both = fake({ handlers: [(u) => (u.includes('searchWidget') || u.includes('asset/map') ? status(500) : null)] });
   await assert.rejects(() => mk(both).airlinesFor('BRI', 'TIA'));
 });

@@ -99,6 +99,14 @@ test('formatTrackingTelegram: riga gruppo solo con persone > 1; escape HTML del 
   assert.doesNotMatch(solo, /persone/);
 });
 
+test('formatTrackingTelegram: escape HTML anche della rotta (città con «&»)', () => {
+  const names = { DBV: 'Ragusa & <dintorni>' };
+  const gruppo = formatTrackingTelegram({ item: item(7, 56, { names }), kind: 'inizio', drop: 0 });
+  assert.match(gruppo, /\nBari → Ragusa &amp; &lt;dintorni&gt; e ritorno · 6 persone · 336 € in tutto\n/);
+  const solo = formatTrackingTelegram({ item: item(7, 56, { names, tracking: tracking({ people: 1 }) }), kind: 'inizio', drop: 0 });
+  assert.match(solo, /\nBari → Ragusa &amp; &lt;dintorni&gt; e ritorno\n/);
+});
+
 test('formatTrackingTelegram: nome vuoto, orari ambigui omessi, compagnie miste, solo andata', () => {
   const wizz = { airline: 'wizz', date: '2026-07-15', price: 20, time: '10:00 18:30' };
   const t = formatTrackingTelegram({

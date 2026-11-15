@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { formatBody, parseTracking } from '../web/tracking-spec.js';
 import {
   newIssueUrl, priceLine, ageText, buyAdvice, formToTracking, romeToday, departTime, comboText,
-  namesMap, airportCode, nextMonths, isStale,
+  namesMap, airportCode, nextMonths, isStale, priceNotes, updatedText,
 } from '../web/seguite-view.js';
 
 const TODAY = '2026-11-15';
@@ -62,6 +62,26 @@ test('ageText: mai, ora, minuti, ore, giorni', () => {
   assert.equal(ageText('2026-11-15T05:00:00Z', now), 'aggiornato 5 ore fa');
   assert.equal(ageText('2026-11-14T09:00:00Z', now), 'aggiornato 1 giorno fa');
   assert.equal(ageText('2026-11-12T09:00:00Z', now), 'aggiornato 3 giorni fa');
+});
+
+test('priceNotes: senza prezzo e con la fonte in errore si mostra solo l\'errore di fonte', () => {
+  assert.deepEqual(priceNotes(item()), { noPrice: null, sourceError: null });
+  assert.deepEqual(priceNotes(item({ sourceErrors: ['Ryanair: prezzi non scaricabili ora'] })), {
+    noPrice: null, sourceError: 'Ultimo controllo non riuscito (Ryanair: prezzi non scaricabili ora): il prezzo mostrato è del controllo precedente.',
+  });
+  assert.deepEqual(priceNotes(item({ best: null })), { noPrice: 'Nessun prezzo disponibile ora: la tratta potrebbe non essere ancora in vendita.', sourceError: null });
+  assert.deepEqual(priceNotes(item({ best: null, sourceErrors: ['Elenco delle tratte non scaricabile ora', 'Wizz Air: prezzi non scaricabili ora'] })), {
+    noPrice: null, sourceError: 'Ultimo controllo non riuscito (Elenco delle tratte non scaricabile ora; Wizz Air: prezzi non scaricabili ora).',
+  });
+});
+
+test('updatedText: solo l\'ora se è di oggi (Roma), altrimenti anche il giorno', () => {
+  const now = new Date('2026-11-15T10:00:00Z');
+  assert.equal(updatedText('2026-11-15T09:20:00Z', now), 'elenco aggiornato alle 10:20');
+  assert.equal(updatedText('2026-11-14T09:20:00Z', now), 'elenco aggiornato il 14 nov alle 10:20');
+  // 23:30 UTC del 14 è già il 15 a Roma
+  assert.equal(updatedText('2026-11-14T23:30:00Z', now), 'elenco aggiornato alle 00:30');
+  assert.equal(updatedText(null, now), null);
 });
 
 test('isStale: oltre 6 ore o mai controllato', () => {

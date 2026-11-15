@@ -3,7 +3,7 @@ import { describeTracking } from './tracking-spec.js';
 import { scale, priceDomain } from './storico-view.js';
 import {
   newIssueUrl, priceLine, ageText, isStale, buyAdvice, formToTracking, romeToday, comboText,
-  namesMap, nextMonths, fmtPrice,
+  namesMap, nextMonths, fmtPrice, priceNotes, updatedText,
 } from './seguite-view.js';
 
 const $ = (id) => document.getElementById(id);
@@ -12,7 +12,6 @@ const form = $('follow-form');
 const follow = $('follow');
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const DAY_MS = 86400000;
-const NO_PRICE = 'Nessun prezzo disponibile ora: la tratta potrebbe non essere ancora in vendita.';
 const DONE = 'Conferma la richiesta su GitHub: entro pochi minuti la tratta compare qui e ricevi un messaggio.';
 
 let airports = [];
@@ -132,10 +131,8 @@ function showMessage(title, text, retry) {
 function statusText(data) {
   const n = items.length;
   const parts = [`${n} ${n === 1 ? 'tratta seguita' : 'tratte seguite'}`, 'controllo ogni 2 ore'];
-  if (data.generatedAt) {
-    const time = new Date(data.generatedAt).toLocaleTimeString('it-IT', { timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit' });
-    parts.push(`elenco aggiornato alle ${time}`);
-  }
+  const updated = updatedText(data.generatedAt, new Date());
+  if (updated) parts.push(updated);
   return parts.join(' · ');
 }
 
@@ -148,12 +145,12 @@ function render(data) {
   }
   $('status').textContent = statusText(data);
   const list = html('ul', 'track-list');
-  for (const it of items) list.append(it.status === 'errore' || !it.tracking ? errorCard(it) : trackCard(it));
+  for (const it of items) list.append(it.status === 'errore' || !it.tracking ? errorCard(it, data.generatedAt) : trackCard(it));
   content.replaceChildren(list);
   drawCharts();
 }
 
-function errorCard(it) {
+function errorCard(it, generatedAt) {
   const li = html('li', 'track track-error');
   li.append(html('h2', 'track-name', (it.title ?? '').replace(/^Segui:\s*/, '') || `Richiesta n. ${it.id}`));
   const box = html('div', 'track-alert');
@@ -161,7 +158,7 @@ function errorCard(it) {
   const ul = html('ul');
   for (const e of it.errors?.length ? it.errors : ['Errore sconosciuto.']) ul.append(html('li', null, e));
   box.append(ul);
-  li.append(box);
+  li.append(box, html('p', 'track-age', ageText(it.checkedAt ?? generatedAt, new Date())));
   const actions = html('div', 'track-actions');
   actions.append(link('btn-book', 'Correggi su GitHub', it.url));
   li.append(actions);
@@ -178,6 +175,7 @@ function trackCard(it) {
   if (t.name) li.append(html('p', 'track-desc', desc));
 
   const price = priceLine(it);
+  const notes = priceNotes(it);
   if (price) {
     const row = html('p', 'track-price');
     const amount = html('span', 'price');
@@ -187,8 +185,8 @@ function trackCard(it) {
     if (price.drop) row.append(html('span', 'track-drop', price.drop));
     li.append(row, html('p', 'track-legs', comboText(it.best)));
     if (t.people > 1) li.append(html('p', 'track-note', 'Per un gruppo il prezzo può essere più alto, soprattutto vicino alla partenza.'));
-  } else {
-    li.append(html('p', 'track-noprice', NO_PRICE));
+  } else if (notes.noPrice) {
+    li.append(html('p', 'track-noprice', notes.noPrice));
   }
 
   if (it.series?.length) {
@@ -203,9 +201,7 @@ function trackCard(it) {
 
   const age = html('p', isStale(it.checkedAt, now) ? 'stale-note track-age' : 'track-age', ageText(it.checkedAt, now));
   li.append(age);
-  if (it.sourceErrors?.length) {
-    li.append(html('p', 'stale-note', `Ultimo controllo non riuscito (${it.sourceErrors.join('; ')}): il prezzo mostrato è del controllo precedente.`));
-  }
+  if (notes.sourceError) li.append(html('p', 'stale-note', notes.sourceError));
 
   if (it.top?.length > 1) li.append(otherCombos(it));
 

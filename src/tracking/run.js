@@ -112,7 +112,8 @@ async function processIssue(issue, prev, { now, today, github, sources, names, l
     // Una tratta già seguita le cui date sono passate non è un errore: si chiude
     const senzaDate = parseTracking(body, { today: SEMPRE }).tracking;
     if (senzaDate && prev?.hash === trackingHash(senzaDate) && isExpired(senzaDate, today)) return chiudi();
-    const item = voce(issue, { status: 'errore', errors, series: prev?.series, commentedFor: prev?.commentedFor });
+    // L'ultimo hash valido resta: serve a chiudere per date passate e ad azzerare l'avviso se il corpo cambia
+    const item = voce(issue, { status: 'errore', errors, hash: prev?.hash, series: prev?.series, commentedFor: prev?.commentedFor });
     const bh = bodyHash(body);
     if (item.commentedFor !== bh && await commenta(testoErrori(errors))) item.commentedFor = bh;
     log(`issue #${n}: corpo con ${errors.length} errori`);
@@ -135,6 +136,7 @@ async function processIssue(issue, prev, { now, today, github, sources, names, l
   try {
     airlines = await sources.airlinesFor(t.from, t.to);
   } catch (err) {
+    // Anche un solo elenco mancante è un errore di fonte: «non servita» solo se entrambi hanno risposto
     log(`issue #${n}: elenco tratte non scaricabile: ${err.message}`);
     item.sourceErrors = ['Elenco delle tratte non scaricabile ora'];
     return { item, checked: false };

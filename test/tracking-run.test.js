@@ -7,6 +7,7 @@ import { join } from 'node:path';
 import { DateTime } from 'luxon';
 import { runTracking, cliOptions } from '../src/tracking/run.js';
 import { createGitHub } from '../src/tracking/github.js';
+import { createSources } from '../src/tracking/fetch.js';
 import { trackingHash, bodyHash, parseTracking } from '../src/tracking/spec.js';
 
 const NOW = DateTime.fromISO('2026-11-15T10:00:00Z');
@@ -186,6 +187,113 @@ test('fonte in errore al primo giro: nessuna conferma finché il controllo non r
   assert.equal(it.sourceErrors.length, 1);
   assert.equal(it.commentedFor, null);
   assert.equal(github.comments.length, 0);
+});
+
+/**
+ * Sorgenti con gli elenchi tratte veri (createSources su fetch finto) e prezzi finti.
+ * BRI: Ryanair vola a DBV; Wizz (mappa) vola solo a TIA. `ryanairDown` fa fallire l'elenco Ryanair.
+ */
+function listSources({ ryanairDown = false } = {}) {
+  const fetchImpl = async (url) => {
+    const ok = (body) => ({ ok: true, status: 200, json: async () => body, text: async () => (typeof body === 'string' ? body : JSON.stringify(body)) });
+    if (url.includes('searchWidget')) {
+      if (ryanairDown) return { ok: false, status: 500, json: async () => ({}), text: async () => '' };
+      return ok([{ connectingAirport: null, arrivalAirport: { code: 'DBV', city: { name: 'Dubrovnik' }, country: { name: 'Croazia' } } }]);
+    }
+    if (url === 'https://wizzair.com/') return ok('<script src="https://be.wizzair.com/28.4.0/static.js"></script>');
+    const city = (iata, shortName, countryCode, to) => ({ iata, shortName, countryName: '', countryCode, latitude: 41, longitude: 17, connections: [{ iata: to }] });
+    if (url.includes('/Api/asset/map')) return ok({ cities: [city('BRI', 'Bari', 'IT', 'TIA'), city('TIA', 'Tirana', 'AL', 'BRI')] });
+    throw new Error(`url inattesa ${url}`);
+  };
+  const real = createSources({ fetchImpl, pauseMs: false, retryBaseMs: 0, log: () => {} });
+  const s = fakeSources({ obs: [...OBS, ...OBS.map((o) => ({ ...o, airline: 'wizz', dest: o.dest === 'DBV' ? 'TIA' : o.dest, origin: o.origin === 'DBV' ? 'TIA' : o.origin }))] });
+  s.airlinesFor = real.airlinesFor;
+  return s;
+}
+
+test('elenco Ryanair non scaricabile su tratta solo Ryanair: nessun «non servita», voce precedente conservata', async () => {
+  const github = fakeGitHub([issue(1)]);
+  const fetchImpl = fakeTelegram();
+  await run({ github, sources: listSources(), env: TG_ENV, alertDeps: { fetchImpl } });
+  assert.equal(github.comments.length, 1);
+  assert.equal(fetchImpl.sent.length, 1);
+  const later = NOW.plus({ hours: 2 });
+  await run({ github, sources: listSources({ ryanairDown: true }), now: later, env: TG_ENV, alertDeps: { fetchImpl } });
+  assert.equal(github.comments.length, 1);
+  assert.equal(fetchImpl.sent.length, 1);
+  let [it] = (await readJson('tracking.json')).items;
+  assert.equal(it.status, 'attivo');
+  assert.deepEqual(it.errors, []);
+  assert.deepEqual(it.airlines, ['ryanair']);
+  assert.equal(it.best.price, 55);
+  assert.equal(it.checkedAt, NOW.toUTC().toISO());
+  assert.deepEqual(it.sourceErrors, ['Elenco delle tratte non scaricabile ora']);
+  // elenco di nuovo a posto: nessuna seconda conferma
+  await run({ github, sources: listSources(), now: later.plus({ hours: 2 }), env: TG_ENV, alertDeps: { fetchImpl } });
+  [it] = (await readJson('tracking.json')).items;
+  assert.equal(github.comments.length, 1);
+  assert.deepEqual(it.sourceErrors, []);
+});
+
+test('elenco Ryanair non scaricabile e Wizz serve la tratta: errore di fonte, non prezzi solo Wizz', async () => {
+  const github = fakeGitHub([issue(1, BODY.replace('a: DBV', 'a: TIA'))]);
+  const sources = listSources({ ryanairDown: true });
+  const fetchImpl = fakeTelegram();
+  await run({ github, sources, env: TG_ENV, alertDeps: { fetchImpl } });
+  const [it] = (await readJson('tracking.json')).items;
+  assert.equal(sources.calls.length, 0);
+  assert.equal(it.status, 'attivo');
+  assert.equal(it.best, null);
+  assert.deepEqual(it.sourceErrors, ['Elenco delle tratte non scaricabile ora']);
+  assert.equal(github.comments.length, 0);
+  assert.equal(fetchImpl.sent.length, 0);
+});
+
+test('valida → errore → valida diversa: riferimento avvisi azzerato e nuovo «Ora seguo»', async () => {
+  const github = fakeGitHub([issue(1)]);
+  const sources = fakeSources();
+  const fetchImpl = fakeTelegram();
+  await run({ github, sources, env: TG_ENV, alertDeps: { fetchImpl } });
+  github.issues = [issue(1, 'da: BRI\na: XX')];
+  await run({ github, sources, now: NOW.plus({ hours: 2 }), env: TG_ENV, alertDeps: { fetchImpl } });
+  const [err] = (await readJson('tracking.json')).items;
+  assert.equal(err.status, 'errore');
+  assert.equal(err.hash, trackingHash(parseTracking(BODY, { today: '2026-11-15' }).tracking));
+  // ribasso di 1 €: senza azzeramento non ci sarebbe avviso
+  sources.obs = OBS.map((o) => ({ ...o, price: o.price - 0.5 }));
+  github.issues = [issue(1, BODY.replace('persone: 2', 'persone: 3'))];
+  await run({ github, sources, now: NOW.plus({ hours: 4 }), env: TG_ENV, alertDeps: { fetchImpl } });
+  assert.equal(fetchImpl.sent.length, 2);
+  assert.match(fetchImpl.sent[1], /Ora seguo/);
+  assert.equal((await readJson('alerts_state_tracking.json'))['1'].ref, 54);
+});
+
+test('voce in errore con hash precedente uguale e date passate: issue chiusa', async () => {
+  const github = fakeGitHub([issue(1)]);
+  const sources = fakeSources();
+  await run({ github, sources });
+  github.issues = [issue(1, 'da: BRI\na: XX')];
+  await run({ github, sources, now: NOW.plus({ days: 1 }) });
+  github.issues = [issue(1)];
+  await run({ github, sources, now: DateTime.fromISO('2027-01-20T12:00:00Z') });
+  assert.deepEqual(github.closed, [{ number: 1, text: 'Date passate: smetto di seguire. Prezzo più basso visto: 55 € il 15 nov 2026.' }]);
+  assert.deepEqual((await readJson('tracking.json')).items, []);
+});
+
+test('eccezione imprevista in una issue: voce precedente conservata, le altre proseguono', async () => {
+  const github = fakeGitHub([issue(1), issue(2)]);
+  const sources = fakeSources();
+  await run({ github, sources });
+  const [prev1] = (await readJson('tracking.json')).items;
+  // risposta senza forma attesa: TypeError dentro processIssue solo per la issue 1
+  const logs = [];
+  let n = 0;
+  sources.airlinesFor = async () => (n++ === 0 ? null : ['ryanair']);
+  await run({ github, sources, now: NOW.plus({ hours: 2 }), log: (s) => logs.push(s) });
+  const [it1, it2] = (await readJson('tracking.json')).items;
+  assert.deepEqual(it1, prev1);
+  assert.equal(it2.checkedAt, NOW.plus({ hours: 2 }).toUTC().toISO());
+  assert.ok(logs.some((l) => /issue #1: errore inatteso, tengo la voce precedente/.test(l)));
 });
 
 test('nessuna combinazione: best null, status attivo, nessun avviso', async () => {

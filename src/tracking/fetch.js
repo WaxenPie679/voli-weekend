@@ -46,15 +46,17 @@ export function createSources({ fetchImpl = fetch, pauseMs = true, retryBaseMs =
   const wizzMap = () => once('wizz:map', async () => get(`${await wizzBase()}/asset/map?languageCode=it-it`));
 
   return {
-    /** Compagnie che servono la tratta from→to, nell'ordine ['ryanair','wizz']. Lancia se nessuna delle due è interrogabile. */
+    /**
+     * Compagnie che servono la tratta from→to, nell'ordine ['ryanair','wizz'].
+     * Lancia se anche un solo elenco non è scaricabile: un risultato parziale non dice che la tratta non è servita.
+     */
     async airlinesFor(from, to) {
       const [ry, wz] = await Promise.allSettled([
         ryanairRoutes(from).then((rs) => rs.some((r) => r.code === to)),
         wizzMap().then((map) => parseWizzRoutes(map, [from]).some((r) => r.code === to)),
       ]);
-      if (ry.status === 'rejected' && wz.status === 'rejected') throw new Error(`elenchi tratte non scaricabili: ${ry.reason.message}; ${wz.reason.message}`);
-      if (ry.status === 'rejected') log(`ryanair ${from}: elenco tratte non scaricabile: ${ry.reason.message}`);
-      if (wz.status === 'rejected') log(`wizz ${from}: elenco tratte non scaricabile: ${wz.reason.message}`);
+      const falliti = [['ryanair', ry], ['wizz', wz]].filter(([, r]) => r.status === 'rejected').map(([nome, r]) => `${nome} ${from}: ${r.reason.message}`);
+      if (falliti.length) throw new Error(`elenco tratte non scaricabile: ${falliti.join('; ')}`);
       const out = [];
       if (ry.value) out.push('ryanair');
       if (wz.value) out.push('wizz');

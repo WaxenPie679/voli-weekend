@@ -8,11 +8,14 @@ const STALE_HOURS = 6;
 const DAY_MS = 86400000;
 const NO_HISTORY = 'Storico in costruzione da quando l\'hai aggiunta.';
 const ESTIMATE = ' (stima: ancora nessuna estate raccolta)';
+const NO_PRICE = 'Nessun prezzo disponibile ora: la tratta potrebbe non essere ancora in vendita.';
 
 const dayMs = (d) => Date.UTC(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8, 10));
 const romeFmt = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit' });
 const legFmt = new Intl.DateTimeFormat('it-IT', { timeZone: 'UTC', weekday: 'short', day: 'numeric', month: 'short' });
 const monthFmt = new Intl.DateTimeFormat('it-IT', { timeZone: 'UTC', month: 'short', year: 'numeric' });
+const timeFmt = new Intl.DateTimeFormat('it-IT', { timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit' });
+const dayFmt = new Intl.DateTimeFormat('it-IT', { timeZone: 'Europe/Rome', day: 'numeric', month: 'short' });
 
 export const fmtPrice = (n) => `${n.toLocaleString('it-IT', { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 })} €`;
 const round2 = (n) => Math.round(n * 100) / 100;
@@ -48,6 +51,27 @@ export function ageText(checkedAt, now) {
   if (h < 24) return `aggiornato ${h} ${h === 1 ? 'ora' : 'ore'} fa`;
   const d = Math.floor(h / 24);
   return `aggiornato ${d} ${d === 1 ? 'giorno' : 'giorni'} fa`;
+}
+
+/** Ora dell'elenco: «elenco aggiornato alle 10:20», con il giorno se non è di oggi (Roma); null senza data. */
+export function updatedText(generatedAt, now) {
+  if (!generatedAt) return null;
+  const d = new Date(generatedAt);
+  const giorno = romeToday(d) === romeToday(now) ? '' : `il ${dayFmt.format(d).replace('.', '')} `;
+  return `elenco aggiornato ${giorno}alle ${timeFmt.format(d)}`;
+}
+
+/**
+ * Note sotto il prezzo. Senza prezzo e con la fonte in errore si dice solo che il controllo non è riuscito:
+ * non si sa se la tratta è in vendita e non c'è un prezzo precedente da mostrare.
+ */
+export function priceNotes(item) {
+  const errors = item?.sourceErrors ?? [];
+  const elenco = errors.join('; ');
+  if (item?.best) {
+    return { noPrice: null, sourceError: errors.length ? `Ultimo controllo non riuscito (${elenco}): il prezzo mostrato è del controllo precedente.` : null };
+  }
+  return errors.length ? { noPrice: null, sourceError: `Ultimo controllo non riuscito (${elenco}).` } : { noPrice: NO_PRICE, sourceError: null };
 }
 
 /** Dati vecchi: mai controllati o più di 6 ore fa (il giro gira ogni 2 ore). */
