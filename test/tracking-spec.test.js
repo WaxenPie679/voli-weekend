@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { parseTracking, formatBody, describeTracking, trackingHash, bodyHash } from '../src/tracking/spec.js';
 
+const NOMI = { DBV: 'Dubrovnik' };
 const OGGI = { today: '2026-11-15' };
 const BODY_FINESTRA = `da: BRI
 a: DBV
@@ -103,10 +104,21 @@ test('formatBody → parseTracking restituisce lo stesso tracking', () => {
 });
 
 test('describeTracking', () => {
-  assert.equal(describeTracking(T), 'Bari → Dubrovnik e ritorno · luglio, agosto 2027 · gio, ven · 5–7 notti · 6 persone');
-  assert.equal(describeTracking({ ...T, months: ['2026-12', '2027-01'], nights: [7, 7], people: 1 }), 'Bari → Dubrovnik e ritorno · dicembre 2026, gennaio 2027 · gio, ven · 7 notti · 1 persona');
-  assert.equal(describeTracking(T_PRECISE), 'Bari → Dubrovnik e ritorno · 8 lug → 15 lug 2027 · 6 persone');
+  assert.equal(describeTracking(T, NOMI), 'Bari → Dubrovnik e ritorno · luglio, agosto 2027 · gio, ven · 5–7 notti · 6 persone');
+  assert.equal(describeTracking({ ...T, months: ['2026-12', '2027-01'], nights: [7, 7], people: 1 }, NOMI), 'Bari → Dubrovnik e ritorno · dicembre 2026, gennaio 2027 · gio, ven · 7 notti · 1 persona');
+  assert.equal(describeTracking(T_PRECISE, NOMI), 'Bari → Dubrovnik e ritorno · 8 lug → 15 lug 2027 · 6 persone');
   assert.equal(describeTracking({ ...T_PRECISE, roundTrip: false, back: undefined, to: 'XYZ', from: 'BDS', people: 1 }), 'Brindisi → XYZ · 8 lug 2027 · 1 persona');
+});
+
+test('describeTracking: codice sconosciuto resta il codice', () => {
+  assert.equal(describeTracking({ ...T_PRECISE, roundTrip: false, back: undefined, people: 1 }), 'Bari → DBV · 8 lug 2027 · 1 persona');
+});
+
+test('commenti «# ...» a fine riga ignorati', () => {
+  const r = parseTracking('da: BRI   # partenza\na: DBV # arrivo\ndate: precise # esatte\nandata: 2027-07-08\nritorno: 2027-07-15\nnome: Gara #1', OGGI);
+  assert.deepEqual(r.errors, []);
+  assert.equal(r.tracking.from, 'BRI');
+  assert.equal(r.tracking.name, 'Gara #1');
 });
 
 test('trackingHash cambia se cambiano le persone, non se cambia l’ordine delle righe', () => {

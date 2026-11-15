@@ -6,7 +6,7 @@ const MESI = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'lug
 const MESI_BREVI = ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'];
 const GIORNI = ['lun', 'mar', 'mer', 'gio', 'ven', 'sab', 'dom'];
 const GIORNI_INTERI = ['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato', 'domenica'];
-const CITTA = { BRI: 'Bari', BDS: 'Brindisi', DBV: 'Dubrovnik' };
+const CITTA = { BRI: 'Bari', BDS: 'Brindisi' };
 
 const senzaAccenti = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '');
 const chiave = (s) => senzaAccenti(s).toLowerCase().trim().replace(/\s+/g, ' ');
@@ -21,7 +21,7 @@ function dataValida(s) {
 function leggiRighe(body) {
   const campi = {};
   for (const riga of String(body ?? '').split(/\r?\n/)) {
-    const m = riga.match(/^\s*([^:]+?)\s*:\s*(.*?)\s*$/);
+    const m = riga.replace(/\s#.*$/, '').match(/^\s*([^:]+?)\s*:\s*(.*?)\s*$/);
     if (!m) continue;
     const k = chiave(m[1]);
     if (!(k in campi)) campi[k] = m[2];
@@ -153,8 +153,9 @@ function dataBreve(iso, conAnno) {
   return `${d} ${MESI_BREVI[m - 1]}${conAnno ? ` ${y}` : ''}`;
 }
 
-export function describeTracking(t) {
-  const citta = (c) => CITTA[c] ?? c;
+export function describeTracking(t, names = {}) {
+  const mappa = { ...CITTA, ...names };
+  const citta = (c) => mappa[c] ?? c;
   const parti = [`${citta(t.from)} → ${citta(t.to)}${t.roundTrip ? ' e ritorno' : ''}`];
   if (t.mode === 'precise') {
     if (t.roundTrip) {
