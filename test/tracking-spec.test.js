@@ -115,10 +115,10 @@ test('describeTracking: codice sconosciuto resta il codice', () => {
 });
 
 test('commenti «# ...» a fine riga ignorati', () => {
-  const r = parseTracking('da: BRI   # partenza\na: DBV # arrivo\ndate: precise # esatte\nandata: 2027-07-08\nritorno: 2027-07-15\nnome: Gara #1', OGGI);
+  const r = parseTracking('da: BRI   # partenza\na: DBV # arrivo\ndate: precise # esatte\nandata: 2027-07-08\nritorno: 2027-07-15\nnome: Gara#1', OGGI);
   assert.deepEqual(r.errors, []);
   assert.equal(r.tracking.from, 'BRI');
-  assert.equal(r.tracking.name, 'Gara #1');
+  assert.equal(r.tracking.name, 'Gara#1');
 });
 
 test('trackingHash cambia se cambiano le persone, non se cambia l’ordine delle righe', () => {
