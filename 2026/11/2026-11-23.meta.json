@@ -1,0 +1,26 @@
+{
+ "day": "2026-11-23",
+ "startedAt": "2026-11-23T04:48:23.297Z",
+ "finishedAt": "2026-11-23T05:19:12.669Z",
+ "rowsWritten": 7617,
+ "airlines": {
+  "ryanair": {
+   "routesExpected": 87,
+   "routesOk": 87,
+   "requestsOk": 2088,
+   "requestsFailed": 0,
+   "missing": [],
+   "stoppedReason": null,
+   "notListed": []
+  },
+  "wizz": {
+   "routesExpected": 18,
+   "routesOk": 18,
+   "requestsOk": 234,
+   "requestsFailed": 0,
+   "missing": [],
+   "stoppedReason": null,
+   "notListed": []
+  }
+ }
+}
