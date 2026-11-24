@@ -29,7 +29,7 @@ test('nessun aeroporto in due gruppi', () => {
 test('dataFile e historyBranch', () => {
   assert.equal(dataFile('direct', 'puglia'), 'direct.json');
   assert.equal(dataFile('direct', 'milano'), 'direct-milano.json');
-  assert.equal(dataFile('connections', 'roma'), 'connections-roma.json');
+  assert.equal(dataFile('premium', 'roma'), 'premium-roma.json');
   assert.equal(historyBranch('puglia'), 'history');
   assert.equal(historyBranch('roma'), 'history-roma');
   assert.equal(historyBranch('milano'), 'history-milano');

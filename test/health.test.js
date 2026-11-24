@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { DateTime } from 'luxon';
-import { checkData, checkRuns, checkWebapp, checkHistory, checkTracking, allChecks, HISTORY_URL, DATA_URL, runChecks, formatReport } from '../src/health.js';
+import { checkData, checkRuns, checkWebapp, checkHistory, checkTracking, checkPremium, allChecks, HISTORY_URL, DATA_URL, runChecks, formatReport } from '../src/health.js';
 
 const NOW = DateTime.fromISO('2026-11-02T08:00:00Z');
 const ago = (h) => NOW.minus({ hours: h }).toUTC().toISO();
@@ -21,8 +21,8 @@ test('checkData: dati vecchi, fonte in errore da tempo e nessun volo', () => {
 });
 
 test('checkData: un errore isolato di una fonte non è un problema se ha funzionato da poco', () => {
-  const f = file(0.2, { google: { status: 'error', error: 'timeout', lastSuccessAt: ago(4) } });
-  assert.deepEqual(checkData(f, 'connections', NOW), []);
+  const f = file(0.2, { ryanair: ok(0.2), wizz: { status: 'error', error: 'timeout', lastSuccessAt: ago(0.4) } });
+  assert.deepEqual(checkData(f, 'direct', NOW), []);
 });
 
 test('checkData: file mancante', () => {
@@ -139,8 +139,9 @@ test("allChecks 'Tratte seguite': 404 = assente, altri errori = problema, file v
 
 test('allChecks: aggiunge i controlli di Milano, Bergamo e Roma e tiene quelli della Puglia', () => {
   const keys = Object.keys(allChecks({ now: NOW, env: {}, fetchImpl: async () => ({ ok: false, status: 404 }) }));
-  for (const k of ['Dati voli diretti', 'Storico prezzi', 'Dati voli diretti · Milano', 'Dati voli con scalo · Roma', 'Storico prezzi · Bergamo']) assert.ok(keys.includes(k), k);
+  for (const k of ['Dati voli diretti', 'Storico prezzi', 'Dati voli diretti · Milano', 'Dati voli diretti · Roma', 'Storico prezzi · Bergamo']) assert.ok(keys.includes(k), k);
   assert.ok(!keys.some((k) => k.includes('Puglia')));
+  assert.ok(!keys.some((k) => /scal/i.test(k)), 'nessun controllo dei voli con scalo');
 });
 
 test("allChecks 'Storico prezzi · Roma': legge il ramo history-roma", async () => {
@@ -158,4 +159,15 @@ test("allChecks 'Dati voli diretti · Milano': 404 → problema col nome del fil
   assert.equal(problems.length, 1);
   assert.match(problems[0], /direct-milano\.json/);
   assert.match(checkData(null, 'direct', NOW, 'direct-milano.json')[0], /direct-milano\.json non trovati/);
+});
+
+test('checkPremium: file di 31 ore fa → problema; di 20 ore fa → niente', () => {
+  assert.match(checkPremium({ generatedAt: ago(31), entries: [] }, 'premium.json', NOW)[0], /premium\.json fermo da 31 ore/);
+  assert.deepEqual(checkPremium({ generatedAt: ago(20), entries: [] }, 'premium.json', NOW), []);
+});
+
+test("allChecks 'Premium': 404 = non ancora creato, file vecchio = problema; anche per gli altri gruppi", async () => {
+  const run = (key, file, res) => allChecks({ now: NOW, env: {}, fetchImpl: async (url) => { assert.equal(url, `${DATA_URL}${file}`); return res; } })[key]();
+  assert.deepEqual(await run('Premium', 'premium.json', { ok: false, status: 404 }), []);
+  assert.equal((await run('Premium · Roma', 'premium-roma.json', { ok: true, status: 200, json: async () => ({ generatedAt: ago(40), entries: [] }) })).length, 1);
 });

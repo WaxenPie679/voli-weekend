@@ -1,17 +1,42 @@
 // Logica pura della webapp: nessun accesso al DOM, importabile anche dai test in Node.
 
 const byPrice = (a, b) => a.price - b.price;
-const DIRECT_SOURCES = ['ryanair', 'wizz'];
-const STALE_MINUTES = { direct: 45, connections: 9 * 60 };
+const STALE_MINUTES = 45;
 
-/** Unisce direct.json e connections.json; a parità di id vince il prezzo più basso. */
-export function combine(direct, connections) {
+/** Itinerari di direct.json senza doppioni; a parità di id vince il prezzo più basso. */
+export function combine(direct) {
   const byId = new Map();
-  for (const it of [...(direct?.itineraries ?? []), ...(connections?.itineraries ?? [])]) {
+  for (const it of direct?.itineraries ?? []) {
     const prev = byId.get(it.id);
     if (!prev || it.price < prev.price) byId.set(it.id, it);
   }
   return [...byId.values()].sort(byPrice);
+}
+
+const AIRLINE_NAMES = { ryanair: 'Ryanair', wizz: 'Wizz Air' };
+
+/** Gamba dello storico → segmento. Ryanair «HH:MM-HH:MM» (partenza-arrivo); Wizz «HH:MM HH:MM» (partenze del giorno, arrivo ignoto). */
+function premiumSegment(leg, from, to) {
+  const t = leg.time ?? '';
+  const ry = /^(\d{2}:\d{2})-(\d{2}:\d{2})$/.exec(t);
+  const deps = t.match(/\d{2}:\d{2}/g) ?? [];
+  const dep = `${leg.date}T${ry ? ry[1] : deps[0] ?? '00:00'}`;
+  const arr = ry ? `${leg.date}T${ry[2]}` : dep;
+  return { segment: { from, to, dep, arr, airline: AIRLINE_NAMES[leg.airline] ?? leg.airline }, known: Boolean(ry), times: deps.join(' · ') };
+}
+
+/** Voce del file Premium (src/history/premium.js) → itinerario mostrabile come gli altri. */
+export function fromPremium(e) {
+  const out = premiumSegment(e.out, e.origin, e.destination.code);
+  const back = premiumSegment(e.back, e.destination.code, e.origin);
+  return {
+    id: e.id, source: 'storico', kind: e.kind, origin: e.origin, destination: e.destination, weekend: e.weekend, price: e.price,
+    outbound: { segments: [out.segment], times: out.known ? null : out.times },
+    inbound: { segments: [back.segment], times: back.known ? null : back.times },
+    arrivalUnknown: !out.known || !back.known,
+    seenOn: e.out.seenOn < e.back.seenOn ? e.out.seenOn : e.back.seenOn,
+    bookingUrl: e.out.bookingUrl, returnUrl: e.back.bookingUrl,
+  };
 }
 
 export function groupByWeekend(its) {
@@ -23,16 +48,13 @@ export function groupByWeekend(its) {
   return [...groups.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([weekend, items]) => ({ weekend, items }));
 }
 
-export const isDirect = (it) => it.outbound.segments.length === 1 && it.inbound.segments.length === 1;
-
-export function applyFilters(its, { origin, directOnly, stopsOnly, maxPrice, airline, weekend, minStay } = {}) {
-  return its.filter((it) => (!origin || it.origin === origin)
-    && (!directOnly || isDirect(it))
-    && (!stopsOnly || !isDirect(it))
+export function applyFilters(its, { tipo, origin, maxPrice, airline, weekend, minStay } = {}) {
+  return its.filter((it) => (tipo === 'lungo' ? it.kind === 'lungo' : it.kind !== 'lungo')
+    && (!origin || it.origin === origin)
     && (maxPrice == null || it.price <= maxPrice)
     && (!airline || it.outbound.segments[0].airline === airline)
     && (!weekend || it.weekend === weekend)
-    && (!minStay || stayHours(it) >= minStay));
+    && (!minStay || (!it.arrivalUnknown && stayHours(it) >= minStay)));
 }
 
 /** Una carta per destinazione: la più economica tra tutti i weekend e gli aeroporti. */
@@ -58,7 +80,7 @@ export function romeNow(date = new Date()) {
   return `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}`;
 }
 
-/** I dati degli scali si aggiornano ogni 4 ore: in pagina si nascondono i voli già partiti. */
+/** In pagina si nascondono i voli già partiti (i dati si aggiornano ogni 15 minuti). */
 export const notDeparted = (its, nowLocal) => its.filter((it) => it.outbound.segments[0].dep > nowLocal);
 
 const AXIS_HOURS = 72; // venerdì 00:00 → lunedì 00:00
@@ -88,6 +110,5 @@ export function freshness(name, status, now) {
   const minutes = Math.max(0, Math.round((now - Date.parse(status.lastSuccessAt)) / 60000));
   const label = minutes < 60 ? `aggiornato ${minutes} min fa` : minutes < 48 * 60
     ? `aggiornato ${Math.floor(minutes / 60)} h fa` : `aggiornato ${Math.floor(minutes / 1440)} giorni fa`;
-  const limit = DIRECT_SOURCES.includes(name) ? STALE_MINUTES.direct : STALE_MINUTES.connections;
-  return { label, stale: status.status === 'error' || minutes > limit };
+  return { label, stale: status.status === 'error' || minutes > STALE_MINUTES };
 }

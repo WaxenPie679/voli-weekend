@@ -12,10 +12,9 @@ export const DATA_URL = 'https://raw.githubusercontent.com/WaxenPie679/voli-week
 export const HISTORY_URL = 'https://raw.githubusercontent.com/WaxenPie679/voli-weekend/history/';
 const WEBAPP_FILES = ['', 'app.js', 'view.js', 'config.js', 'notify.js', 'style.css', 'sw.js', 'manifest.webmanifest'];
 
-// Soglie per modalità: i diretti girano ogni 15 minuti, gli scali ogni 4 ore (e una ricerca Google dura a lungo).
+// Soglie dei voli diretti, che girano ogni 15 minuti.
 const LIMITS = {
   direct: { file: 'direct.json', workflow: 'direct.yml', sources: ['ryanair', 'wizz'], maxAgeHours: 2, maxSourceAgeHours: 6, failStreak: 2, minFailures: 3 },
-  connections: { file: 'connections.json', workflow: 'connections.yml', sources: ['google'], maxAgeHours: 9, maxSourceAgeHours: 13, failStreak: 1, minFailures: 2 },
 };
 
 const hoursSince = (iso, now) => now.diff(DateTime.fromISO(iso), 'hours').hours;
@@ -84,6 +83,15 @@ export function checkTracking(file, now) {
   if (!file.generatedAt) return ['tratte seguite: dati senza data di aggiornamento'];
   const age = hoursSince(file.generatedAt, now);
   return age > TRACKING_MAX_AGE_HOURS ? [`tratte seguite ferme da ${fmtHours(age)} (ultimo controllo ${file.generatedAt.slice(0, 16)} UTC)`] : [];
+}
+
+const PREMIUM_MAX_AGE_HOURS = 30;
+
+/** Il file Premium si rifà ogni notte con lo storico: più vecchio di 30 ore vuol dire che il calcolo si è fermato. */
+export function checkPremium(file, fileName, now) {
+  if (!file?.generatedAt) return [`${fileName} senza data di aggiornamento`];
+  const age = hoursSince(file.generatedAt, now);
+  return age > PREMIUM_MAX_AGE_HOURS ? [`${fileName} fermo da ${fmtHours(age)} (ultimo calcolo ${file.generatedAt.slice(0, 16)} UTC)`] : [];
 }
 
 /** Problemi delle esecuzioni di un workflow nelle ultime 24 ore. */
@@ -187,6 +195,15 @@ async function trackingProblems(now, fetchImpl) {
   return checkTracking(await res.json(), now);
 }
 
+/** 404 = file non ancora creato (prima notte dopo il rilascio). */
+async function premiumProblems(now, fetchImpl, gruppo = 'puglia') {
+  const fileName = dataFile('premium', gruppo);
+  const res = await fetchImpl(DATA_URL + fileName, { cache: 'no-store' });
+  if (res.status === 404) return [];
+  if (!res.ok) return [`${fileName} non raggiungibile: HTTP ${res.status}`];
+  return checkPremium(await res.json(), fileName, now);
+}
+
 async function telegramProblems(env, fetchImpl) {
   if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return ['mancano TELEGRAM_BOT_TOKEN o TELEGRAM_CHAT_ID'];
   const res = await fetchImpl(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/getMe`);
@@ -200,19 +217,18 @@ export function allChecks({ now = DateTime.now(), env = process.env, fetchImpl =
     const label = g[0].toUpperCase() + g.slice(1);
     const base = `https://raw.githubusercontent.com/WaxenPie679/voli-weekend/${historyBranch(g)}/`;
     perGruppo[`Dati voli diretti · ${label}`] = () => dataProblems('direct', now, fetchImpl, g);
-    perGruppo[`Dati voli con scalo · ${label}`] = () => dataProblems('connections', now, fetchImpl, g);
     perGruppo[`Storico prezzi · ${label}`] = () => historyProblems(now, fetchImpl, base);
+    perGruppo[`Premium · ${label}`] = () => premiumProblems(now, fetchImpl, g);
   }
   return {
     'Webapp online': () => checkWebapp(WEBAPP_URL, { fetchImpl }),
     'Dati voli diretti': () => dataProblems('direct', now, fetchImpl),
-    'Dati voli con scalo': () => dataProblems('connections', now, fetchImpl),
     'Ricerche diretti (GitHub)': () => workflowProblems('direct', now, env, fetchImpl),
-    'Ricerche scali (GitHub)': () => workflowProblems('connections', now, env, fetchImpl),
     'Ryanair risponde': () => probeRyanair(now, fetchImpl),
     'Wizz risponde': () => probeWizz(now, fetchImpl),
     'Storico prezzi': () => historyProblems(now, fetchImpl),
     'Tratte seguite': () => trackingProblems(now, fetchImpl),
+    'Premium': () => premiumProblems(now, fetchImpl),
     'Bot Telegram': () => telegramProblems(env, fetchImpl),
     ...perGruppo,
   };

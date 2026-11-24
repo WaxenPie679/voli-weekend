@@ -49,13 +49,13 @@ function fakeSources({ airlines = ['ryanair'], obs = OBS, airports = AIRPORTS } 
   return s;
 }
 
-/** Telegram finto: conta i messaggi. */
-function fakeTelegram() {
-  const f = async (url, init) => { f.sent.push(JSON.parse(init.body).text); return { ok: true, status: 200 }; };
+/** Notifica dell'app finta: conta le notifiche (titolo e testo). */
+function fakePush() {
+  const f = async (p) => { f.sent.push(`${p.title} · ${p.body}`); };
   f.sent = [];
   return f;
 }
-const TG_ENV = { TELEGRAM_BOT_TOKEN: 't', TELEGRAM_CHAT_ID: 'c' };
+const PUSH_ENV = { PUSH_SUBSCRIPTION: '{}', VAPID_PRIVATE_KEY: 'k' };
 
 let dir;
 beforeEach(async () => { dir = await mkdtemp(join(tmpdir(), 'tracking-')); });
@@ -166,14 +166,14 @@ test('airports.json senza gruppi (versione vecchia) rifatto anche se di oggi', a
 test('fonte in errore: best e checkedAt del giro prima conservati, nessun avviso', async () => {
   const github = fakeGitHub([issue(1)]);
   const sources = fakeSources();
-  const fetchImpl = fakeTelegram();
-  await run({ github, sources, env: TG_ENV, alertDeps: { fetchImpl } });
-  assert.equal(fetchImpl.sent.length, 1);
+  const pushImpl = fakePush();
+  await run({ github, sources, env: PUSH_ENV, alertDeps: { pushImpl } });
+  assert.equal(pushImpl.sent.length, 1);
 
   // al giro dopo il prezzo scenderebbe, ma la fonte fallisce
   sources.failPrices = true;
   const later = NOW.plus({ hours: 2 });
-  await run({ github, sources, now: later, env: TG_ENV, alertDeps: { fetchImpl } });
+  await run({ github, sources, now: later, env: PUSH_ENV, alertDeps: { pushImpl } });
   let [it] = (await readJson('tracking.json')).items;
   assert.equal(it.best.price, 55);
   assert.equal(it.top.length, 1);
@@ -182,18 +182,18 @@ test('fonte in errore: best e checkedAt del giro prima conservati, nessun avviso
   assert.equal(it.sourceErrors.length, 1);
   assert.match(it.sourceErrors[0], /Ryanair/);
   assert.equal(it.status, 'attivo');
-  assert.equal(fetchImpl.sent.length, 1);
+  assert.equal(pushImpl.sent.length, 1);
   // riferimento dell'avviso non azzerato
   assert.deepEqual((await readJson('alerts_state_tracking.json'))['1'].ref, 55);
   assert.equal(it.alertRef, 55);
 
   // fonte di nuovo a posto: errori azzerati
   sources.failPrices = false;
-  await run({ github, sources, now: later.plus({ hours: 2 }), env: TG_ENV, alertDeps: { fetchImpl } });
+  await run({ github, sources, now: later.plus({ hours: 2 }), env: PUSH_ENV, alertDeps: { pushImpl } });
   [it] = (await readJson('tracking.json')).items;
   assert.deepEqual(it.sourceErrors, []);
   assert.equal(it.checkedAt, later.plus({ hours: 2 }).toUTC().toISO());
-  assert.equal(fetchImpl.sent.length, 1);
+  assert.equal(pushImpl.sent.length, 1);
 });
 
 test('fonte in errore al primo giro: nessuna conferma finché il controllo non riesce', async () => {
@@ -234,14 +234,14 @@ function listSources({ ryanairDown = false } = {}) {
 
 test('elenco Ryanair non scaricabile su tratta solo Ryanair: nessun «non servita», voce precedente conservata', async () => {
   const github = fakeGitHub([issue(1)]);
-  const fetchImpl = fakeTelegram();
-  await run({ github, sources: listSources(), env: TG_ENV, alertDeps: { fetchImpl } });
+  const pushImpl = fakePush();
+  await run({ github, sources: listSources(), env: PUSH_ENV, alertDeps: { pushImpl } });
   assert.equal(github.comments.length, 1);
-  assert.equal(fetchImpl.sent.length, 1);
+  assert.equal(pushImpl.sent.length, 1);
   const later = NOW.plus({ hours: 2 });
-  await run({ github, sources: listSources({ ryanairDown: true }), now: later, env: TG_ENV, alertDeps: { fetchImpl } });
+  await run({ github, sources: listSources({ ryanairDown: true }), now: later, env: PUSH_ENV, alertDeps: { pushImpl } });
   assert.equal(github.comments.length, 1);
-  assert.equal(fetchImpl.sent.length, 1);
+  assert.equal(pushImpl.sent.length, 1);
   let [it] = (await readJson('tracking.json')).items;
   assert.equal(it.status, 'attivo');
   assert.deepEqual(it.errors, []);
@@ -250,7 +250,7 @@ test('elenco Ryanair non scaricabile su tratta solo Ryanair: nessun «non servit
   assert.equal(it.checkedAt, NOW.toUTC().toISO());
   assert.deepEqual(it.sourceErrors, ['Elenco delle tratte non scaricabile ora']);
   // elenco di nuovo a posto: nessuna seconda conferma
-  await run({ github, sources: listSources(), now: later.plus({ hours: 2 }), env: TG_ENV, alertDeps: { fetchImpl } });
+  await run({ github, sources: listSources(), now: later.plus({ hours: 2 }), env: PUSH_ENV, alertDeps: { pushImpl } });
   [it] = (await readJson('tracking.json')).items;
   assert.equal(github.comments.length, 1);
   assert.deepEqual(it.sourceErrors, []);
@@ -259,33 +259,33 @@ test('elenco Ryanair non scaricabile su tratta solo Ryanair: nessun «non servit
 test('elenco Ryanair non scaricabile e Wizz serve la tratta: errore di fonte, non prezzi solo Wizz', async () => {
   const github = fakeGitHub([issue(1, BODY.replace('a: DBV', 'a: TIA'))]);
   const sources = listSources({ ryanairDown: true });
-  const fetchImpl = fakeTelegram();
-  await run({ github, sources, env: TG_ENV, alertDeps: { fetchImpl } });
+  const pushImpl = fakePush();
+  await run({ github, sources, env: PUSH_ENV, alertDeps: { pushImpl } });
   const [it] = (await readJson('tracking.json')).items;
   assert.equal(sources.calls.length, 0);
   assert.equal(it.status, 'attivo');
   assert.equal(it.best, null);
   assert.deepEqual(it.sourceErrors, ['Elenco delle tratte non scaricabile ora']);
   assert.equal(github.comments.length, 0);
-  assert.equal(fetchImpl.sent.length, 0);
+  assert.equal(pushImpl.sent.length, 0);
 });
 
 test('valida → errore → valida diversa: riferimento avvisi azzerato e nuovo «Ora seguo»', async () => {
   const github = fakeGitHub([issue(1)]);
   const sources = fakeSources();
-  const fetchImpl = fakeTelegram();
-  await run({ github, sources, env: TG_ENV, alertDeps: { fetchImpl } });
+  const pushImpl = fakePush();
+  await run({ github, sources, env: PUSH_ENV, alertDeps: { pushImpl } });
   github.issues = [issue(1, 'da: BRI\na: XX')];
-  await run({ github, sources, now: NOW.plus({ hours: 2 }), env: TG_ENV, alertDeps: { fetchImpl } });
+  await run({ github, sources, now: NOW.plus({ hours: 2 }), env: PUSH_ENV, alertDeps: { pushImpl } });
   const [err] = (await readJson('tracking.json')).items;
   assert.equal(err.status, 'errore');
   assert.equal(err.hash, trackingHash(parseTracking(BODY, { today: '2026-11-15' }).tracking));
   // ribasso di 1 €: senza azzeramento non ci sarebbe avviso
   sources.obs = OBS.map((o) => ({ ...o, price: o.price - 0.5 }));
   github.issues = [issue(1, BODY.replace('persone: 2', 'persone: 3'))];
-  await run({ github, sources, now: NOW.plus({ hours: 4 }), env: TG_ENV, alertDeps: { fetchImpl } });
-  assert.equal(fetchImpl.sent.length, 2);
-  assert.match(fetchImpl.sent[1], /Ora seguo/);
+  await run({ github, sources, now: NOW.plus({ hours: 4 }), env: PUSH_ENV, alertDeps: { pushImpl } });
+  assert.equal(pushImpl.sent.length, 2);
+  assert.match(pushImpl.sent[1], /Ora la seguo/);
   assert.equal((await readJson('alerts_state_tracking.json'))['1'].ref, 54);
 });
 
@@ -320,8 +320,8 @@ test('eccezione imprevista in una issue: voce precedente conservata, le altre pr
 test('nessuna combinazione: best null, status attivo, nessun avviso', async () => {
   const github = fakeGitHub([issue(1)]);
   const sources = fakeSources({ obs: [] });
-  const fetchImpl = fakeTelegram();
-  await run({ github, sources, env: TG_ENV, alertDeps: { fetchImpl } });
+  const pushImpl = fakePush();
+  await run({ github, sources, env: PUSH_ENV, alertDeps: { pushImpl } });
   const [it] = (await readJson('tracking.json')).items;
   assert.equal(it.status, 'attivo');
   assert.equal(it.best, null);
@@ -330,7 +330,7 @@ test('nessuna combinazione: best null, status attivo, nessun avviso', async () =
   assert.deepEqual(it.series, []);
   assert.equal(it.checkedAt, NOW.toUTC().toISO());
   assert.equal(it.alertRef, null);
-  assert.equal(fetchImpl.sent.length, 0);
+  assert.equal(pushImpl.sent.length, 0);
   assert.ok(github.comments[0].text.includes('Nessun prezzo disponibile ora: la tratta potrebbe non essere ancora in vendita.'));
 });
 
@@ -398,16 +398,16 @@ test('corpo modificato: nuova conferma, serie conservata', async () => {
 test('corpo modificato: riferimento degli avvisi azzerato, nuovo «Ora seguo»', async () => {
   const github = fakeGitHub([issue(1), issue(2)]);
   const sources = fakeSources();
-  const fetchImpl = fakeTelegram();
-  await run({ github, sources, env: TG_ENV, alertDeps: { fetchImpl } });
-  assert.equal(fetchImpl.sent.length, 1);
+  const pushImpl = fakePush();
+  await run({ github, sources, env: PUSH_ENV, alertDeps: { pushImpl } });
+  assert.equal(pushImpl.sent.length, 1);
   // ribasso di 1 €: senza azzeramento non ci sarebbe avviso
   sources.obs = OBS.map((o) => ({ ...o, price: o.price - 0.5 }));
   github.issues = [issue(1, BODY.replace('persone: 2', 'persone: 3')), issue(2)];
-  await run({ github, sources, now: NOW.plus({ days: 1 }), env: TG_ENV, alertDeps: { fetchImpl } });
-  assert.equal(fetchImpl.sent.length, 2);
-  assert.match(fetchImpl.sent[1], /Ora seguo/);
-  assert.doesNotMatch(fetchImpl.sent[1], /Tratta 2|#2/);
+  await run({ github, sources, now: NOW.plus({ days: 1 }), env: PUSH_ENV, alertDeps: { pushImpl } });
+  assert.equal(pushImpl.sent.length, 2);
+  assert.match(pushImpl.sent[1], /Ora la seguo/);
+  assert.doesNotMatch(pushImpl.sent[1], /Tratta 2|#2/);
   const state = await readJson('alerts_state_tracking.json');
   assert.equal(state['1'].ref, 54);
   assert.equal(state['2'].ref, 55);
@@ -419,9 +419,9 @@ test('corpo modificato: riferimento degli avvisi azzerato, nuovo «Ora seguo»',
 
 test('alertRef: riferimento dell’ultimo avviso nella voce', async () => {
   const github = fakeGitHub([issue(1)]);
-  const fetchImpl = fakeTelegram();
-  await run({ github, sources: fakeSources(), env: TG_ENV, alertDeps: { fetchImpl } });
-  assert.equal(fetchImpl.sent.length, 1);
+  const pushImpl = fakePush();
+  await run({ github, sources: fakeSources(), env: PUSH_ENV, alertDeps: { pushImpl } });
+  assert.equal(pushImpl.sent.length, 1);
   assert.equal((await readJson('tracking.json')).items[0].alertRef, 55);
   // senza canali: nessun avviso, nessun riferimento
   await rm(join(dir, 'alerts_state_tracking.json'));

@@ -176,3 +176,52 @@ test('runHistory stesso giorno, orario cambiato → nel file del giorno l’orar
   await runHistory(dir, { now: NOW.plus({ hours: 2 }), collectors: fakeCollectors([{ ...obsA, time: '06:00-07:45' }]), log: () => {} });
   assert.deepEqual((await rows('2026/11/2026-11-12.csv.gz')).map((r) => r.time), ['06:00-07:45']);
 });
+
+// --- File Premium ---
+const out = (date, price, extra = {}) => ({ airline: 'ryanair', origin: 'BRI', dest: 'BUD', date, state: 'prezzo', price, time: '10:00-12:00', ...extra });
+const back = (date, price) => ({ airline: 'ryanair', origin: 'BUD', dest: 'BRI', date, state: 'prezzo', price, time: '13:00-15:00' });
+const routeBud = { airline: 'ryanair', origin: 'BRI', code: 'BUD', city: 'Budapest', country: 'Ungheria' };
+const cover = [{ airline: 'ryanair', origin: 'BRI', dest: 'BUD', from: '2026-11-12', to: '2027-11-30' }, { airline: 'ryanair', origin: 'BUD', dest: 'BRI', from: '2026-11-12', to: '2027-11-30' }];
+const budCollectors = (obs, coverage = cover, meta = okMeta) => ({
+  ryanair: async () => ({ observations: obs, coverage, routes: [routeBud], meta }),
+  wizz: async () => ({ observations: [], coverage: [], routes: [], meta: { ...okMeta, routesExpected: 0, routesOk: 0, requestsOk: 0 } }),
+});
+const aprile = (e) => e.kind === 'weekend' && e.saturday === '2027-04-03';
+
+test('runHistory con premiumPath: scrive il file Premium con i prezzi di stanotte', async () => {
+  const premiumPath = join(dir, 'data', 'premium.json');
+  const code = await runHistory(dir, { now: NOW, collectors: budCollectors([out('2027-04-03', 30), back('2027-04-04', 40)]), log: () => {}, premiumPath });
+  assert.equal(code, 0);
+  const f = JSON.parse(await readFile(premiumPath, 'utf8'));
+  assert.equal(f.day, '2026-11-12');
+  const e = f.entries.find(aprile);
+  assert.equal(e.price, 70);
+  assert.equal(e.destination.city, 'Budapest');
+  assert.equal(e.out.seenOn, '2026-11-12');
+});
+
+test('runHistory: prezzo invariato e riletto oggi → visto oggi; tratta non riletta → visto il giorno dell\'ultima lettura', async () => {
+  const premiumPath = join(dir, 'premium.json');
+  await runHistory(dir, { now: NOW, collectors: budCollectors([out('2027-04-03', 30), back('2027-04-04', 40)]), log: () => {}, premiumPath });
+  await runHistory(dir, { now: NOW.plus({ days: 1 }), collectors: budCollectors([out('2027-04-03', 30), back('2027-04-04', 40)]), log: () => {}, premiumPath });
+  assert.equal(JSON.parse(await readFile(premiumPath, 'utf8')).entries.find(aprile).out.seenOn, '2026-11-13');
+  // il terzo giorno la tratta non viene riletta (raccolta fermata prima): resta la conferma del 13
+  await runHistory(dir, { now: NOW.plus({ days: 3 }), collectors: budCollectors([], [], { ...okMeta, routesOk: 0, missing: ['BRI-BUD'], stoppedReason: 'tempo' }), log: () => {}, premiumPath });
+  const e = JSON.parse(await readFile(premiumPath, 'utf8')).entries.find(aprile);
+  assert.equal(e.out.seenOn, '2026-11-13');
+});
+
+test('runHistory: errore nel file Premium → stesso esito e storico scritto comunque', async () => {
+  await writeFile(join(dir, 'un-file'), 'x');
+  const logs = [];
+  const code = await runHistory(dir, { now: NOW, collectors: budCollectors([out('2027-04-03', 30), back('2027-04-04', 40)]), log: (l) => logs.push(l), premiumPath: join(dir, 'un-file', 'premium.json') });
+  assert.equal(code, 0);
+  assert.ok(existsSync(join(dir, '2026/11/2026-11-12.csv.gz')));
+  assert.ok(existsSync(join(dir, '2026/11/2026-11-12.meta.json')));
+  assert.ok(logs.some((l) => /premium/i.test(l)));
+});
+
+test('runHistory senza premiumPath non scrive file Premium', async () => {
+  await runHistory(dir, { now: NOW, collectors: budCollectors([out('2027-04-03', 30), back('2027-04-04', 40)]), log: () => {} });
+  assert.ok(!(await readdir(dir)).some((f) => f.includes('premium')));
+});

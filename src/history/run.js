@@ -1,9 +1,11 @@
 import { readdir, readFile, writeFile, mkdir, rename, rm } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 import { DateTime } from 'luxon';
 import { todayRome } from '../weekends.js';
 import { collectRyanair, collectWizz } from './collect.js';
 import { encodeCsv, decodeCsv, replayState, diffState, obsKey } from './store.js';
+import { buildPremium, confirmedOn } from './premium.js';
+import { CONSTRAINTS } from '../filter.js';
 
 const AIRLINES = ['ryanair', 'wizz'];
 /** Tempo concesso alla raccolta: il passo del workflow ha 110 minuti, il resto serve a scrivere. */
@@ -62,11 +64,32 @@ function notListedOf(airline, known, listed, meta) {
 }
 
 /**
+ * Le notti dopo l'ultima riga di una chiave il prezzo può essere stato riletto senza cambiare: secondo i meta
+ * dei giorni precedenti (fino a 8) porta avanti in `seen` il giorno dell'ultima conferma.
+ */
+async function addConfirmations(dir, state, seen, today) {
+  const days = [];
+  for (let i = 1; i <= 8; i++) days.push(DateTime.fromISO(today).minus({ days: i }).toISODate());
+  const metas = [];
+  for (const day of days) {
+    const meta = await readJson(join(dir, day.slice(0, 4), day.slice(5, 7), `${day}.meta.json`), null);
+    if (meta) metas.push({ day, meta });
+  }
+  for (const [key, o] of state) {
+    const last = seen.get(key);
+    const hit = metas.find(({ day, meta }) => day > (last ?? '') && confirmedOn(meta, o));
+    if (hit) seen.set(key, hit.day);
+  }
+}
+
+/**
  * Giro giornaliero: raccoglie i prezzi, scrive nel file del giorno solo i cambiamenti rispetto allo
  * stato ricostruito dai file precedenti, poi riepilogo (meta) e archivio delle tratte.
+ * Con `premiumPath` scrive anche il file Premium (Weekend mesi 4–12, Weekend lunghi mesi 1–12): un suo errore
+ * finisce nel log e non cambia né l'esito né i file dello storico.
  * @returns {Promise<number>} 1 se nessuna compagnia ha completato almeno una tratta, altrimenti 0.
  */
-export async function runHistory(dir, { now = DateTime.now(), collectors = { ryanair: collectRyanair, wizz: collectWizz }, collectOpts = {}, log = console.log, deadline = Date.now() + COLLECT_MINUTES * 60000 } = {}) {
+export async function runHistory(dir, { now = DateTime.now(), collectors = { ryanair: collectRyanair, wizz: collectWizz }, collectOpts = {}, log = console.log, deadline = Date.now() + COLLECT_MINUTES * 60000, premiumPath, origins = CONSTRAINTS.origins } = {}) {
   const startedAt = new Date().toISOString();
   const today = todayRome(now);
   const [year, month] = today.split('-');
@@ -74,13 +97,14 @@ export async function runHistory(dir, { now = DateTime.now(), collectors = { rya
   const metaRel = join(year, month, `${today}.meta.json`);
 
   const state = new Map();
+  const seen = new Map(); // chiave → giorno in cui il prezzo è stato visto l'ultima volta (per il file Premium)
   let todayRows = [];
   for (const f of await listDayFiles(dir)) {
     const rows = await readDayFile(dir, f.path);
     if (f.name === `${today}.csv.gz`) todayRows = rows;
     // Le date già passate non servono al confronto (diffState le ignora): fuori dallo stato
     for (const [k, r] of replayState(rows)) {
-      if (r.date < today) state.delete(k); else state.set(k, r);
+      if (r.date < today) { state.delete(k); seen.delete(k); } else { state.set(k, r); seen.set(k, f.name.slice(0, 10)); }
     }
   }
 
@@ -131,6 +155,22 @@ export async function runHistory(dir, { now = DateTime.now(), collectors = { rya
   const meta = { day: today, startedAt, finishedAt: new Date().toISOString(), rowsWritten: dayRows.length, airlines };
   await writeAtomic(join(dir, metaRel), JSON.stringify(meta, null, 1));
   log(`storico ${today}: ${fresh.length} righe nuove, ${dayRows.length} nel file del giorno`);
+
+  if (premiumPath) {
+    try {
+      // Stato dopo stanotte: le righe nuove sostituiscono le vecchie
+      for (const r of fresh) state.set(obsKey(r), r);
+      await addConfirmations(dir, state, seen, today);
+      // Ciò che è stato riletto stanotte è «visto oggi»
+      for (const o of observations) seen.set(obsKey(o), today);
+      const premium = buildPremium({ state, seen, today, origins, routes: updated, now, generatedAt: new Date().toISOString() });
+      await mkdir(dirname(premiumPath), { recursive: true });
+      await writeAtomic(premiumPath, JSON.stringify(premium));
+      log(`premium: ${premium.entries.length} voci in ${premiumPath}`);
+    } catch (err) {
+      log(`premium: ERRORE ${String(err?.message ?? err).split('\n')[0]}`);
+    }
+  }
   return AIRLINES.some((a) => airlines[a].routesOk > 0) ? 0 : 1;
 }
 
@@ -138,5 +178,5 @@ if (process.argv[1]?.endsWith('history/run.js')) {
   process.on('unhandledRejection', (err) => console.error('errore asincrono non gestito:', err?.message ?? err));
   const arg = (name) => { const i = process.argv.indexOf(name); return i > 0 ? process.argv[i + 1] : undefined; };
   const maxRoutes = arg('--max-routes');
-  process.exitCode = await runHistory(arg('--dir') ?? './history', { collectOpts: maxRoutes ? { maxRoutes: Number(maxRoutes) } : {} });
+  process.exitCode = await runHistory(arg('--dir') ?? './history', { collectOpts: maxRoutes ? { maxRoutes: Number(maxRoutes) } : {}, premiumPath: arg('--premium') });
 }

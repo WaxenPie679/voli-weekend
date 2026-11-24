@@ -10,7 +10,7 @@ export const HISTORY_BASE_URL = new URLSearchParams(location.search).has('sample
 
 export const PAGE_SIZE = 20;
 export const ALERT_THRESHOLD = 80;
-export const MAX_PRICE = 200;
+export const MAX_PRICE = 400;
 export const REFRESH_MS = 5 * 60 * 1000;
 
 // Chiave pubblica delle notifiche (la privata è solo nei Secrets di GitHub)

@@ -25,12 +25,19 @@ test('direct: una fonte in errore non blocca le altre, codice 0', async () => {
   assert.equal(file.sources.wizz.error, 'HTTP 403');
 });
 
-test('connections: tutte le fonti in errore → codice 1, file comunque scritto', async () => {
+test('direct: tutte le fonti in errore → codice 1, file comunque scritto', async () => {
   const dir = await mkdtemp(join(tmpdir(), 'voli-'));
-  const code = await runMode('connections', dir, { ...quiet, sources: { google: async () => { throw new Error('google-blocked'); } } });
+  const fail = async () => { throw new Error('HTTP 503'); };
+  const code = await runMode('direct', dir, { ...quiet, sources: { ryanair: fail, wizz: fail } });
   assert.equal(code, 1);
-  const file = JSON.parse(await readFile(join(dir, 'connections.json'), 'utf8'));
-  assert.equal(file.sources.google.status, 'error');
+  const file = JSON.parse(await readFile(join(dir, 'direct.json'), 'utf8'));
+  assert.equal(file.sources.ryanair.status, 'error');
+});
+
+test('la modalità connections (Google) non esiste più', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'voli-'));
+  await assert.rejects(runMode('connections', dir, { ...quiet, sources: {} }), /modalità sconosciuta/);
+  assert.deepEqual(Object.keys(MODES), ['direct']);
 });
 
 test('modalità sconosciuta → errore', async () => {
@@ -39,16 +46,15 @@ test('modalità sconosciuta → errore', async () => {
 
 test('ogni modalità ha il proprio file dati e il proprio file di stato degli avvisi', () => {
   assert.equal(MODES.direct.stateFile, 'alerts_state_direct.json');
-  assert.equal(MODES.connections.stateFile, 'alerts_state_connections.json');
 });
 
 test('una fonte che lancia un valore senza message non fa crashare il runner', async () => {
   const dir = await mkdtemp(join(tmpdir(), 'voli-'));
-  const code = await runMode('connections', dir, { ...quiet, sources: { google: async () => { throw undefined; } } });
+  const code = await runMode('direct', dir, { ...quiet, sources: { ryanair: async () => { throw undefined; } } });
   assert.equal(code, 1);
-  const file = JSON.parse(await readFile(join(dir, 'connections.json'), 'utf8'));
-  assert.equal(file.sources.google.status, 'error');
-  assert.equal(file.sources.google.error, 'errore sconosciuto');
+  const file = JSON.parse(await readFile(join(dir, 'direct.json'), 'utf8'));
+  assert.equal(file.sources.ryanair.status, 'error');
+  assert.equal(file.sources.ryanair.error, 'errore sconosciuto');
 });
 
 // Itinerario da Roma Fiumicino: stessa struttura di `fare`, con origine e tratte da/per FCO
