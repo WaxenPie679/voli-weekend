@@ -1,6 +1,47 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "voli-weekend", "runtimeExecutable": "node", "runtimeArgs": ["scripts/serve.js"], "port": 5190 }
+    {
+      "name": "voli-weekend",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "scripts/serve.js"
+      ],
+      "port": 5190
+    },
+    {
+      "name": "voli-weekend-icone",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "/Users/utente/Progetti/Ricerca voli-icone-dovai/scripts/serve.js"
+      ],
+      "port": 5190
+    },
+    {
+      "name": "dovai-caratteri",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "5195",
+        "--directory",
+        "/Users/utente/Progetti/Voli Weekend Servizio/brand/caratteri"
+      ],
+      "port": 5195
+    },
+    {
+      "name": "voli-weekend-motore",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "5196",
+        "--bind",
+        "127.0.0.1",
+        "--directory",
+        "/Users/utente/Progetti/Ricerca voli/web"
+      ],
+      "port": 5196
+    }
   ]
 }
