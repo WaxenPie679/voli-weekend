@@ -68,6 +68,11 @@ export function checkHistory(metas, now) {
       if (lowCoverage(last, name) && lowCoverage(prev, name)) problems.push(`${name}: meno di metà delle tratte raccolte per due giorni di fila (${prev.day}, ${last.day})`);
     }
   }
+  // Raccolta tagliata dal tempo: le tratte rimaste fuori (es. Ciampino) non fanno scendere la copertura sotto la metà
+  for (const name of HISTORY_AIRLINES) {
+    const a = last.airlines?.[name];
+    if (a?.stoppedReason === 'tempo') problems.push(`${name}: raccolta interrotta per tempo il ${last.day} (${a.missing?.length ?? 0} voci mancanti)`);
+  }
   return problems;
 }
 

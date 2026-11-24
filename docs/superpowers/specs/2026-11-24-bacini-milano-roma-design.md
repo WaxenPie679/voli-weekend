@@ -52,7 +52,7 @@ DoVai avrà tre bacini di partenza: Puglia, «Milano e Bergamo», Roma. Oggi i p
 
 **Avvisi.** Solo il gruppo `puglia` manda avvisi Telegram e push.
 
-**Aeroporti senza una compagnia.** A Linate Ryanair non vola e il suo elenco tratte risponde con un errore. A Linate e Ciampino Wizz non vola. Un aeroporto senza tratte per una compagnia si salta senza errore: non deve far fallire la compagnia per tutto il gruppo.
+**Aeroporti senza una compagnia.** A Linate Ryanair non vola e il suo elenco tratte risponde con un errore. A Linate Wizz non vola; da Ciampino sì (18 tratte nella mappa Wizz del 24/11). Un aeroporto senza tratte per una compagnia si salta senza errore: non deve far fallire la compagnia per tutto il gruppo.
 
 **Controllo giornaliero.** Il controllo delle 6:13 verifica anche i file e lo storico dei gruppi nuovi. Ogni problema riporta il nome del gruppo. Il messaggio Telegram arriva solo se c'è un problema, come oggi.
 
@@ -66,5 +66,5 @@ DoVai avrà tre bacini di partenza: Puglia, «Milano e Bergamo», Roma. Oggi i p
 
 - `npm test` verde, con test nuovi su: scelta del gruppo, nomi dei file, avvisi solo per la Puglia, aeroporto senza tratte.
 - Un giro vero su GitHub per ogni ricerca e ogni gruppo. Il branch `data` deve avere i file dei gruppi nuovi con voli veri, e i branch `history-*` il file del giorno.
-- Tempi misurati per ogni gruppo, sotto i limiti (diretti 10 minuti, scali 60, storico 65).
+- Tempi misurati per ogni gruppo, sotto i limiti (diretti 10 minuti, scali 60, storico 110).
 - La webapp di Bruno è uguale a prima.

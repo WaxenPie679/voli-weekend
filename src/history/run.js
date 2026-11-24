@@ -6,8 +6,8 @@ import { collectRyanair, collectWizz } from './collect.js';
 import { encodeCsv, decodeCsv, replayState, diffState, obsKey } from './store.js';
 
 const AIRLINES = ['ryanair', 'wizz'];
-/** Tempo concesso alla raccolta: il passo del workflow ha 65 minuti, il resto serve a scrivere. */
-const COLLECT_MINUTES = 55;
+/** Tempo concesso alla raccolta: il passo del workflow ha 110 minuti, il resto serve a scrivere. */
+const COLLECT_MINUTES = 100;
 const byKey = (a, b) => (obsKey(a) < obsKey(b) ? -1 : obsKey(a) > obsKey(b) ? 1 : 0);
 
 /** Percorsi (relativi alla cartella) dei file giornalieri, ordinati per data. */

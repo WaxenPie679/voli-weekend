@@ -35,6 +35,7 @@ test('dataFile e historyBranch', () => {
   assert.equal(historyBranch('milano'), 'history-milano');
 });
 
+// I test vanno lanciati senza GRUPPO impostato nella shell
 test('CONSTRAINTS.origins viene dal gruppo (senza GRUPPO = Puglia)', () => {
   assert.deepEqual(CONSTRAINTS.origins, ['BRI', 'BDS']);
 });

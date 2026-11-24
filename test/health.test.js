@@ -85,6 +85,13 @@ test('checkHistory: meno di metà tratte per 2 giorni di fila → problema; per 
   assert.match(checkHistory([meta('2026-11-02', 4, [10, 4]), meta('2026-11-01', 28, [10, 3])], NOW).join('\n'), /ryanair/);
   assert.deepEqual(checkHistory([meta('2026-11-02', 4, [10, 4]), meta('2026-11-01', 28)], NOW), []);
 });
+test('checkHistory: raccolta fermata per tempo → problema; stoppedReason null → nessuno', () => {
+  const m = (reason, missing = []) => { const x = meta('2026-11-02', 4); x.airlines.wizz = { ...x.airlines.wizz, stoppedReason: reason, missing }; return x; };
+  const p = checkHistory([m('tempo', ['a', 'b', 'c'])], NOW);
+  assert.equal(p.length, 1);
+  assert.match(p[0], /wizz: raccolta interrotta per tempo il 2026-11-02 \(3 voci mancanti\)/);
+  assert.deepEqual(checkHistory([m(null)], NOW), []);
+});
 test('checkHistory: elenco tratte vuoto (routesExpected 0) conta come sotto la metà', () => {
   assert.match(checkHistory([meta('2026-11-02', 4, [0, 0]), meta('2026-11-01', 28, [0, 0])], NOW).join('\n'), /ryanair/);
 });
