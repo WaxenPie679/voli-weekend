@@ -85,6 +85,15 @@ export function checkTracking(file, now) {
   return age > TRACKING_MAX_AGE_HOURS ? [`tratte seguite ferme da ${fmtHours(age)} (ultimo controllo ${file.generatedAt.slice(0, 16)} UTC)`] : [];
 }
 
+const PREMIUM_MAX_AGE_HOURS = 30;
+
+/** Il file Premium si rifà ogni notte con lo storico: più vecchio di 30 ore vuol dire che il calcolo si è fermato. */
+export function checkPremium(file, fileName, now) {
+  if (!file?.generatedAt) return [`${fileName} senza data di aggiornamento`];
+  const age = hoursSince(file.generatedAt, now);
+  return age > PREMIUM_MAX_AGE_HOURS ? [`${fileName} fermo da ${fmtHours(age)} (ultimo calcolo ${file.generatedAt.slice(0, 16)} UTC)`] : [];
+}
+
 /** Problemi delle esecuzioni di un workflow nelle ultime 24 ore. */
 export function checkRuns(workflow, runs, mode, now) {
   const lim = LIMITS[mode];
@@ -186,6 +195,15 @@ async function trackingProblems(now, fetchImpl) {
   return checkTracking(await res.json(), now);
 }
 
+/** 404 = file non ancora creato (prima notte dopo il rilascio). */
+async function premiumProblems(now, fetchImpl, gruppo = 'puglia') {
+  const fileName = dataFile('premium', gruppo);
+  const res = await fetchImpl(DATA_URL + fileName, { cache: 'no-store' });
+  if (res.status === 404) return [];
+  if (!res.ok) return [`${fileName} non raggiungibile: HTTP ${res.status}`];
+  return checkPremium(await res.json(), fileName, now);
+}
+
 async function telegramProblems(env, fetchImpl) {
   if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return ['mancano TELEGRAM_BOT_TOKEN o TELEGRAM_CHAT_ID'];
   const res = await fetchImpl(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/getMe`);
@@ -200,6 +218,7 @@ export function allChecks({ now = DateTime.now(), env = process.env, fetchImpl =
     const base = `https://raw.githubusercontent.com/WaxenPie679/voli-weekend/${historyBranch(g)}/`;
     perGruppo[`Dati voli diretti · ${label}`] = () => dataProblems('direct', now, fetchImpl, g);
     perGruppo[`Storico prezzi · ${label}`] = () => historyProblems(now, fetchImpl, base);
+    perGruppo[`Premium · ${label}`] = () => premiumProblems(now, fetchImpl, g);
   }
   return {
     'Webapp online': () => checkWebapp(WEBAPP_URL, { fetchImpl }),
@@ -209,6 +228,7 @@ export function allChecks({ now = DateTime.now(), env = process.env, fetchImpl =
     'Wizz risponde': () => probeWizz(now, fetchImpl),
     'Storico prezzi': () => historyProblems(now, fetchImpl),
     'Tratte seguite': () => trackingProblems(now, fetchImpl),
+    'Premium': () => premiumProblems(now, fetchImpl),
     'Bot Telegram': () => telegramProblems(env, fetchImpl),
     ...perGruppo,
   };

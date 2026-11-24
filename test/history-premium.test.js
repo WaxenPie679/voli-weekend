@@ -98,3 +98,37 @@ test('voci ordinate per prezzo', () => {
   const prices = f.entries.map((e) => e.price);
   assert.deepEqual(prices, [...prices].sort((a, b) => a - b));
 });
+
+import { confirmedOn } from '../src/history/premium.js';
+
+const meta = (airline, extra = {}) => ({ day: '2026-11-24', airlines: { [airline]: { routesExpected: 2, routesOk: 2, requestsOk: 10, requestsFailed: 0, missing: [], stoppedReason: null, notListed: [], ...extra } } });
+const o = (airline, origin, dest, date) => ({ airline, origin, dest, date });
+
+test('confirmedOn: tratta riletta per intero → confermata', () => {
+  assert.equal(confirmedOn(meta('ryanair'), o('ryanair', 'BRI', 'BUD', '2027-04-03')), true);
+});
+
+test('confirmedOn: tratta saltata (in missing, anche al contrario) o sparita (notListed) → no', () => {
+  assert.equal(confirmedOn(meta('ryanair', { missing: ['BRI-BUD'] }), o('ryanair', 'BUD', 'BRI', '2027-04-04')), false);
+  assert.equal(confirmedOn(meta('wizz', { notListed: ['BRI-BUD'] }), o('wizz', 'BRI', 'BUD', '2027-04-03')), false);
+});
+
+test('confirmedOn: mese Ryanair mancante → no solo per quel mese e quella direzione', () => {
+  const m = meta('ryanair', { missing: ['BRI-BUD 2027-04'] });
+  assert.equal(confirmedOn(m, o('ryanair', 'BRI', 'BUD', '2027-04-03')), false);
+  assert.equal(confirmedOn(m, o('ryanair', 'BRI', 'BUD', '2027-05-01')), true);
+  assert.equal(confirmedOn(m, o('ryanair', 'BUD', 'BRI', '2027-04-04')), true);
+});
+
+test('confirmedOn: finestra Wizz mancante (30 giorni dalla data) → no dentro la finestra', () => {
+  const m = meta('wizz', { missing: ['BRI-BUD 2027-04-01'] });
+  assert.equal(confirmedOn(m, o('wizz', 'BRI', 'BUD', '2027-04-03')), false);
+  assert.equal(confirmedOn(m, o('wizz', 'BRI', 'BUD', '2027-04-30')), false);
+  assert.equal(confirmedOn(m, o('wizz', 'BRI', 'BUD', '2027-05-01')), true);
+});
+
+test('confirmedOn: compagnia senza resoconto o senza tratte quel giorno → no', () => {
+  assert.equal(confirmedOn(meta('wizz'), o('ryanair', 'BRI', 'BUD', '2027-04-03')), false);
+  assert.equal(confirmedOn(meta('ryanair', { routesExpected: 0, routesOk: 0, stoppedReason: '429' }), o('ryanair', 'BRI', 'BUD', '2027-04-03')), false);
+  assert.equal(confirmedOn(null, o('ryanair', 'BRI', 'BUD', '2027-04-03')), false);
+});

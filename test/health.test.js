@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { DateTime } from 'luxon';
-import { checkData, checkRuns, checkWebapp, checkHistory, checkTracking, allChecks, HISTORY_URL, DATA_URL, runChecks, formatReport } from '../src/health.js';
+import { checkData, checkRuns, checkWebapp, checkHistory, checkTracking, checkPremium, allChecks, HISTORY_URL, DATA_URL, runChecks, formatReport } from '../src/health.js';
 
 const NOW = DateTime.fromISO('2026-11-02T08:00:00Z');
 const ago = (h) => NOW.minus({ hours: h }).toUTC().toISO();
@@ -159,4 +159,15 @@ test("allChecks 'Dati voli diretti · Milano': 404 → problema col nome del fil
   assert.equal(problems.length, 1);
   assert.match(problems[0], /direct-milano\.json/);
   assert.match(checkData(null, 'direct', NOW, 'direct-milano.json')[0], /direct-milano\.json non trovati/);
+});
+
+test('checkPremium: file di 31 ore fa → problema; di 20 ore fa → niente', () => {
+  assert.match(checkPremium({ generatedAt: ago(31), entries: [] }, 'premium.json', NOW)[0], /premium\.json fermo da 31 ore/);
+  assert.deepEqual(checkPremium({ generatedAt: ago(20), entries: [] }, 'premium.json', NOW), []);
+});
+
+test("allChecks 'Premium': 404 = non ancora creato, file vecchio = problema; anche per gli altri gruppi", async () => {
+  const run = (key, file, res) => allChecks({ now: NOW, env: {}, fetchImpl: async (url) => { assert.equal(url, `${DATA_URL}${file}`); return res; } })[key]();
+  assert.deepEqual(await run('Premium', 'premium.json', { ok: false, status: 404 }), []);
+  assert.equal((await run('Premium · Roma', 'premium-roma.json', { ok: true, status: 200, json: async () => ({ generatedAt: ago(40), entries: [] }) })).length, 1);
 });

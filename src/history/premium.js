@@ -14,6 +14,30 @@ export function oneWayUrl(airline, from, to, date) {
     : `https://wizzair.com/it-it/booking/select-flight/${from}/${to}/${date}/null/1/0/0/null`;
 }
 
+/** Giorni di una finestra Wizz (vedi collect.js): una voce «A-B AAAA-MM-GG» in missing copre 30 giorni. */
+const WIZZ_WINDOW_DAYS = 30;
+
+/**
+ * Vero se il resoconto (meta) di una notte dice che il prezzo di `o` è stato riletto quella notte. Lo storico
+ * salva solo i cambi: senza questo controllo un prezzo rimasto uguale sembrerebbe vecchio.
+ * In `missing` ci sono le tratte saltate («BRI-BUD», entrambe le direzioni), i mesi Ryanair («BRI-BUD 2027-04»)
+ * e le finestre Wizz («BRI-BUD 2027-04-01») non riletti; in `notListed` le tratte sparite dall'elenco.
+ */
+export function confirmedOn(meta, o) {
+  const m = meta?.airlines?.[o.airline];
+  if (!m || !m.routesExpected) return false;
+  const pair = `${o.origin}-${o.dest}`;
+  const reverse = `${o.dest}-${o.origin}`;
+  if ((m.notListed ?? []).some((r) => r === pair || r === reverse)) return false;
+  for (const miss of m.missing ?? []) {
+    const [route, tag] = miss.split(' ');
+    if (!tag) { if (route === pair || route === reverse) return false; continue; }
+    if (route !== pair) continue;
+    if (tag.length === 7 ? o.date.startsWith(tag) : (o.date >= tag && daysBetween(tag, o.date) < WIZZ_WINDOW_DAYS)) return false;
+  }
+  return true;
+}
+
 const daysBetween = (a, b) => DateTime.fromISO(b).diff(DateTime.fromISO(a), 'days').days;
 const friday = (saturday) => DateTime.fromISO(saturday).minus({ days: 1 }).toISODate();
 
