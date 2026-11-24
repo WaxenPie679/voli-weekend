@@ -1,12 +1,9 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { DateTime } from 'luxon';
-import { CONSTRAINTS, layoverMinutes } from './filter.js';
+import { CONSTRAINTS } from './filter.js';
 import { ZONE } from './weekends.js';
-import { sendTelegram } from './telegram.js';
 import { sendPush } from './push.js';
-
-export { sendTelegram };
 
 export const alertGroup = (it) => `${it.origin}|${it.destination.code}|${it.weekend}`;
 
@@ -37,44 +34,8 @@ export function selectAlerts(itineraries, state, { threshold = CONSTRAINTS.alert
   return { toSend, nextState };
 }
 
-const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const fmtDay = (iso) => DateTime.fromISO(iso).setLocale('it').toFormat('ccc d LLL');
-const fmtDur = (m) => `${Math.floor(m / 60)}h${String(m % 60).padStart(2, '0')}`;
-
-function legLine(name, leg) {
-  const first = leg.segments[0];
-  const last = leg.segments.at(-1);
-  const hubs = leg.segments.slice(0, -1).map((s) => s.to);
-  const stops = hubs.length === 0
-    ? 'diretto'
-    : `1 scalo (via ${hubs.map(esc).join(', ')}, ${layoverMinutes(leg).map(fmtDur).join(', ')})`;
-  return `${name} ${fmtDay(first.dep)} ${first.dep.slice(11)} → ${last.arr.slice(11)} · ${esc(first.airline)} · ${stops}`;
-}
-
-export function formatAlert(it) {
-  const origin = it.origin === 'BRI' ? 'Bari' : 'Brindisi';
-  return [
-    `✈️ <b>${esc(it.destination.city)}</b> (${esc(it.destination.country)}) — <b>${it.price.toFixed(2).replace('.', ',').replace(',00', '')} €</b> A/R`,
-    `Da ${origin} · weekend del ${fmtDay(it.weekend)}`,
-    legLine('Andata', it.outbound),
-    legLine('Ritorno', it.inbound),
-    `<a href="${esc(it.bookingUrl)}">Vedi e prenota</a>`,
-  ].join('\n');
-}
-
 export const WEBAPP_URL = 'https://waxenpie679.github.io/voli-weekend/';
-const DIGEST_MAX = 8;
-
-/** Un solo messaggio per giro: i migliori DIGEST_MAX, poi il conteggio degli altri. */
-export function formatDigest(items, threshold = CONSTRAINTS.alertThreshold) {
-  const sorted = [...items].sort((a, b) => a.price - b.price);
-  const head = sorted.length === 1 ? '🔔 Nuovo volo' : `🔔 ${sorted.length} nuovi voli`;
-  const parts = [`<b>${head} sotto ${threshold} €</b>`, ...sorted.slice(0, DIGEST_MAX).map(formatAlert)];
-  const rest = sorted.length - DIGEST_MAX;
-  if (rest > 0) parts.push(`…e altri ${rest} nella <a href="${WEBAPP_URL}">webapp</a>`);
-  return parts.join('\n\n');
-}
-
 const euro = (n) => `${n.toFixed(2).replace('.', ',').replace(',00', '')} €`;
 const origin = (it) => (it.origin === 'BRI' ? 'Bari' : 'Brindisi');
 
@@ -88,18 +49,17 @@ export function formatPush(items, threshold = CONSTRAINTS.alertThreshold) {
 }
 
 /**
- * Legge lo stato, invia gli avvisi (Telegram e/o notifica dell'app) e salva lo stato in `<dataDir>/<stateFile>`.
+ * Legge lo stato, invia gli avvisi (notifica dell'app; Telegram resta solo per il check-up) e salva lo stato in `<dataDir>/<stateFile>`.
  * Ogni ricerca ha il suo file di stato: i due workflow pubblicano in momenti diversi e non devono sovrascriversi.
  * Un avviso conta come inviato se almeno un canale lo consegna.
  */
-export async function processAlerts(dataDir, itineraries, env, now, { fetchImpl = fetch, pushImpl = sendPush, log = console.log, stateFile = 'alerts_state.json' } = {}) {
-  const { TELEGRAM_BOT_TOKEN: token, TELEGRAM_CHAT_ID: chatId, PUSH_SUBSCRIPTION: subscription, VAPID_PRIVATE_KEY: vapidKey } = env;
+export async function processAlerts(dataDir, itineraries, env, now, { pushImpl = sendPush, log = console.log, stateFile = 'alerts_state.json' } = {}) {
+  const { PUSH_SUBSCRIPTION: subscription, VAPID_PRIVATE_KEY: vapidKey } = env;
   const channels = [];
-  if (token && chatId) channels.push(['Telegram', (items) => sendTelegram(formatDigest(items), { token, chatId, fetchImpl })]);
   if (subscription && vapidKey) channels.push(['app', (items) => pushImpl(formatPush(items), { subscription, vapidKey })]);
   if (!channels.length) {
     // Senza canali configurati non si tocca lo stato: gli avvisi partiranno quando ce ne sarà uno
-    log('avvisi: nessun canale configurato (Telegram o notifica app), nessun invio');
+    log('avvisi: notifica dell\'app non configurata, nessun invio');
     return 0;
   }
   const path = join(dataDir, stateFile);

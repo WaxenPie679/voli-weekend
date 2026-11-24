@@ -1,8 +1,8 @@
 // Interfaccia e dati: prima la rete, la cache solo come riserva offline.
 // Così dopo un aggiornamento non si mescolano mai file nuovi e vecchi (es. app.js nuovo con view.js vecchio).
-const CACHE = 'voli-weekend-v7';
+const CACHE = 'voli-weekend-v8';
 const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'view.js', 'notify.js', 'config.js',
-  'storico.html', 'storico.js', 'storico-view.js', 'seguite.html', 'seguite.js', 'seguite-view.js', 'tracking-spec.js',
+  'storico.html', 'storico.js', 'storico-view.js', 'weekend-trips.js', 'seguite.html', 'seguite.js', 'seguite-view.js', 'tracking-spec.js',
   'manifest.webmanifest',
   'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png'];
 

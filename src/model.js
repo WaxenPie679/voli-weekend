@@ -1,6 +1,6 @@
 /** @typedef {{from:string,to:string,dep:string,arr:string,flight:string,airline:string}} Segment */
 /** @typedef {{segments:Segment[], selfTransfer:boolean, arrivalEstimated?:boolean}} Leg */
-/** @typedef {{id:string, source:'ryanair'|'wizz'|'google', origin:'BRI'|'BDS',
+/** @typedef {{id:string, source:'ryanair'|'wizz', origin:'BRI'|'BDS',
  *   destination:{code:string,city:string,country:string},
  *   outbound:Leg, inbound:Leg, price:number, currency:'EUR',
  *   bookingUrl:string, weekend:string, seenAt:string}} Itinerary */

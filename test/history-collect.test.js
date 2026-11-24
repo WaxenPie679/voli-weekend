@@ -179,6 +179,7 @@ test('collectRyanair: mese con fares [] → nessuna osservazione né copertura, 
   assert.equal(r.coverage.length, 23);
   assert.equal(r.observations.length, 23);
   assert.deepEqual(r.meta.missing, []);
+  assert.deepEqual(r.meta.empty, ['BRI-TRN 2027-02']);
   assert.deepEqual([r.meta.routesOk, r.meta.requestsFailed, r.meta.requestsOk], [1, 0, 24]);
 });
 
@@ -193,6 +194,7 @@ test('collectWizz: una direzione con elenco vuoto → copertura solo per l’alt
   assert.equal(r.coverage.length, 25);
   assert.deepEqual([r.meta.routesOk, r.meta.requestsFailed, r.meta.requestsOk], [1, 0, 13]);
   assert.deepEqual(r.meta.missing, []);
+  assert.deepEqual(r.meta.empty, ['BRI-BUD 2026-12-12']);
 });
 
 test('collectRyanair: 10 errori di fila → fermata, il resto in missing; un successo azzera il conto', async () => {

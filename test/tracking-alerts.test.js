@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { WEBAPP_URL } from '../src/alerts.js';
 import {
-  DROP_EUR, selectTrackingAlerts, formatTrackingTelegram, formatTrackingPush, bookingLinks, sendTrackingAlerts,
+  DROP_EUR, selectTrackingAlerts, formatTrackingPush, bookingLinks, sendTrackingAlerts,
 } from '../src/tracking/alerts.js';
 
 const NOW = DateTime.fromISO('2026-11-15T10:00:00Z');
@@ -85,45 +85,6 @@ test('bookingLinks: stessa compagnia un link, compagnie diverse due, adults=6', 
   assert.doesNotMatch(solo[0].url, /dateIn/);
 });
 
-test('formatTrackingTelegram: riga gruppo solo con persone > 1; escape HTML del nome', () => {
-  const gruppo = formatTrackingTelegram({ item: item(7, 56), kind: 'ribasso', drop: 8 });
-  assert.match(gruppo, /^📉 <b>Dubrovnik con gli amici<\/b> — <b>56 €<\/b> a persona \(−8 €\)\n/);
-  assert.match(gruppo, /\nBari → Dubrovnik e ritorno · 6 persone · 336 € in tutto\n/);
-  assert.match(gruppo, /Andata mer 8 lug 06:25 · Ritorno mer 15 lug 21:10 · Ryanair\n/);
-  assert.match(gruppo, /Per un gruppo il prezzo può essere più alto/);
-  assert.match(gruppo, /<a href="https:\/\/waxenpie679\.github\.io\/voli-weekend\/seguite\.html">Apri<\/a> · <a href="https:\/\/www\.ryanair\.com[^"]*&amp;[^"]*">Prenota<\/a>$/);
-
-  const solo = formatTrackingTelegram({ item: item(7, 56, { tracking: tracking({ people: 1, name: 'A <b> & "c"' }) }), kind: 'inizio', drop: 0 });
-  assert.match(solo, /^👀 Ora seguo <b>A &lt;b&gt; &amp; &quot;c&quot;<\/b> — <b>56 €<\/b> a persona\n/);
-  assert.doesNotMatch(solo, /in tutto|Per un gruppo/);
-  assert.doesNotMatch(solo, /persone/);
-});
-
-test('formatTrackingTelegram: escape HTML anche della rotta (città con «&»)', () => {
-  const names = { DBV: 'Ragusa & <dintorni>' };
-  const gruppo = formatTrackingTelegram({ item: item(7, 56, { names }), kind: 'inizio', drop: 0 });
-  assert.match(gruppo, /\nBari → Ragusa &amp; &lt;dintorni&gt; e ritorno · 6 persone · 336 € in tutto\n/);
-  const solo = formatTrackingTelegram({ item: item(7, 56, { names, tracking: tracking({ people: 1 }) }), kind: 'inizio', drop: 0 });
-  assert.match(solo, /\nBari → Ragusa &amp; &lt;dintorni&gt; e ritorno\n/);
-});
-
-test('formatTrackingTelegram: nome vuoto, orari ambigui omessi, compagnie miste, solo andata', () => {
-  const wizz = { airline: 'wizz', date: '2026-07-15', price: 20, time: '10:00 18:30' };
-  const t = formatTrackingTelegram({
-    item: item(7, 56.5, { tracking: tracking({ name: '', people: 1 }), names: { DBV: 'Ragusa' }, best: combo(56.5, { back: wizz }) }),
-    kind: 'inizio', drop: 0,
-  });
-  assert.match(t, /<b>Bari → Ragusa e ritorno · /);
-  assert.match(t, /<b>56,50 €<\/b>/);
-  assert.match(t, /Andata mer 8 lug 06:25 · Ritorno mer 15 lug · Ryanair \+ Wizz Air\n/);
-  const one = formatTrackingTelegram({
-    item: item(7, 30, { tracking: tracking({ roundTrip: false, people: 1 }), best: combo(30, { back: null, out: { airline: 'wizz', date: '2026-07-08', price: 30, time: '09:45' } }) }),
-    kind: 'inizio', drop: 0,
-  });
-  assert.match(one, /\nAndata mer 8 lug 09:45 · Wizz Air\n/);
-  assert.doesNotMatch(one, /Ritorno/);
-});
-
 test('formatTrackingPush: il ribasso maggiore, altrimenti il primo', () => {
   const a = { item: item(1, 56), kind: 'inizio', drop: 0 };
   const b = { item: item(2, 40, { tracking: tracking({ name: 'Praga' }) }), kind: 'ribasso', drop: 5 };
@@ -143,14 +104,14 @@ async function setup(state) {
   if (state) await writeFile(join(dir, 'alerts_state_tracking.json'), JSON.stringify(state));
   return dir;
 }
-const ENV = { TELEGRAM_BOT_TOKEN: 't', TELEGRAM_CHAT_ID: 'c' };
+const ENV = { TELEGRAM_BOT_TOKEN: 't', TELEGRAM_CHAT_ID: 'c', PUSH_SUBSCRIPTION: '{}', VAPID_PRIVATE_KEY: 'k' };
 const quiet = () => {};
 
 test('sendTrackingAlerts: tutti i canali falliti → stato non avanza', async () => {
   const old = { 7: { ref: 70, alertedAt: 'x' } };
   const dir = await setup(old);
-  const fetchImpl = async () => ({ ok: false, status: 500 });
-  const n = await sendTrackingAlerts(dir, [item(7, 60), item(8, 50)], ENV, NOW, { fetchImpl, log: quiet });
+  const pushImpl = async () => { throw new Error('410'); };
+  const n = await sendTrackingAlerts(dir, [item(7, 60), item(8, 50)], ENV, NOW, { pushImpl, log: quiet });
   assert.equal(n, 0);
   assert.deepEqual(JSON.parse(await readFile(join(dir, 'alerts_state_tracking.json'), 'utf8')), old);
 });
@@ -164,18 +125,24 @@ test('sendTrackingAlerts: nessun canale → stato non toccato', async () => {
   await assert.rejects(readFile(join(dir, 'alerts_state_tracking.json'), 'utf8'));
 });
 
-test('sendTrackingAlerts: consegna → un solo messaggio Telegram e stato avanzato', async () => {
+test('sendTrackingAlerts: consegna → una notifica nell\'app, nessun Telegram, stato avanzato', async () => {
   const dir = await setup({ 9: { ref: 1, alertedAt: 'x' } });
-  const corpi = [];
-  const fetchImpl = async (_u, o) => { corpi.push(JSON.parse(o.body)); return { ok: true, status: 200 }; };
+  const urls = [];
+  const fetchImpl = async (u) => { urls.push(u); return { ok: true, status: 200 }; };
   const pushes = [];
-  const env = { ...ENV, PUSH_SUBSCRIPTION: '{}', VAPID_PRIVATE_KEY: 'k' };
-  const n = await sendTrackingAlerts(dir, [item(7, 60), item(8, 50)], env, NOW, { fetchImpl, pushImpl: async (p) => { pushes.push(p); }, log: quiet });
+  const n = await sendTrackingAlerts(dir, [item(7, 60), item(8, 50)], ENV, NOW, { fetchImpl, pushImpl: async (p) => { pushes.push(p); }, log: quiet });
   assert.equal(n, 2);
-  assert.equal(corpi.length, 1);
-  assert.match(corpi[0].text, /\n\n/);
+  assert.deepEqual(urls, []);
   assert.equal(pushes.length, 1);
   const st = JSON.parse(await readFile(join(dir, 'alerts_state_tracking.json'), 'utf8'));
   assert.deepEqual(Object.keys(st).sort(), ['7', '8']);
   assert.equal(st['8'].ref, 50);
+});
+
+test('sendTrackingAlerts: con solo Telegram configurato non invia niente', async () => {
+  const dir = await setup(null);
+  const urls = [];
+  const n = await sendTrackingAlerts(dir, [item(7, 60)], { TELEGRAM_BOT_TOKEN: 't', TELEGRAM_CHAT_ID: 'c' }, NOW, { fetchImpl: async (u) => { urls.push(u); return { ok: true }; }, log: quiet });
+  assert.equal(n, 0);
+  assert.deepEqual(urls, []);
 });

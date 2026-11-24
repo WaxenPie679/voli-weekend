@@ -8,17 +8,15 @@ import { mergeSource } from './store.js';
 import { processAlerts } from './alerts.js';
 import { fetchRyanair } from './sources/ryanair.js';
 import { fetchWizz } from './sources/wizz.js';
-import { fetchGoogle } from './sources/google.js';
 
 export const MODES = {
   direct: { file: 'direct.json', stateFile: 'alerts_state_direct.json', sources: { ryanair: fetchRyanair, wizz: fetchWizz } },
-  connections: { file: 'connections.json', stateFile: 'alerts_state_connections.json', sources: { google: fetchGoogle } },
 };
 
 /** Esegue le fonti di una modalità, aggiorna il file dati e invia gli avvisi. Restituisce il codice d'uscita. */
 export async function runMode(mode, dataDir, { sources, now = DateTime.now(), env = process.env, log = console.log, gruppo = GRUPPO } = {}) {
   const cfg = MODES[mode];
-  if (!cfg) throw new Error(`modalità sconosciuta: ${mode} (usa direct o connections)`);
+  if (!cfg) throw new Error(`modalità sconosciuta: ${mode} (usa direct)`);
   await mkdir(dataDir, { recursive: true });
   // Il file dati dipende dal gruppo; gli aeroporti validi sono quelli del gruppo (non del processo)
   const fileName = dataFile(mode, gruppo);

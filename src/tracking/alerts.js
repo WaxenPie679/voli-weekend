@@ -2,7 +2,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { DateTime } from 'luxon';
-import { sendTelegram } from '../telegram.js';
 import { sendPush } from '../push.js';
 import { WEBAPP_URL } from '../alerts.js';
 import { describeTracking } from './spec.js';
@@ -13,7 +12,6 @@ export const DROP_EUR = 3;
 /** @typedef {{id:number, tracking:object, best:object|null, names?:Record<string,string>}} TrackItem */
 
 const cent = (n) => Math.round(n * 100);
-const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const euro = (n) => `${n.toFixed(2).replace('.', ',').replace(',00', '')} €`;
 const fmtDay = (iso) => DateTime.fromISO(iso).setLocale('it').toFormat('ccc d LLL');
 const PAGINA = `${WEBAPP_URL}seguite.html`;
@@ -57,36 +55,7 @@ export function bookingLinks(combo, from, to, people) {
   ];
 }
 
-/** Ora di partenza solo se sicura: Ryanair «HH:MM-HH:MM», Wizz solo con una sola partenza. */
-function oraPartenza(day) {
-  const t = day.time ?? '';
-  if (day.airline === 'ryanair') return /^\d{2}:\d{2}-/.test(t) ? t.slice(0, 5) : '';
-  const ore = t.match(/\d{2}:\d{2}/g) ?? [];
-  return ore.length === 1 ? ore[0] : '';
-}
-
-const giorno = (etichetta, day) => [etichetta, fmtDay(day.date), oraPartenza(day)].filter(Boolean).join(' ');
 const titolo = (it) => it.tracking.name || describeTracking(it.tracking, it.names ?? {});
-
-export function formatTrackingTelegram({ item: it, kind, drop }) {
-  const { tracking: t, best } = it;
-  const persone = t.people ?? 1;
-  const prezzo = `<b>${euro(best.price)}</b> a persona`;
-  const testa = kind === 'ribasso'
-    ? `📉 <b>${esc(titolo(it))}</b> — ${prezzo} (−${euro(drop)})`
-    : `👀 Ora seguo <b>${esc(titolo(it))}</b> — ${prezzo}`;
-  const rotta = describeTracking(t, it.names ?? {}).split(' · ')[0];
-  const compagnie = [...new Set([best.out.airline, best.back?.airline].filter(Boolean))].map((a) => NOMI[a]).join(' + ');
-  const tratti = [giorno('Andata', best.out), best.back && giorno('Ritorno', best.back), compagnie].filter(Boolean).join(' · ');
-  const [prenota] = bookingLinks(best, t.from, t.to, persone);
-  return [
-    testa,
-    persone > 1 ? `${esc(rotta)} · ${persone} persone · ${euro(best.price * persone)} in tutto` : esc(rotta),
-    tratti,
-    persone > 1 && 'Per un gruppo il prezzo può essere più alto, soprattutto vicino alla partenza.',
-    `<a href="${esc(PAGINA)}">Apri</a> · <a href="${esc(prenota.url)}">Prenota</a>`,
-  ].filter(Boolean).join('\n');
-}
 
 /** Notifica dell'app: il ribasso maggiore, altrimenti la prima voce. */
 export function formatTrackingPush(entries) {
@@ -101,16 +70,15 @@ export function formatTrackingPush(entries) {
 }
 
 /**
- * Invia gli avvisi (un messaggio Telegram per giro, una notifica app) e salva lo stato.
+ * Invia gli avvisi (una notifica dell'app per giro) e salva lo stato.
  * Senza canali lo stato non si tocca; se nessun canale consegna, si ripristina il precedente.
  */
-export async function sendTrackingAlerts(dataDir, items, env, now, { fetchImpl = fetch, pushImpl = sendPush, log = console.log } = {}) {
-  const { TELEGRAM_BOT_TOKEN: token, TELEGRAM_CHAT_ID: chatId, PUSH_SUBSCRIPTION: subscription, VAPID_PRIVATE_KEY: vapidKey } = env;
+export async function sendTrackingAlerts(dataDir, items, env, now, { pushImpl = sendPush, log = console.log } = {}) {
+  const { PUSH_SUBSCRIPTION: subscription, VAPID_PRIVATE_KEY: vapidKey } = env;
   const channels = [];
-  if (token && chatId) channels.push(['Telegram', (e) => sendTelegram(e.map(formatTrackingTelegram).join('\n\n'), { token, chatId, fetchImpl })]);
   if (subscription && vapidKey) channels.push(['app', (e) => pushImpl(formatTrackingPush(e), { subscription, vapidKey })]);
   if (!channels.length) {
-    log('avvisi tratte: nessun canale configurato (Telegram o notifica app), nessun invio');
+    log('avvisi tratte: notifica dell\'app non configurata, nessun invio');
     return 0;
   }
   const path = join(dataDir, 'alerts_state_tracking.json');

@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { DateTime } from 'luxon';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { selectAlerts, formatAlert, sendTelegram, processAlerts, formatPush, WEBAPP_URL } from '../src/alerts.js';
+import { selectAlerts, processAlerts, formatPush, WEBAPP_URL } from '../src/alerts.js';
+import { sendTelegram } from '../src/telegram.js';
 
 const NOW = DateTime.fromISO('2026-11-02T10:00:00Z');
 
@@ -45,29 +46,6 @@ test('le voci di weekend passati vengono rimosse dallo stato', () => {
   assert.deepEqual(Object.keys(nextState), ['attuale']);
 });
 
-test('formatAlert con scalo mostra "1 scalo" e l\'aeroporto di scalo', () => {
-  const x = it(75, {
-    outbound: { segments: [
-      { from: 'BRI', to: 'FCO', dep: '2026-11-06T19:00', arr: null, flight: 'a', airline: 'ITA' },
-      { from: 'FCO', to: 'BUD', dep: null, arr: '2026-11-06T23:00', flight: 'b', airline: 'ITA' },
-    ], selfTransfer: false, layovers: [100] },
-  });
-  const msg = formatAlert(x);
-  assert.match(msg, /1 scalo/);
-  assert.match(msg, /FCO/);
-  assert.match(msg, /1h40/);
-  assert.match(msg, /Budapest/);
-  assert.match(msg, /75 €/);
-  assert.match(msg, /href="https:\/\/wizzair\.com\/x"/);
-});
-
-test('formatAlert diretto e con caratteri HTML nel nome città', () => {
-  const msg = formatAlert(it(60, { destination: { code: 'XXX', city: 'A<B', country: 'C&D' } }));
-  assert.match(msg, /diretto/);
-  assert.match(msg, /A&lt;B/);
-  assert.match(msg, /C&amp;D/);
-});
-
 test('sendTelegram chiama sendMessage con chat e testo', async () => {
   let call;
   const fetchImpl = async (url, init) => { call = { url, body: JSON.parse(init.body) }; return new Response('{"ok":true}'); };
@@ -88,37 +66,6 @@ test('processAlerts: senza credenziali non invia e non crea lo stato', async () 
   const dir = await mkdtemp(join(tmpdir(), 'voli-'));
   assert.equal(await processAlerts(dir, [it(50)], {}, NOW, { log: () => {} }), 0);
   assert.deepEqual(await readdir(dir), []);
-});
-
-test('processAlerts: invio fallito non registra l\'itinerario, invio riuscito sì', async () => {
-  const { mkdtemp, readFile } = await import('node:fs/promises');
-  const dir = await mkdtemp(join(tmpdir(), 'voli-'));
-  const env = { TELEGRAM_BOT_TOKEN: 'T', TELEGRAM_CHAT_ID: '1' };
-  const fail = async () => new Response('', { status: 500 });
-  const opts = { stateFile: 'alerts_state_direct.json', log: () => {} };
-  assert.equal(await processAlerts(dir, [it(50)], env, NOW, { ...opts, fetchImpl: fail }), 0);
-  assert.deepEqual(JSON.parse(await readFile(join(dir, 'alerts_state_direct.json'), 'utf8')), {});
-  const ok = async () => new Response('{"ok":true}');
-  assert.equal(await processAlerts(dir, [it(50)], env, NOW, { ...opts, fetchImpl: ok }), 1);
-  assert.equal(JSON.parse(await readFile(join(dir, 'alerts_state_direct.json'), 'utf8'))['BRI|BUD|2026-11-06'].price, 50);
-});
-
-test('processAlerts: tanti voli nuovi → un solo messaggio riepilogativo con gli 8 migliori, sotto i 4096 caratteri', async () => {
-  const { mkdtemp } = await import('node:fs/promises');
-  const dir = await mkdtemp(join(tmpdir(), 'voli-'));
-  const many = Array.from({ length: 25 }, (_, n) => it(40 + n, {
-    id: `id${n}`, destination: { code: `D${String(n).padStart(2, '0')}`, city: `Città${n}`, country: 'X' },
-  }));
-  const sent = [];
-  const fetchImpl = async (url, init) => { sent.push(JSON.parse(init.body).text); return new Response('{"ok":true}'); };
-  const env = { TELEGRAM_BOT_TOKEN: 'T', TELEGRAM_CHAT_ID: '1' };
-  assert.equal(await processAlerts(dir, many, env, NOW, { fetchImpl, log: () => {} }), 25);
-  assert.equal(sent.length, 1);
-  assert.match(sent[0], /Città0\b/);
-  assert.match(sent[0], /Città7\b/);
-  assert.doesNotMatch(sent[0], /Città8\b/);
-  assert.ok(sent[0].length < 4096);
-  assert.match(sent[0], /altri 17/);
 });
 
 test('selectAlerts: stessa destinazione e weekend da più itinerari → una sola voce, la più economica', () => {
@@ -151,15 +98,32 @@ test('processAlerts: con solo la notifica push configurata invia e registra lo s
   assert.ok(JSON.parse(await readFile(join(dir, 's.json'), 'utf8'))['BRI|BUD|2026-11-06']);
 });
 
-test('processAlerts: Telegram fallisce ma la push riesce → avviso registrato; falliscono entrambi → no', async () => {
-  const { mkdtemp, readFile } = await import('node:fs/promises');
+test('processAlerts: con Telegram e push configurati scrive solo nella notifica dell\'app', async () => {
+  const { mkdtemp } = await import('node:fs/promises');
+  const dir = await mkdtemp(join(tmpdir(), 'voli-'));
   const env = { TELEGRAM_BOT_TOKEN: 'T', TELEGRAM_CHAT_ID: '1', PUSH_SUBSCRIPTION: '{}', VAPID_PRIVATE_KEY: 'k' };
-  const tgFail = async () => new Response('', { status: 500 });
-  const read = async (d) => JSON.parse(await readFile(join(d, 's.json'), 'utf8'));
-  const d1 = await mkdtemp(join(tmpdir(), 'voli-'));
-  await processAlerts(d1, [it(50)], env, NOW, { fetchImpl: tgFail, pushImpl: async () => {}, stateFile: 's.json', log: () => {} });
-  assert.ok((await read(d1))['BRI|BUD|2026-11-06']);
-  const d2 = await mkdtemp(join(tmpdir(), 'voli-'));
-  await processAlerts(d2, [it(50)], env, NOW, { fetchImpl: tgFail, pushImpl: async () => { throw new Error('410'); }, stateFile: 's.json', log: () => {} });
-  assert.deepEqual(await read(d2), {});
+  const urls = [];
+  const pushes = [];
+  const fetchImpl = async (url) => { urls.push(url); return new Response('{"ok":true}'); };
+  assert.equal(await processAlerts(dir, [it(50)], env, NOW, { fetchImpl, pushImpl: async (p) => { pushes.push(p); }, stateFile: 's.json', log: () => {} }), 1);
+  assert.deepEqual(urls, []);
+  assert.equal(pushes.length, 1);
+});
+
+test('processAlerts: con solo Telegram configurato non invia niente e non crea lo stato', async () => {
+  const { mkdtemp, readdir } = await import('node:fs/promises');
+  const dir = await mkdtemp(join(tmpdir(), 'voli-'));
+  const urls = [];
+  const env = { TELEGRAM_BOT_TOKEN: 'T', TELEGRAM_CHAT_ID: '1' };
+  assert.equal(await processAlerts(dir, [it(50)], env, NOW, { fetchImpl: async (url) => { urls.push(url); return new Response('{"ok":true}'); }, log: () => {} }), 0);
+  assert.deepEqual(urls, []);
+  assert.deepEqual(await readdir(dir), []);
+});
+
+test('processAlerts: push fallita → avviso non registrato', async () => {
+  const { mkdtemp, readFile } = await import('node:fs/promises');
+  const dir = await mkdtemp(join(tmpdir(), 'voli-'));
+  const env = { PUSH_SUBSCRIPTION: '{}', VAPID_PRIVATE_KEY: 'k' };
+  await processAlerts(dir, [it(50)], env, NOW, { pushImpl: async () => { throw new Error('410'); }, stateFile: 's.json', log: () => {} });
+  assert.deepEqual(JSON.parse(await readFile(join(dir, 's.json'), 'utf8')), {});
 });
