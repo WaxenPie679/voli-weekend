@@ -15,7 +15,8 @@ I voli weekend più economici da **Bari (BRI)** e **Brindisi (BDS)**, verso qual
 | Storico prezzi (Ryanair, Wizz) | GitHub Actions `history.yml`, branch `history` (un commit al giorno) | ogni giorno alle 03:41 UTC |
 | Dati | branch `data` (`direct.json`) | a ogni ricerca |
 | Webapp | GitHub Pages, oppure in locale su http://127.0.0.1:5190 | sempre |
-| Avvisi | bot Telegram, un riepilogo per giro con i voli nuovi o ribassati sotto 80 € | a ogni ricerca |
+| Avvisi | notifica nell'app (iPhone) con i voli nuovi o ribassati sotto 80 € e i ribassi delle tratte seguite | a ogni ricerca |
+| Check-up | bot Telegram, scrive solo se qualcosa non va | ogni giorno |
 
 ## Uso sul PC
 

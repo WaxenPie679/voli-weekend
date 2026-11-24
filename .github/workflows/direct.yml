@@ -37,8 +37,6 @@ jobs:
       - run: node src/run.js direct --data ./data
         env:
           GRUPPO: ${{ matrix.gruppo }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           PUSH_SUBSCRIPTION: ${{ secrets.PUSH_SUBSCRIPTION }}
           VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
       # Per i gruppi non Puglia `state` è vuoto: lo stato degli avvisi non si ripubblica mai
