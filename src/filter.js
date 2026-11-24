@@ -1,8 +1,9 @@
 import { DateTime } from 'luxon';
 import { ZONE } from './weekends.js';
+import { GRUPPI, GRUPPO } from './gruppi.js';
 
 export const CONSTRAINTS = Object.freeze({
-  origins: ['BRI', 'BDS'],
+  origins: GRUPPI[GRUPPO].aeroporti,
   fridayMinDeparture: '18:00',
   maxPrice: 200,
   maxStopsPerLeg: 1,
