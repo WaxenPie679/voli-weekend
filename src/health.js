@@ -5,6 +5,7 @@ import { fetchJson } from './util.js';
 import { buildRyanairQueries, parseRyanair } from './sources/ryanair.js';
 import { wizzVersion, parseWizzRoutes, timetableWindows } from './sources/wizz.js';
 import { sendTelegram } from './telegram.js';
+import { GRUPPI, dataFile, historyBranch } from './gruppi.js';
 
 export const WEBAPP_URL = 'https://waxenpie679.github.io/voli-weekend/';
 export const DATA_URL = 'https://raw.githubusercontent.com/WaxenPie679/voli-weekend/data/';
@@ -21,9 +22,9 @@ const hoursSince = (iso, now) => now.diff(DateTime.fromISO(iso), 'hours').hours;
 const fmtHours = (h) => (h >= 48 ? `${Math.round(h / 24)} giorni` : `${Math.round(h)} ore`);
 
 /** Problemi di un file dati pubblicato: aggiornamento, stato delle singole fonti, presenza di voli. */
-export function checkData(file, mode, now) {
+export function checkData(file, mode, now, fileName = LIMITS[mode].file) {
   const lim = LIMITS[mode];
-  if (!file?.generatedAt) return [`dati ${lim.file} non trovati o illeggibili`];
+  if (!file?.generatedAt) return [`dati ${fileName} non trovati o illeggibili`];
   const problems = [];
   const age = hoursSince(file.generatedAt, now);
   if (age > lim.maxAgeHours) problems.push(`dati fermi da ${fmtHours(age)} (ultimo aggiornamento ${file.generatedAt.slice(0, 16)} UTC)`);
@@ -153,18 +154,19 @@ async function workflowProblems(mode, now, env, fetchImpl) {
   return checkRuns(workflow, runs, mode, now);
 }
 
-async function dataProblems(mode, now, fetchImpl) {
-  const res = await fetchImpl(DATA_URL + LIMITS[mode].file, { cache: 'no-store' });
-  if (!res.ok) return [`dati ${LIMITS[mode].file} non raggiungibili: HTTP ${res.status}`];
-  return checkData(await res.json(), mode, now);
+async function dataProblems(mode, now, fetchImpl, gruppo = 'puglia') {
+  const fileName = dataFile(mode, gruppo);
+  const res = await fetchImpl(DATA_URL + fileName, { cache: 'no-store' });
+  if (!res.ok) return [`dati ${fileName} non raggiungibili: HTTP ${res.status}`];
+  return checkData(await res.json(), mode, now, fileName);
 }
 
 /** Scarica i meta di oggi, ieri e l'altro ieri (data di Roma); 404 = giorno senza raccolta. */
-async function historyProblems(now, fetchImpl) {
+async function historyProblems(now, fetchImpl, baseUrl = HISTORY_URL) {
   const metas = [];
   for (let i = 0; i < 3; i++) {
     const day = DateTime.fromISO(todayRome(now)).minus({ days: i }).toISODate();
-    const res = await fetchImpl(`${HISTORY_URL}${day.slice(0, 4)}/${day.slice(5, 7)}/${day}.meta.json`, { cache: 'no-store' });
+    const res = await fetchImpl(`${baseUrl}${day.slice(0, 4)}/${day.slice(5, 7)}/${day}.meta.json`, { cache: 'no-store' });
     if (res.status === 404) continue;
     if (!res.ok) throw new Error(`meta ${day} non raggiungibile: HTTP ${res.status}`);
     metas.push(await res.json());
@@ -188,6 +190,14 @@ async function telegramProblems(env, fetchImpl) {
 
 /** Elenco dei controlli del check-up, ognuno restituisce i problemi trovati. */
 export function allChecks({ now = DateTime.now(), env = process.env, fetchImpl = fetch } = {}) {
+  const perGruppo = {};
+  for (const g of Object.keys(GRUPPI).filter((x) => x !== 'puglia')) {
+    const label = g[0].toUpperCase() + g.slice(1);
+    const base = `https://raw.githubusercontent.com/WaxenPie679/voli-weekend/${historyBranch(g)}/`;
+    perGruppo[`Dati voli diretti · ${label}`] = () => dataProblems('direct', now, fetchImpl, g);
+    perGruppo[`Dati voli con scalo · ${label}`] = () => dataProblems('connections', now, fetchImpl, g);
+    perGruppo[`Storico prezzi · ${label}`] = () => historyProblems(now, fetchImpl, base);
+  }
   return {
     'Webapp online': () => checkWebapp(WEBAPP_URL, { fetchImpl }),
     'Dati voli diretti': () => dataProblems('direct', now, fetchImpl),
@@ -199,6 +209,7 @@ export function allChecks({ now = DateTime.now(), env = process.env, fetchImpl =
     'Storico prezzi': () => historyProblems(now, fetchImpl),
     'Tratte seguite': () => trackingProblems(now, fetchImpl),
     'Bot Telegram': () => telegramProblems(env, fetchImpl),
+    ...perGruppo,
   };
 }
 

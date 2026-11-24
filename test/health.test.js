@@ -129,3 +129,26 @@ test("allChecks 'Tratte seguite': 404 = assente, altri errori = problema, file v
   assert.match((await run({ ok: false, status: 500 }))[0], /HTTP 500/);
   assert.equal((await run({ ok: true, status: 200, json: async () => ({ generatedAt: ago(8), items: [{}] }) })).length, 1);
 });
+
+test('allChecks: aggiunge i controlli di Milano, Bergamo e Roma e tiene quelli della Puglia', () => {
+  const keys = Object.keys(allChecks({ now: NOW, env: {}, fetchImpl: async () => ({ ok: false, status: 404 }) }));
+  for (const k of ['Dati voli diretti', 'Storico prezzi', 'Dati voli diretti · Milano', 'Dati voli con scalo · Roma', 'Storico prezzi · Bergamo']) assert.ok(keys.includes(k), k);
+  assert.ok(!keys.some((k) => k.includes('Puglia')));
+});
+
+test("allChecks 'Storico prezzi · Roma': legge il ramo history-roma", async () => {
+  const asked = [];
+  const fetchImpl = async (url) => { asked.push(url); return { ok: false, status: 404 }; };
+  await allChecks({ now: NOW, env: {}, fetchImpl })['Storico prezzi · Roma']();
+  assert.equal(asked.length, 3);
+  assert.ok(asked.every((u) => u.includes('/voli-weekend/history-roma/2026/')));
+  assert.ok(asked[0].includes('/voli-weekend/history-roma/2026/11/'));
+});
+
+test("allChecks 'Dati voli diretti · Milano': 404 → problema col nome del file del gruppo", async () => {
+  const fetchImpl = async (url) => { assert.equal(url, `${DATA_URL}direct-milano.json`); return { ok: false, status: 404 }; };
+  const problems = await allChecks({ now: NOW, env: {}, fetchImpl })['Dati voli diretti · Milano']();
+  assert.equal(problems.length, 1);
+  assert.match(problems[0], /direct-milano\.json/);
+  assert.match(checkData(null, 'direct', NOW, 'direct-milano.json')[0], /direct-milano\.json non trovati/);
+});
