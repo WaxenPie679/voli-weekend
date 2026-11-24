@@ -1,0 +1,983 @@
+{
+ "ryanair|MXP|ACE": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "ACE",
+  "city": "Lanzarote",
+  "country": "Spagna",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|AGA": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "AGA",
+  "city": "Agadir",
+  "country": "Marocco",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|AGP": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "AGP",
+  "city": "Malaga",
+  "country": "Spagna",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|AHO": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "AHO",
+  "city": "Alghero",
+  "country": "Italia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|ALC": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "ALC",
+  "city": "Alicante",
+  "country": "Spagna",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|ATH": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "ATH",
+  "city": "Atene",
+  "country": "Grecia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|BCN": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "BCN",
+  "city": "Barcellona",
+  "country": "Spagna",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|BDS": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "BDS",
+  "city": "Brindisi",
+  "country": "Italia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|BER": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "BER",
+  "city": "Berlino",
+  "country": "Germania",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|BRI": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "BRI",
+  "city": "Bari",
+  "country": "Italia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|BTS": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "BTS",
+  "city": "Bratislava",
+  "country": "Slovacchia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|BUD": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "BUD",
+  "city": "Budapest",
+  "country": "Ungheria",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|BVA": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "BVA",
+  "city": "Parigi",
+  "country": "Francia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|CAG": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "CAG",
+  "city": "Cagliari",
+  "country": "Italia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|CFU": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "CFU",
+  "city": "Corfù",
+  "country": "Grecia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|CRV": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "CRV",
+  "city": "Crotone",
+  "country": "Italia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|CTA": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "CTA",
+  "city": "Catania",
+  "country": "Italia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|DUB": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "DUB",
+  "city": "Dublino",
+  "country": "Irlanda",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|EDI": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "EDI",
+  "city": "Edimburgo",
+  "country": "Regno Unito",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|FNC": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "FNC",
+  "city": "Funchal",
+  "country": "Portogallo",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|FUE": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "FUE",
+  "city": "Fuerteventura",
+  "country": "Spagna",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|GDN": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "GDN",
+  "city": "Danzica",
+  "country": "Polonia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|GOT": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "GOT",
+  "city": "Göteborg",
+  "country": "Svezia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|HER": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "HER",
+  "city": "Heraklion",
+  "country": "Grecia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|JTR": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "JTR",
+  "city": "Santorini",
+  "country": "Grecia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|KGS": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "KGS",
+  "city": "Kos",
+  "country": "Grecia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|KRK": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "KRK",
+  "city": "Cracovia",
+  "country": "Polonia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|LPA": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "LPA",
+  "city": "Gran Canaria",
+  "country": "Spagna",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|MAD": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "MAD",
+  "city": "Madrid",
+  "country": "Spagna",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|MAN": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "MAN",
+  "city": "Manchester",
+  "country": "Regno Unito",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|MLA": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "MLA",
+  "city": "Malta",
+  "country": "Malta",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|NAP": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "NAP",
+  "city": "Napoli",
+  "country": "Italia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|OPO": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "OPO",
+  "city": "Porto",
+  "country": "Portogallo",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|OTP": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "OTP",
+  "city": "Bucarest",
+  "country": "Romania",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|PDV": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "PDV",
+  "city": "Plovdiv",
+  "country": "Bulgaria",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|PMI": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "PMI",
+  "city": "Palma",
+  "country": "Spagna",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|PMO": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "PMO",
+  "city": "Palermo",
+  "country": "Italia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|PSR": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "PSR",
+  "city": "Pescara",
+  "country": "Italia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|RAK": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "RAK",
+  "city": "Marrakesh",
+  "country": "Marocco",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|REG": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "REG",
+  "city": "Reggio Calabria",
+  "country": "Italia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|STN": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "STN",
+  "city": "Londra",
+  "country": "Regno Unito",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|SUF": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "SUF",
+  "city": "Lamezia",
+  "country": "Italia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|SVQ": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "SVQ",
+  "city": "Siviglia",
+  "country": "Spagna",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|TFS": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "TFS",
+  "city": "Tenerife",
+  "country": "Spagna",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|TIA": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "TIA",
+  "city": "Tirana",
+  "country": "Albania",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|TLL": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "TLL",
+  "city": "Tallinn",
+  "country": "Estonia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|TPS": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "TPS",
+  "city": "Trapani",
+  "country": "Italia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|VIE": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "VIE",
+  "city": "Vienna",
+  "country": "Austria",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|VLC": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "VLC",
+  "city": "Valencia",
+  "country": "Spagna",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|WMI": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "WMI",
+  "city": "Varsavia",
+  "country": "Polonia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "ryanair|MXP|ZAD": {
+  "airline": "ryanair",
+  "origin": "MXP",
+  "code": "ZAD",
+  "city": "Zara",
+  "country": "Croazia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|AGA": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "AGA",
+  "city": "Agadir",
+  "country": "Marocco",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|AGP": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "AGP",
+  "city": "Malaga",
+  "country": "Spagna",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|ALC": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "ALC",
+  "city": "Alicante",
+  "country": "Spagna",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|BCN": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "BCN",
+  "city": "Barcellona El Prat",
+  "country": "Spagna",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|BER": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "BER",
+  "city": "Berlino Brandenburgo",
+  "country": "Germania",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|BIO": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "BIO",
+  "city": "Bilbao",
+  "country": "Spagna",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|BUD": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "BUD",
+  "city": "Budapest",
+  "country": "Ungheria",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|CAG": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "CAG",
+  "city": "Cagliari",
+  "country": "Italia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|CFU": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "CFU",
+  "city": "Corfù",
+  "country": "Grecia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|CIY": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "CIY",
+  "city": "Comiso (Sicilia)",
+  "country": "Italia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|CLJ": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "CLJ",
+  "city": "Cluj-Napoca",
+  "country": "Romania",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|CTA": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "CTA",
+  "city": "Catania",
+  "country": "Italia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|DTM": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "DTM",
+  "city": "Dortmund",
+  "country": "Germania",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|EVN": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "EVN",
+  "city": "Erevan",
+  "country": "Armenia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|GDN": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "GDN",
+  "city": "Danzica",
+  "country": "Polonia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|GHV": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "GHV",
+  "city": "Brasov",
+  "country": "Romania",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|GLA": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "GLA",
+  "city": "Glasgow",
+  "country": "Regno Unito",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|HER": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "HER",
+  "city": "Candia (Creta)",
+  "country": "Grecia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|IAS": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "IAS",
+  "city": "Iasi",
+  "country": "Romania",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|JED": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "JED",
+  "city": "Gedda",
+  "country": "Arabia Saudita",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|JSI": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "JSI",
+  "city": "Skiathos",
+  "country": "Grecia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|KEF": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "KEF",
+  "city": "Reykjavik",
+  "country": "Islanda",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|KRK": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "KRK",
+  "city": "Cracovia",
+  "country": "Polonia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|KUT": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "KUT",
+  "city": "Kutaisi",
+  "country": "Georgia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|LCA": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "LCA",
+  "city": "Larnaca",
+  "country": "Cipro",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|LMP": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "LMP",
+  "city": "Lampedusa",
+  "country": "Italia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|LTN": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "LTN",
+  "city": "Londra Luton",
+  "country": "Regno Unito",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|LON": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "LON",
+  "city": "Londra (tutti gli aeroporti)",
+  "country": "Regno Unito",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|MAD": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "MAD",
+  "city": "Madrid",
+  "country": "Spagna",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|NAP": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "NAP",
+  "city": "Napoli",
+  "country": "Italia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|OHD": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "OHD",
+  "city": "Ocrida",
+  "country": "Macedonia del Nord",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|OLB": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "OLB",
+  "city": "Olbia",
+  "country": "Italia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|OPO": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "OPO",
+  "city": "Porto",
+  "country": "Portogallo",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|OTP": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "OTP",
+  "city": "Bucarest Henri Coandă",
+  "country": "Romania",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|PMI": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "PMI",
+  "city": "Palma di Maiorca",
+  "country": "Spagna",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|PMO": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "PMO",
+  "city": "Palermo (Sicilia)",
+  "country": "Italia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|PRN": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "PRN",
+  "city": "Pristina",
+  "country": "Kosovo",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|RAK": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "RAK",
+  "city": "Marrakesh",
+  "country": "Marocco",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|RMF": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "RMF",
+  "city": "Marsa Alam",
+  "country": "Egitto",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|RMO": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "RMO",
+  "city": "Chișinău",
+  "country": "Moldavia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|SCV": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "SCV",
+  "city": "Suceava",
+  "country": "Romania",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|SDR": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "SDR",
+  "city": "Santander",
+  "country": "Spagna",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|SKP": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "SKP",
+  "city": "Skopje",
+  "country": "Macedonia del Nord",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|SPX": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "SPX",
+  "city": "Il Cairo (Sfinge)",
+  "country": "Egitto",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|SSH": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "SSH",
+  "city": "Sharm El Sheikh",
+  "country": "Egitto",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|SUF": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "SUF",
+  "city": "Lamezia Terme",
+  "country": "Italia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|SVQ": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "SVQ",
+  "city": "Siviglia",
+  "country": "Spagna",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|TFS": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "TFS",
+  "city": "Tenerife (Isole Canerie)",
+  "country": "Spagna",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|TGD": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "TGD",
+  "city": "Podgorica",
+  "country": "Montenegro",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|TIA": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "TIA",
+  "city": "Tirana",
+  "country": "Albania",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|TLV": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "TLV",
+  "city": "Tel Aviv",
+  "country": "Israele",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|TOS": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "TOS",
+  "city": "Tromso",
+  "country": "Norvegia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|VLC": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "VLC",
+  "city": "Valencia",
+  "country": "Spagna",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|VNO": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "VNO",
+  "city": "Vilnius",
+  "country": "Lituania",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|WAW": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "WAW",
+  "city": "Varsavia Chopin",
+  "country": "Polonia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|WSW": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "WSW",
+  "city": "Warsaw Any",
+  "country": "Polonia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|ZAZ": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "ZAZ",
+  "city": "Saragozza",
+  "country": "Spagna",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ },
+ "wizz|MXP|ZTH": {
+  "airline": "wizz",
+  "origin": "MXP",
+  "code": "ZTH",
+  "city": "Zakynthos",
+  "country": "Grecia",
+  "firstSeen": "2026-11-24",
+  "lastSeen": "2026-11-24"
+ }
+}
