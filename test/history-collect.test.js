@@ -154,6 +154,15 @@ test('collectRyanair: elenco BRI ok ma BDS in errore → routesExpected 0 e rout
   assert.match(r.meta.stoppedReason, /elenco tratte/);
 });
 
+test('collectRyanair: elenco tratte 404 per un aeroporto (es. LIN) → zero tratte da lì, le altre proseguono', async () => {
+  const { fetchImpl } = ryanairFake(['TRN'], (u) => (u.includes('/airport/BDS') ? status(404) : null));
+  const r = await collectRyanair('2026-11-12', { fetchImpl, pauseMs: false, log: () => {} });
+  assert.equal(r.meta.stoppedReason, null);
+  assert.ok(r.routes.length > 0);
+  assert.ok(r.routes.every((x) => x.origin === 'BRI'));
+  assert.ok(r.meta.routesExpected > 0);
+});
+
 test('collectRyanair: maxRoutes limita tratte e routesExpected', async () => {
   const { fetchImpl, calls } = ryanairFake(['TRN', 'MXP']);
   const r = await collectRyanair('2026-11-12', { fetchImpl, pauseMs: false, maxRoutes: 1, log: () => {} });

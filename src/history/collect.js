@@ -32,7 +32,11 @@ export async function fetchRetry(fetchImpl, url, init, { retries = 3, baseMs = 3
   for (let attempt = 0; ; attempt++) {
     const res = await timed(url, init);
     if (res.ok) return res.json();
-    if (!THROTTLE_STATUS.has(res.status)) throw new Error(`HTTP ${res.status} ${url.split('?')[0]}`);
+    if (!THROTTLE_STATUS.has(res.status)) {
+      const err = new Error(`HTTP ${res.status} ${url.split('?')[0]}`);
+      err.status = res.status;
+      throw err;
+    }
     if (attempt >= retries) {
       const err = new Error(`HTTP ${res.status} ${url.split('?')[0]}`);
       err.rateLimited = true;
@@ -93,8 +97,14 @@ export async function collectRyanair(today, { fetchImpl = fetch, pauseMs = true,
   const routes = [];
   try {
     for (const origin of CONSTRAINTS.origins) {
-      const json = await fetchRetry(fetchImpl, `https://www.ryanair.com/api/views/locate/searchWidget/routes/it/airport/${origin}`, undefined, { baseMs: retryBaseMs });
-      routes.push(...parseRyanairRoutes(json, origin));
+      try {
+        const json = await fetchRetry(fetchImpl, `https://www.ryanair.com/api/views/locate/searchWidget/routes/it/airport/${origin}`, undefined, { baseMs: retryBaseMs });
+        routes.push(...parseRyanairRoutes(json, origin));
+      } catch (err) {
+        // 404: Ryanair non serve questo aeroporto (es. Linate), zero tratte da lì e si prosegue
+        if (err.status !== 404) throw err;
+        log(`storico ryanair ${origin}: nessuna tratta (404)`);
+      }
     }
   } catch (err) {
     meta.stoppedReason = `elenco tratte non scaricabile: ${err.message}`;
