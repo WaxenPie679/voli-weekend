@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
 import { CONSTRAINTS } from '../filter.js';
-import { jitter, sleep } from '../util.js';
+import { jitter, fetchRetry, withTimeout, FETCH_TIMEOUT_MS } from '../util.js';
 import { wizzVersion, parseWizzRoutes } from '../sources/wizz.js';
 import { parseRyanairRoutes, parseRyanairDays, parseWizzDays } from './observe.js';
 
@@ -12,35 +12,8 @@ import { parseRyanairRoutes, parseRyanairDays, parseWizzDays } from './observe.j
 const MONTHS = 12;
 const WIZZ_WINDOW_DAYS = 30;
 const WIZZ_HORIZON_DAYS = 365;
-/** Status che significano «rallenta»: si riprova dopo una pausa invece di contare un errore. */
-const THROTTLE_STATUS = new Set([429, 503]);
-const FETCH_TIMEOUT_MS = 20000;
 /** Richieste fallite di fila dopo cui la compagnia si ferma (blocco prolungato). */
 const MAX_CONSECUTIVE_FAILURES = 10;
-
-/** `fetchImpl` con un tempo massimo per ogni chiamata (risposta e corpo compresi). */
-const withTimeout = (fetchImpl, timeoutMs) => (url, init) => fetchImpl(url, { ...init, signal: AbortSignal.timeout(timeoutMs) });
-
-/**
- * Scarica un JSON; su HTTP 429 o 503 (Wizz blocca per circa un minuto con 503 se si va troppo veloci)
- * attende baseMs × 2^tentativo e riprova.
- * Esauriti i tentativi lancia un errore con `rateLimited = true`; gli altri status non ok lanciano subito.
- * Ogni chiamata ha un tempo massimo di `timeoutMs`: scaduto, lancia (conta come richiesta fallita).
- */
-export async function fetchRetry(fetchImpl, url, init, { retries = 3, baseMs = 30000, timeoutMs = FETCH_TIMEOUT_MS } = {}) {
-  const timed = withTimeout(fetchImpl, timeoutMs);
-  for (let attempt = 0; ; attempt++) {
-    const res = await timed(url, init);
-    if (res.ok) return res.json();
-    if (!THROTTLE_STATUS.has(res.status)) throw new Error(`HTTP ${res.status} ${url.split('?')[0]}`);
-    if (attempt >= retries) {
-      const err = new Error(`HTTP ${res.status} ${url.split('?')[0]}`);
-      err.rateLimited = true;
-      throw err;
-    }
-    await sleep(baseMs * 2 ** attempt);
-  }
-}
 
 const emptyMeta = () => ({ routesExpected: 0, routesOk: 0, requestsOk: 0, requestsFailed: 0, missing: [], stoppedReason: null });
 
@@ -93,8 +66,14 @@ export async function collectRyanair(today, { fetchImpl = fetch, pauseMs = true,
   const routes = [];
   try {
     for (const origin of CONSTRAINTS.origins) {
-      const json = await fetchRetry(fetchImpl, `https://www.ryanair.com/api/views/locate/searchWidget/routes/it/airport/${origin}`, undefined, { baseMs: retryBaseMs });
-      routes.push(...parseRyanairRoutes(json, origin));
+      try {
+        const json = await fetchRetry(fetchImpl, `https://www.ryanair.com/api/views/locate/searchWidget/routes/it/airport/${origin}`, undefined, { baseMs: retryBaseMs });
+        routes.push(...parseRyanairRoutes(json, origin));
+      } catch (err) {
+        // 404: Ryanair non serve questo aeroporto (es. Linate), zero tratte da lì e si prosegue
+        if (err.status !== 404) throw err;
+        log(`storico ryanair ${origin}: nessuna tratta (404)`);
+      }
     }
   } catch (err) {
     meta.stoppedReason = `elenco tratte non scaricabile: ${err.message}`;

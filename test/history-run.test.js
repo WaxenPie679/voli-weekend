@@ -139,12 +139,12 @@ test('runHistory: compagnie in parallelo con la stessa scadenza; l’errore di u
   assert.equal((await json('2026/11/2026-11-12.meta.json')).airlines.wizz.stoppedReason, 'rete assente');
 });
 
-test('runHistory: scadenza predefinita a 55 minuti dall’avvio', async () => {
+test('runHistory: scadenza predefinita a 100 minuti dall’avvio', async () => {
   let got;
   const t0 = Date.now();
   const collectors = { ...fakeCollectors([obsA]), ryanair: async (today, opts) => { got = opts.deadline; return { observations: [], coverage: [], routes: [], meta: okMeta }; } };
   await runHistory(dir, { now: NOW, collectors, log: () => {} });
-  assert.ok(got >= t0 + 55 * 60000 && got <= Date.now() + 55 * 60000);
+  assert.ok(got >= t0 + 100 * 60000 && got <= Date.now() + 100 * 60000);
 });
 
 test('runHistory: i voli già partiti restano fuori dal confronto', async () => {
