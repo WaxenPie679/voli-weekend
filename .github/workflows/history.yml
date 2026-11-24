@@ -15,6 +15,15 @@ permissions:
 
 jobs:
   collect:
+    name: ${{ matrix.gruppo }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { gruppo: puglia, branch: history }
+          - { gruppo: milano, branch: history-milano }
+          - { gruppo: bergamo, branch: history-bergamo }
+          - { gruppo: roma, branch: history-roma }
     runs-on: ubuntu-latest
     timeout-minutes: 75
     steps:
@@ -24,21 +33,23 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: bash scripts/prepare-history.sh
+      - run: bash scripts/prepare-history.sh ${{ matrix.branch }}
       # Sotto il timeout del job (75): così il passo di pubblicazione ha tempo di girare
       - run: node src/history/run.js --dir ./history
+        env:
+          GRUPPO: ${{ matrix.gruppo }}
         timeout-minutes: 65
       # Riepilogo per i grafici: se fallisce, i dati del giorno si pubblicano lo stesso
       - id: summary
-        if: always()
+        if: always() && matrix.gruppo == 'puglia'
         run: node src/history/summary.js --dir ./history --out ./summary
         timeout-minutes: 5
         continue-on-error: true
       - id: publish_history
         if: always()
-        run: bash scripts/publish-history.sh ./history
+        run: bash scripts/publish-history.sh ./history ${{ matrix.branch }}
       # Il riepilogo va sul branch `summary` (un solo commit orfano, sostituito ogni notte),
       # solo se anche i dati del giorno sono stati pubblicati: non deve mostrare un giorno assente da `history`
-      - if: always() && steps.summary.outcome == 'success' && steps.publish_history.outcome == 'success'
+      - if: always() && matrix.gruppo == 'puglia' && steps.summary.outcome == 'success' && steps.publish_history.outcome == 'success'
         run: bash scripts/publish-summary.sh ./summary
         timeout-minutes: 5
