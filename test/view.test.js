@@ -16,13 +16,13 @@ const file = (sources, itineraries) => ({ generatedAt: '', sources, itineraries 
 const ok = (min) => ({ status: 'ok', error: null, lastSuccessAt: new Date(Date.parse('2026-11-02T10:00:00Z') - min * 60000).toISOString() });
 const NOW = new Date('2026-11-02T10:00:00Z');
 
-test('combine unisce i due file, deduplica per id tenendo il prezzo più basso, ordina per prezzo', () => {
-  const r = combine(file({}, [it('a', { price: 90 }), it('b', { price: 50 })]), file({}, [it('a', { price: 80 })]));
+test('combine deduplica per id tenendo il prezzo più basso, ordina per prezzo', () => {
+  const r = combine(file({}, [it('a', { price: 90 }), it('b', { price: 50 }), it('a', { price: 80 })]));
   assert.deepEqual(r.map((x) => [x.id, x.price]), [['b', 50], ['a', 80]]);
 });
 
 test('combine tollera un file mancante', () => {
-  assert.equal(combine(null, file({}, [it('a')])).length, 1);
+  assert.equal(combine(null).length, 0);
 });
 
 test('groupByWeekend ordina i weekend per data e le offerte per prezzo', () => {
@@ -31,13 +31,11 @@ test('groupByWeekend ordina i weekend per data e le offerte per prezzo', () => {
   assert.deepEqual(g[0].items.map((x) => x.id), ['c', 'b']);
 });
 
-test('applyFilters: aeroporto, solo diretti, prezzo massimo, compagnia, weekend', () => {
-  const its = [it('a'), it('b', { origin: 'BDS' }), it('c', { hubs: ['FCO'], airline: 'ITA', source: 'google' }), it('d', { price: 150 }), it('e', { weekend: '2026-11-13' })];
+test('applyFilters: aeroporto, prezzo massimo, compagnia, weekend', () => {
+  const its = [it('a'), it('b', { origin: 'BDS' }), it('c', { airline: 'Wizz Air', source: 'wizz' }), it('d', { price: 150 }), it('e', { weekend: '2026-11-13' })];
   assert.deepEqual(applyFilters(its, { origin: 'BDS' }).map((x) => x.id), ['b']);
-  assert.ok(!applyFilters(its, { directOnly: true }).some((x) => x.id === 'c'));
-  assert.deepEqual(applyFilters(its, { stopsOnly: true }).map((x) => x.id), ['c']);
   assert.ok(!applyFilters(its, { maxPrice: 100 }).some((x) => x.id === 'd'));
-  assert.deepEqual(applyFilters(its, { airline: 'ITA' }).map((x) => x.id), ['c']);
+  assert.deepEqual(applyFilters(its, { airline: 'Wizz Air' }).map((x) => x.id), ['c']);
   assert.deepEqual(applyFilters(its, { weekend: '2026-11-13' }).map((x) => x.id), ['e']);
   assert.equal(applyFilters(its, {}).length, 5);
 });
@@ -55,12 +53,10 @@ test('airlinesOf elenca le compagnie dell\'andata senza duplicati, in ordine alf
   assert.deepEqual(airlinesOf([it('a'), it('b', { airline: 'ITA' }), it('c')]), ['ITA', 'Ryanair']);
 });
 
-test('freshness: diretti vecchi più di 45 min sono "stale", scali dopo 9 ore, errori sempre', () => {
+test('freshness: dati vecchi più di 45 min sono "stale", errori sempre', () => {
   assert.deepEqual(freshness('ryanair', ok(10), NOW), { label: 'aggiornato 10 min fa', stale: false });
   assert.equal(freshness('ryanair', ok(50), NOW).stale, true);
-  assert.equal(freshness('google', ok(200), NOW).stale, false);
-  assert.equal(freshness('google', ok(200), NOW).label, 'aggiornato 3 h fa');
-  assert.equal(freshness('google', ok(600), NOW).stale, true);
+  assert.equal(freshness('wizz', ok(200), NOW).label, 'aggiornato 3 h fa');
   assert.equal(freshness('wizz', { status: 'error', error: 'HTTP 403', lastSuccessAt: null }, NOW).label, 'mai aggiornato');
   assert.equal(freshness('wizz', { status: 'error', error: 'x', lastSuccessAt: ok(5).lastSuccessAt }, NOW).stale, true);
   assert.deepEqual(freshness('wizz', undefined, NOW), { label: 'nessun dato', stale: true });

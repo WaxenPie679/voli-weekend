@@ -44,7 +44,7 @@ test('itinerari già partiti o non validi vengono rimossi', () => {
 });
 
 test('primo giro con fonte in errore: nessun itinerario e lastSuccessAt null', () => {
-  const f = mergeSource(null, 'google', { ok: false, error: 'google-blocked' }, NOW);
+  const f = mergeSource(null, 'wizz', { ok: false, error: 'HTTP 503' }, NOW);
   assert.deepEqual(f.itineraries, []);
-  assert.deepEqual(f.sources.google, { status: 'error', error: 'google-blocked', lastSuccessAt: null });
+  assert.deepEqual(f.sources.wizz, { status: 'error', error: 'HTTP 503', lastSuccessAt: null });
 });

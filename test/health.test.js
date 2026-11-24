@@ -21,8 +21,8 @@ test('checkData: dati vecchi, fonte in errore da tempo e nessun volo', () => {
 });
 
 test('checkData: un errore isolato di una fonte non è un problema se ha funzionato da poco', () => {
-  const f = file(0.2, { google: { status: 'error', error: 'timeout', lastSuccessAt: ago(4) } });
-  assert.deepEqual(checkData(f, 'connections', NOW), []);
+  const f = file(0.2, { ryanair: ok(0.2), wizz: { status: 'error', error: 'timeout', lastSuccessAt: ago(0.4) } });
+  assert.deepEqual(checkData(f, 'direct', NOW), []);
 });
 
 test('checkData: file mancante', () => {
@@ -139,8 +139,9 @@ test("allChecks 'Tratte seguite': 404 = assente, altri errori = problema, file v
 
 test('allChecks: aggiunge i controlli di Milano, Bergamo e Roma e tiene quelli della Puglia', () => {
   const keys = Object.keys(allChecks({ now: NOW, env: {}, fetchImpl: async () => ({ ok: false, status: 404 }) }));
-  for (const k of ['Dati voli diretti', 'Storico prezzi', 'Dati voli diretti · Milano', 'Dati voli con scalo · Roma', 'Storico prezzi · Bergamo']) assert.ok(keys.includes(k), k);
+  for (const k of ['Dati voli diretti', 'Storico prezzi', 'Dati voli diretti · Milano', 'Dati voli diretti · Roma', 'Storico prezzi · Bergamo']) assert.ok(keys.includes(k), k);
   assert.ok(!keys.some((k) => k.includes('Puglia')));
+  assert.ok(!keys.some((k) => /scal/i.test(k)), 'nessun controllo dei voli con scalo');
 });
 
 test("allChecks 'Storico prezzi · Roma': legge il ramo history-roma", async () => {

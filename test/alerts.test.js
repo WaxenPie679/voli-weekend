@@ -45,22 +45,6 @@ test('le voci di weekend passati vengono rimosse dallo stato', () => {
   assert.deepEqual(Object.keys(nextState), ['attuale']);
 });
 
-test('formatAlert con scalo mostra "1 scalo" e l\'aeroporto di scalo', () => {
-  const x = it(75, {
-    outbound: { segments: [
-      { from: 'BRI', to: 'FCO', dep: '2026-11-06T19:00', arr: null, flight: 'a', airline: 'ITA' },
-      { from: 'FCO', to: 'BUD', dep: null, arr: '2026-11-06T23:00', flight: 'b', airline: 'ITA' },
-    ], selfTransfer: false, layovers: [100] },
-  });
-  const msg = formatAlert(x);
-  assert.match(msg, /1 scalo/);
-  assert.match(msg, /FCO/);
-  assert.match(msg, /1h40/);
-  assert.match(msg, /Budapest/);
-  assert.match(msg, /75 €/);
-  assert.match(msg, /href="https:\/\/wizzair\.com\/x"/);
-});
-
 test('formatAlert diretto e con caratteri HTML nel nome città', () => {
   const msg = formatAlert(it(60, { destination: { code: 'XXX', city: 'A<B', country: 'C&D' } }));
   assert.match(msg, /diretto/);

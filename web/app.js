@@ -1,16 +1,16 @@
 import { DATA_BASE_URL, PAGE_SIZE, ALERT_THRESHOLD, MAX_PRICE, REFRESH_MS } from './config.js';
-import { combine, applyFilters, bestPerDestination, stayHours, stayWindow, airlinesOf, freshness, legTimes, isDirect, notDeparted, romeNow } from './view.js';
+import { combine, applyFilters, bestPerDestination, stayHours, stayWindow, airlinesOf, freshness, legTimes, notDeparted, romeNow } from './view.js';
 
 const $ = (id) => document.getElementById(id);
 const form = $('filters');
 const list = $('passes');
 const tpl = $('pass-template');
 const STORE_KEY = 'voli-weekend-filtri';
-const SOURCE_NAMES = { ryanair: 'Ryanair', wizz: 'Wizz Air', google: 'Google Voli' };
-const SHORT_NAMES = { ryanair: 'Ryanair', wizz: 'Wizz', google: 'Google' };
+const SOURCE_NAMES = { ryanair: 'Ryanair', wizz: 'Wizz Air' };
+const SHORT_NAMES = { ryanair: 'Ryanair', wizz: 'Wizz' };
 
 let all = [];
-let files = { direct: null, connections: null };
+let files = { direct: null };
 let shown = PAGE_SIZE;
 
 // --- Formattazione ---
@@ -25,17 +25,11 @@ const fmtWeekend = (friday) => {
     ? `${f.getUTCDate()}–${s.toLocaleDateString('it-IT', opt)}`
     : `${f.toLocaleDateString('it-IT', opt)} – ${s.toLocaleDateString('it-IT', opt)}`;
 };
-const fmtDuration = (m) => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ''}` : `${m} min`);
 const airportName = (code) => (code === 'BRI' ? 'Bari' : code === 'BDS' ? 'Brindisi' : code);
 
-/** Giorno e orari della tratta; lo scalo compare solo se c'è (compagnia e "diretto" stanno una volta sola nella carta). */
+/** Giorno e orari della tratta (la compagnia sta una volta sola nella carta). */
 function legText(leg) {
-  const hubs = leg.segments.slice(0, -1).map((s) => s.to);
-  const layovers = leg.layovers ?? [];
-  const stop = hubs.length
-    ? `1 scalo a ${hubs.join(', ')}${layovers[0] != null ? ` (${fmtDuration(layovers[0])})` : ''}`
-    : '';
-  return { day: fmtDay(leg.segments[0].dep), time: legTimes(leg), stop };
+  return { day: fmtDay(leg.segments[0].dep), time: legTimes(leg) };
 }
 
 const airlinesText = (it) => [...new Set([it.outbound.segments[0].airline, it.inbound.segments[0].airline])].join(' / ');
@@ -48,7 +42,6 @@ function emptyAdvice(f) {
   if (f.minStay) tips.push('ridurre le ore sul posto');
   if (f.weekend) tips.push('scegliere tutti i weekend');
   if (f.origin) tips.push('includere entrambi gli aeroporti');
-  if (f.directOnly || f.stopsOnly) tips.push('mostrare tutti i voli');
   if (f.airline) tips.push('scegliere tutte le compagnie');
   if (!tips.length) return 'Nessun volo soddisfa i criteri al momento.';
   return `Prova ${/^[aeiou]/.test(tips[0]) ? 'ad' : 'a'} ${tips.join(', oppure ')}.`;
@@ -59,8 +52,6 @@ function readFilters() {
   const d = new FormData(form);
   return {
     origin: d.get('origin') || undefined,
-    directOnly: d.get('kind') === 'direct',
-    stopsOnly: d.get('kind') === 'stops',
     weekend: d.get('weekend') || undefined,
     airline: d.get('airline') || undefined,
     maxPrice: Number(d.get('max')),
@@ -93,7 +84,7 @@ function fillSelect(select, options, labelOf) {
 }
 
 function filtersSummary(f) {
-  const parts = [f.origin ? airportName(f.origin) : 'Bari e Brindisi', f.directOnly ? 'diretti' : f.stopsOnly ? 'con scalo' : 'tutti i voli'];
+  const parts = [f.origin ? airportName(f.origin) : 'Bari e Brindisi'];
   if (f.weekend) parts.push(`weekend ${fmtWeekend(f.weekend)}`);
   if (f.airline) parts.push(f.airline);
   parts.push(`fino a ${f.maxPrice} €`);
@@ -109,10 +100,7 @@ syncFiltersBox();
 
 // --- Rendering ---
 function renderSources(now) {
-  const entries = [
-    ...Object.entries(files.direct?.sources ?? { ryanair: undefined, wizz: undefined }),
-    ...Object.entries(files.connections?.sources ?? { google: undefined }),
-  ];
+  const entries = Object.entries(files.direct?.sources ?? { ryanair: undefined, wizz: undefined });
   const stale = [];
   $('sources').replaceChildren(...entries.map(([name, status]) => {
     const f = freshness(name, status, now);
@@ -140,14 +128,13 @@ function renderPass(it) {
   q('.to').textContent = it.destination.code;
   q('.route').setAttribute('aria-label', `Da ${airportName(it.origin)} a ${it.destination.city}`);
   q('.city').textContent = it.destination.city;
-  q('.country').textContent = `${it.destination.country} · ${isDirect(it) ? 'diretto' : 'con scalo'}`;
+  q('.country').textContent = `${it.destination.country} · diretto`;
   for (const [cls, leg] of [['.out', it.outbound], ['.back', it.inbound]]) {
     const t = legText(leg);
     const dd = q(`${cls} dd`);
-    dd.innerHTML = '<span class="day"></span> · <span class="time"></span><span class="meta"></span>';
+    dd.innerHTML = '<span class="day"></span> · <span class="time"></span>';
     dd.querySelector('.day').textContent = t.day;
     dd.querySelector('.time').textContent = t.time;
-    dd.querySelector('.meta').textContent = t.stop ? ` · ${t.stop}` : '';
     if (leg.arrivalEstimated) dd.querySelector('.time').title = 'Orario di arrivo stimato';
   }
   const hours = stayHours(it);
@@ -164,7 +151,7 @@ function renderPass(it) {
   const book = q('.btn-book');
   book.href = it.bookingUrl;
   book.setAttribute('aria-label', `Prenota ${it.destination.city} a ${fmtPrice(it.price)} euro su ${SOURCE_NAMES[it.source]}`);
-  q('.price-note').textContent = `andata e ritorno · ${airlinesText(it)}${it.source === 'google' ? ' · via Google Voli' : ''}`;
+  q('.price-note').textContent = `andata e ritorno · ${airlinesText(it)}`;
   return node;
 }
 
@@ -249,10 +236,10 @@ async function getJson(name) {
 }
 
 async function load() {
-  const [d, c] = await Promise.allSettled([getJson('direct.json'), getJson('connections.json')]);
-  if (d.status === 'rejected' && c.status === 'rejected') {
-    // 404 su entrambi: il branch dei dati non esiste ancora (prima ricerca non terminata)
-    if (/HTTP 404/.test(d.reason.message) && /HTTP 404/.test(c.reason.message)) {
+  const [d] = await Promise.allSettled([getJson('direct.json')]);
+  if (d.status === 'rejected') {
+    // 404: il branch dei dati non esiste ancora (prima ricerca non terminata)
+    if (/HTTP 404/.test(d.reason.message)) {
       list.classList.remove('loading');
       $('finding').textContent = 'In attesa della prima ricerca automatica.';
       list.replaceChildren(emptyNoData());
@@ -261,8 +248,8 @@ async function load() {
     renderError(d.reason.message);
     return;
   }
-  files = { direct: d.value ?? files.direct, connections: c.value ?? files.connections };
-  all = notDeparted(combine(files.direct, files.connections), romeNow()).filter((it) => it.price <= MAX_PRICE);
+  files = { direct: d.value ?? files.direct };
+  all = notDeparted(combine(files.direct), romeNow()).filter((it) => it.price <= MAX_PRICE);
   const weekends = [...new Set(all.map((it) => it.weekend))].sort();
   fillSelect($('weekend'), weekends, (w) => `Weekend ${fmtWeekend(w)}`);
   fillSelect($('airline'), airlinesOf(all), (a) => a);

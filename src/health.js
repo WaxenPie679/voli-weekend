@@ -12,10 +12,9 @@ export const DATA_URL = 'https://raw.githubusercontent.com/WaxenPie679/voli-week
 export const HISTORY_URL = 'https://raw.githubusercontent.com/WaxenPie679/voli-weekend/history/';
 const WEBAPP_FILES = ['', 'app.js', 'view.js', 'config.js', 'notify.js', 'style.css', 'sw.js', 'manifest.webmanifest'];
 
-// Soglie per modalità: i diretti girano ogni 15 minuti, gli scali ogni 4 ore (e una ricerca Google dura a lungo).
+// Soglie dei voli diretti, che girano ogni 15 minuti.
 const LIMITS = {
   direct: { file: 'direct.json', workflow: 'direct.yml', sources: ['ryanair', 'wizz'], maxAgeHours: 2, maxSourceAgeHours: 6, failStreak: 2, minFailures: 3 },
-  connections: { file: 'connections.json', workflow: 'connections.yml', sources: ['google'], maxAgeHours: 9, maxSourceAgeHours: 13, failStreak: 1, minFailures: 2 },
 };
 
 const hoursSince = (iso, now) => now.diff(DateTime.fromISO(iso), 'hours').hours;
@@ -200,15 +199,12 @@ export function allChecks({ now = DateTime.now(), env = process.env, fetchImpl =
     const label = g[0].toUpperCase() + g.slice(1);
     const base = `https://raw.githubusercontent.com/WaxenPie679/voli-weekend/${historyBranch(g)}/`;
     perGruppo[`Dati voli diretti · ${label}`] = () => dataProblems('direct', now, fetchImpl, g);
-    perGruppo[`Dati voli con scalo · ${label}`] = () => dataProblems('connections', now, fetchImpl, g);
     perGruppo[`Storico prezzi · ${label}`] = () => historyProblems(now, fetchImpl, base);
   }
   return {
     'Webapp online': () => checkWebapp(WEBAPP_URL, { fetchImpl }),
     'Dati voli diretti': () => dataProblems('direct', now, fetchImpl),
-    'Dati voli con scalo': () => dataProblems('connections', now, fetchImpl),
     'Ricerche diretti (GitHub)': () => workflowProblems('direct', now, env, fetchImpl),
-    'Ricerche scali (GitHub)': () => workflowProblems('connections', now, env, fetchImpl),
     'Ryanair risponde': () => probeRyanair(now, fetchImpl),
     'Wizz risponde': () => probeWizz(now, fetchImpl),
     'Storico prezzi': () => historyProblems(now, fetchImpl),
