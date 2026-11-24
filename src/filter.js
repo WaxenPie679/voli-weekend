@@ -5,11 +5,11 @@ import { GRUPPI, GRUPPO } from './gruppi.js';
 export const CONSTRAINTS = Object.freeze({
   origins: GRUPPI[GRUPPO].aeroporti,
   fridayMinDeparture: '18:00',
-  maxPrice: 200,
+  maxPrice: 400,
   maxStopsPerLeg: 1,
   maxLayoverMinutes: 180,
   alertThreshold: 80,
-  weekends: 8,
+  weekends: 13,
 });
 
 const local = (s) => DateTime.fromISO(s, { zone: ZONE });

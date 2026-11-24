@@ -32,9 +32,17 @@ test('ritorno di sabato non valido', () =>
   assert.equal(isValid(mk({ inn: [seg('BUD', 'BRI', '2026-11-07T20:00', '2026-11-07T21:40')] }), NOW), false));
 test('ritorno la domenica del weekend dopo non valido', () =>
   assert.equal(isValid(mk({ inn: [seg('BUD', 'BRI', '2026-11-15T20:00', '2026-11-15T21:40')] }), NOW), false));
-test('prezzo 200 valido, 200.01 no', () => {
-  assert.equal(isValid(mk({ price: 200 }), NOW), true);
-  assert.equal(isValid(mk({ price: 200.01 }), NOW), false);
+test('prezzo 399 e 400 validi, 400.01 e 401 no', () => {
+  assert.equal(isValid(mk({ price: 399 }), NOW), true);
+  assert.equal(isValid(mk({ price: 400 }), NOW), true);
+  assert.equal(isValid(mk({ price: 400.01 }), NOW), false);
+  assert.equal(isValid(mk({ price: 401 }), NOW), false);
+});
+
+test('la ricerca guarda 13 weekend (3 mesi)', async () => {
+  const { CONSTRAINTS } = await import('../src/filter.js');
+  assert.equal(CONSTRAINTS.weekends, 13);
+  assert.equal(CONSTRAINTS.maxPrice, 400);
 });
 test('origine NAP non valida', () =>
   assert.equal(isValid(mk({ origin: 'NAP' }), NOW), false));

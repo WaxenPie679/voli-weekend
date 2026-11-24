@@ -4,8 +4,8 @@ I voli weekend più economici da **Bari (BRI)** e **Brindisi (BDS)**, verso qual
 
 - andata il venerdì dalle 18:00 in poi oppure il sabato, ritorno la domenica (arrivo entro le 23:59);
 - solo voli diretti Ryanair e Wizz Air;
-- fino a 200 € andata e ritorno, 1 adulto, solo bagaglio a mano piccolo;
-- i prossimi 8 weekend, con finestra che scorre.
+- fino a 400 € andata e ritorno, 1 adulto, solo bagaglio a mano piccolo;
+- i prossimi 13 weekend (3 mesi), con finestra che scorre; dal 4° al 12° mese e i weekend lunghi arrivano dallo storico notturno.
 
 ## Come funziona
 

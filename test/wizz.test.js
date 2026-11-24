@@ -33,6 +33,14 @@ test('timetableWindows copre gli 8 weekend in finestre di massimo 30 giorni', ()
   for (const x of w) assert.ok(DateTime.fromISO(x.to).diff(DateTime.fromISO(x.from), 'days').days <= 29);
 });
 
+test('timetableWindows: 13 weekend → 4 finestre di massimo 30 giorni, ogni weekend dentro una', () => {
+  const w13 = upcomingWeekends(DateTime.fromISO('2026-11-02T10:00Z'), 13);
+  const w = timetableWindows(w13);
+  assert.equal(w.length, 4);
+  for (const x of w) assert.ok(DateTime.fromISO(x.to).diff(DateTime.fromISO(x.from), 'days').days <= 29);
+  for (const wk of w13) assert.ok(w.some((x) => x.from <= wk.friday && wk.sunday <= x.to), wk.friday);
+});
+
 test('timetableWindows: ogni weekend sta tutto dentro una finestra', () => {
   const w = timetableWindows(weekends);
   for (const wk of weekends) assert.ok(w.some((x) => x.from <= wk.friday && wk.sunday <= x.to), wk.friday);

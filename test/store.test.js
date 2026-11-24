@@ -40,7 +40,7 @@ test('itinerari già partiti o non validi vengono rimossi', () => {
   const prev = mergeSource(null, 'ryanair', { ok: true, itineraries: [it('ryanair', 'BLQ', 90), it('ryanair', 'STN', 90, '2026-11-07T09:00')] }, NOW);
   const f = mergeSource(prev, 'wizz', { ok: true, itineraries: [] }, later);
   assert.deepEqual(f.itineraries.map((i) => i.destination.code), ['STN']);
-  assert.equal(mergeSource(null, 'ryanair', { ok: true, itineraries: [it('ryanair', 'BLQ', 250)] }, NOW).itineraries.length, 0);
+  assert.equal(mergeSource(null, 'ryanair', { ok: true, itineraries: [it('ryanair', 'BLQ', 450)] }, NOW).itineraries.length, 0);
 });
 
 test('primo giro con fonte in errore: nessun itinerario e lastSuccessAt null', () => {
