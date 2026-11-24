@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Pubblica i file indicati sul branch `data`, che contiene sempre un solo commit.
 # Uso: scripts/publish-data.sh <cartella dati> <file>...
-# Si riallinea all'ultima versione remota prima del push, così le due ricerche non si sovrascrivono.
+# Si riallinea all'ultima versione remota prima del push, così le ricerche non si sovrascrivono.
+# Più job (uno per gruppo, più diretti e scali) pubblicano sullo stesso branch: 8 tentativi, con attesa casuale per non scontrarsi sempre insieme.
 set -euo pipefail
 dir="$1"; shift
 tmp="$(mktemp -d)"
@@ -11,7 +12,7 @@ done
 cd "$dir"
 git config user.name "github-actions[bot]"
 git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-for attempt in 1 2 3; do
+for attempt in 1 2 3 4 5 6 7 8; do
   if git ls-remote --exit-code --heads origin data >/dev/null; then
     git fetch -q --depth 1 origin +refs/heads/data:refs/remotes/origin/data
     git reset -q --hard origin/data
@@ -26,6 +27,6 @@ for attempt in 1 2 3; do
   # Il lease fallisce se nel frattempo l'altra ricerca ha pubblicato: si riparte dall'ultima versione
   expected="$(git rev-parse -q --verify refs/remotes/origin/data || true)"
   if git push -q --force-with-lease=refs/heads/data:"$expected" origin HEAD:refs/heads/data; then exit 0; fi
-  echo "push fallito (tentativo $attempt), riprovo"; sleep $((attempt * 5))
+  echo "push fallito (tentativo $attempt), riprovo"; sleep $((attempt * 3 + RANDOM % 7))
 done
 exit 1
