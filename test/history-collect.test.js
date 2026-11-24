@@ -1,6 +1,7 @@
 import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
-import { collectRyanair, collectWizz, fetchRetry } from '../src/history/collect.js';
+import { collectRyanair, collectWizz } from '../src/history/collect.js';
+import { fetchRetry } from '../src/util.js';
 
 const json = (body, status = 200) => ({ ok: status < 400, status, json: async () => body, text: async () => (typeof body === 'string' ? body : JSON.stringify(body)) });
 const status = (s) => ({ ok: false, status: s, json: async () => ({}), text: async () => '' });

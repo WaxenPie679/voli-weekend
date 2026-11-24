@@ -1,8 +1,7 @@
 // Prezzi giornalieri dalle compagnie (Ryanair, Wizz) ed elenco aeroporti per l'autocomplete.
 // Un'istanza di `createSources` vale per un giro: elenchi tratte e versione Wizz si scaricano una volta sola.
 import { DateTime } from 'luxon';
-import { jitter } from '../util.js';
-import { fetchRetry } from '../history/collect.js';
+import { jitter, fetchRetry } from '../util.js';
 import { parseRyanairRoutes, parseRyanairDays, parseWizzDays } from '../history/observe.js';
 import { wizzVersion, parseWizzRoutes } from '../sources/wizz.js';
 
