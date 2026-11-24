@@ -1,8 +1,8 @@
 {
  "day": "2026-11-24",
- "startedAt": "2026-11-24T04:40:37.057Z",
- "finishedAt": "2026-11-24T05:11:48.889Z",
- "rowsWritten": 8711,
+ "startedAt": "2026-11-24T14:14:43.455Z",
+ "finishedAt": "2026-11-24T14:46:37.283Z",
+ "rowsWritten": 11796,
  "airlines": {
   "ryanair": {
    "routesExpected": 87,
