@@ -13,7 +13,7 @@ Oggi il motore scarta i voli sopra i 200 € e guarda 8 weekend.
 
 | | Gratis | Premium |
 |---|---|---|
-| Weekend, mesi 1–3 | sì (ricerca ogni 15 minuti) | sì (gli stessi dati) |
+| Weekend, mesi 1–3 | sì (ricerca ogni 15 minuti) | sì (gli stessi dati della ricerca) |
 | Weekend, mesi 4–12 | no | sì (dallo storico notturno) |
 | Weekend lungo, mesi 1–12 | **mai** | sì (dallo storico notturno) |
 | Prezzo massimo | 400 € (cursore, 100 € all'apertura) | uguale |
@@ -35,6 +35,7 @@ Definizioni (le stesse della scheda «Quando partire», `web/storico-view.js`):
 - Il sito DoVai e il lucchetto vero (#8). Il repository `voli-weekend` è pubblico: il file Premium è leggibile da chi sa dove cercarlo. La protezione vera nasce con il sito.
 - Weekend lunghi nella ricerca ogni 15 minuti.
 - Cambiare la mail del martedì (#43): i testi prevedono «3 Weekend lungo» per tutti, in contrasto con la decisione di oggi. Si annota sulla #43.
+- Avvisi per Milano, Bergamo e Roma.
 - Milano, Bergamo e Roma nella webapp di Bruno (restano solo Puglia, come nel progetto dei bacini).
 
 ## Anti-obiettivi (sarebbe un fallimento anche se funziona)
@@ -52,13 +53,21 @@ Definizioni (le stesse della scheda «Quando partire», `web/storico-view.js`):
    - 3a. **File calcolato ogni notte** per gruppo, pubblicato sul branch `data` — **scelto da Bruno**.
    - 3b. Calcolo nella pagina dai file per tratta del riepilogo: centinaia di file da scaricare, e il riepilogo esiste solo per la Puglia. Scartato.
 
+## Meno pezzi nel progetto (decisioni di Bruno, 24/11)
+
+Bruno non vuole altra complessità. Con questo lavoro:
+
+- **Via i voli con scalo di Google, del tutto:** `src/sources/google.js`, la modalità `connections` di `src/run.js`, il workflow `connections.yml`, i file `connections*.json`, i controlli nel check-up, la parte dell'app che li legge e li mostra, i test, la dipendenza `playwright` se non serve ad altro. Restano solo Ryanair e Wizz diretti. Se un giorno serviranno, si recuperano dalla cronologia di git.
+- **Via Telegram, del tutto:** niente più messaggi né dalla ricerca né dalle tratte seguite; `src/telegram.js`, il workflow `telegram-test.yml`, i segreti nei workflow. **Restano le notifiche nell'app (push)**, sia per «sotto 80 €» sia per le tratte seguite.
+- **Il check-up notturno** oggi scrive su Telegram quando qualcosa non va: d'ora in poi manda una **notifica nell'app**, e non controlla più il bot Telegram. **Scelta del costruttore** (senza un canale il check-up non avviserebbe più nessuno).
+- I segreti `TELEGRAM_BOT_TOKEN` e `TELEGRAM_CHAT_ID` su GitHub li cancella Bruno a mano, dopo il merge.
+
 ## Come funziona
 
 ### Ricerca ogni 15 minuti (`src/filter.js`, fonti)
-- `CONSTRAINTS.maxPrice` 200 → 400 (vale anche per `priceValueTo` di Ryanair e per i filtri di Google).
-- `CONSTRAINTS.weekends` 8 → 13 per i voli diretti.
-- **Scelta del costruttore (da confermare con le misure):** i voli con scalo (Google, ogni 4 ore) restano a 8 weekend. Google è lento (12–20 minuti oggi per la sola Puglia) e blocca facilmente; con 4 gruppi il rischio cresce. Il prezzo massimo sale comunque a 400 €. Serve quindi un numero di weekend per modalità (`direct` 13, `connections` 8).
-- Gli avvisi Telegram/push restano come sono (soglia 80 €): guardando 13 weekend possono arrivare avvisi anche per weekend tra 2 e 3 mesi. **Scelta del costruttore.**
+- `CONSTRAINTS.maxPrice` 200 → 400 (vale anche per `priceValueTo` di Ryanair).
+- `CONSTRAINTS.weekends` 8 → 13.
+- Gli avvisi «sotto 80 €» restano solo come notifica nell'app (push): guardando 13 weekend possono arrivare anche per weekend tra 2 e 3 mesi.
 - **Se un gruppo non sta più nei 15 minuti** (Wizz passa da 2 a 4 finestre per tratta): non si tolgono weekend, perché la promessa «3 mesi gratis» deve valere per tutti i bacini e il confine con Premium resta unico. Si divide il lavoro del gruppo in due job (Ryanair e Wizz separati, o aeroporti separati). Le pause di Wizz non si accorciano. **Scelta del costruttore.**
 
 ### File Premium notturno (nuovo)
@@ -95,6 +104,7 @@ Definizioni (le stesse della scheda «Quando partire», `web/storico-view.js`):
 ## Fatto quando
 
 - `direct*.json` contiene voli fino a 400 € e 13 weekend, e nessun weekend lungo.
+- Nessun pezzo di Google o Telegram resta nel codice e nei workflow; le notifiche nell'app funzionano ancora (avvisi, tratte seguite, check-up).
 - `premium*.json` esiste per ogni gruppo con i Weekend dei mesi 4–12 e i Weekend lunghi dei mesi 1–12.
 - La ricerca diretta resta sotto il suo tempo per tutti i gruppi (misurata su un giro vero).
 - La webapp di Bruno mostra cursore fino a 400 €, 12 mesi e l'interruttore Weekend / Weekend lungo.
