@@ -32,8 +32,8 @@ function legOk(leg) {
 }
 
 /** Vero se l'itinerario rispetta tutti i vincoli dello spec. */
-export function isValid(it, now) {
-  if (!CONSTRAINTS.origins.includes(it.origin)) return false;
+export function isValid(it, now, origins = CONSTRAINTS.origins) {
+  if (!origins.includes(it.origin)) return false;
   if (!(it.price <= CONSTRAINTS.maxPrice)) return false;
   if (!legOk(it.outbound) || !legOk(it.inbound)) return false;
 

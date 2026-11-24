@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { DateTime } from 'luxon';
 import { CONSTRAINTS } from './filter.js';
 import { upcomingWeekends } from './weekends.js';
+import { GRUPPI, GRUPPO, dataFile } from './gruppi.js';
 import { mergeSource } from './store.js';
 import { processAlerts } from './alerts.js';
 import { fetchRyanair } from './sources/ryanair.js';
@@ -15,11 +16,14 @@ export const MODES = {
 };
 
 /** Esegue le fonti di una modalità, aggiorna il file dati e invia gli avvisi. Restituisce il codice d'uscita. */
-export async function runMode(mode, dataDir, { sources, now = DateTime.now(), env = process.env, log = console.log } = {}) {
+export async function runMode(mode, dataDir, { sources, now = DateTime.now(), env = process.env, log = console.log, gruppo = GRUPPO } = {}) {
   const cfg = MODES[mode];
   if (!cfg) throw new Error(`modalità sconosciuta: ${mode} (usa direct o connections)`);
   await mkdir(dataDir, { recursive: true });
-  const path = join(dataDir, cfg.file);
+  // Il file dati dipende dal gruppo; gli aeroporti validi sono quelli del gruppo (non del processo)
+  const fileName = dataFile(mode, gruppo);
+  const origins = GRUPPI[gruppo].aeroporti;
+  const path = join(dataDir, fileName);
   let file = JSON.parse(await readFile(path, 'utf8').catch(() => 'null'));
   const weekends = upcomingWeekends(now, CONSTRAINTS.weekends);
   let failures = 0;
@@ -28,19 +32,20 @@ export async function runMode(mode, dataDir, { sources, now = DateTime.now(), en
     const started = Date.now();
     try {
       const itineraries = await fetchSource(weekends, { log });
-      file = mergeSource(file, name, { ok: true, itineraries }, now);
+      file = mergeSource(file, name, { ok: true, itineraries }, now, origins);
       log(`${name}: ${itineraries.length} trovati in ${Math.round((Date.now() - started) / 1000)} s`);
     } catch (err) {
       failures++;
       // Qualsiasi cosa venga lanciata (anche senza message), i dati si salvano comunque con lo stato d'errore
       const message = String(err?.message ?? err ?? '').split('\n')[0] || 'errore sconosciuto';
-      file = mergeSource(file, name, { ok: false, error: message }, now);
+      file = mergeSource(file, name, { ok: false, error: message }, now, origins);
       log(`${name}: ERRORE ${message}`);
     }
   }
   await writeFile(path, JSON.stringify(file, null, 1));
-  log(`${cfg.file}: ${file.itineraries.length} itinerari validi`);
-  await processAlerts(dataDir, file.itineraries, env, now, { log, stateFile: cfg.stateFile });
+  log(`${fileName}: ${file.itineraries.length} itinerari validi`);
+  // Gli avvisi partono solo dalla Puglia: gli altri gruppi raccolgono soltanto prezzi
+  if (gruppo === 'puglia') await processAlerts(dataDir, file.itineraries, env, now, { log, stateFile: cfg.stateFile });
   return failures === Object.keys(active).length ? 1 : 0;
 }
 
