@@ -96,11 +96,29 @@ test('fetchWizz: un 429 su una rotta non fa fallire la fonte; fallisce solo se c
     return new Response(JSON.stringify({ outboundFlights: [], returnFlights: [] }));
   };
   const log = () => {};
-  await fetchWizz(weekends.slice(0, 1), { fetchImpl: fake(['TIA']), pauseMs: 0, log });
-  await assert.rejects(fetchWizz(weekends.slice(0, 1), { fetchImpl: fake(['TIA', 'OTP']), pauseMs: 0, log }));
+  await fetchWizz(weekends.slice(0, 1), { fetchImpl: fake(['TIA']), pauseMs: 0, retryBaseMs: 1, log });
+  await assert.rejects(fetchWizz(weekends.slice(0, 1), { fetchImpl: fake(['TIA', 'OTP']), pauseMs: 0, retryBaseMs: 1, log }));
 });
 
 test('wizzVersion: se fetch lancia un errore di rete usa curl', async () => {
   const fetchImpl = async () => { throw new Error('ECONNRESET'); };
   assert.equal(await wizzVersion({ fetchImpl, curlImpl: async () => 'be.wizzair.com/29.23.1/' }), '29.23.1');
+});
+
+test('fetchWizz: un 503 sul timetable si riprova e la rotta riesce', async () => {
+  const smallMap = { cities: [
+    { iata: 'BRI', shortName: 'Bari', countryName: 'Italia', countryCode: 'IT', latitude: 41.1, longitude: 16.8, connections: [{ iata: 'BUD' }] },
+    { iata: 'BUD', shortName: 'Budapest', countryName: 'Ungheria', countryCode: 'HU', latitude: 47.4, longitude: 19.2, connections: [] },
+  ] };
+  let timetableCalls = 0;
+  const fetchImpl = async (url) => {
+    if (url === 'https://wizzair.com/') return new Response('be.wizzair.com/29.23.1/Api');
+    if (url.includes('/asset/map')) return new Response(JSON.stringify(smallMap));
+    return ++timetableCalls === 1 ? new Response('', { status: 503 }) : new Response(JSON.stringify({ outboundFlights: [], returnFlights: [] }));
+  };
+  const logs = [];
+  const res = await fetchWizz(weekends.slice(0, 1), { fetchImpl, pauseMs: 0, retryBaseMs: 1, log: (m) => logs.push(m) });
+  assert.deepEqual(res, []);
+  assert.equal(timetableCalls, 2); // una finestra: 503 poi 200
+  assert.deepEqual(logs, []);
 });

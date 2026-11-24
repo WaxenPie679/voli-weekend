@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
 import { CONSTRAINTS } from '../filter.js';
 import { itineraryId } from '../model.js';
-import { fetchJson, jitter } from '../util.js';
+import { fetchJson, fetchRetry, jitter } from '../util.js';
 import { todayRome } from '../weekends.js';
 
 // Fusi orari dei paesi serviti fuori dall'ora dell'Europa centrale (default: Europe/Rome).
@@ -116,7 +116,7 @@ export function pairWizzFares(ttJson, route, weekends, seenAt) {
   return its;
 }
 
-export async function fetchWizz(weekends, { fetchImpl = fetch, pauseMs = 1500, log = console.log } = {}) {
+export async function fetchWizz(weekends, { fetchImpl = fetch, pauseMs = 2000, retryBaseMs = 30000, log = console.log } = {}) {
   const seenAt = new Date().toISOString();
   const base = `https://be.wizzair.com/${await wizzVersion({ fetchImpl })}/Api`;
   const routes = parseWizzRoutes(await fetchJson(fetchImpl, `${base}/asset/map?languageCode=it-it`), CONSTRAINTS.origins);
@@ -133,11 +133,16 @@ export async function fetchWizz(weekends, { fetchImpl = fetch, pauseMs = 1500, l
           ],
           priceType: 'regular', adultCount: 1, childCount: 0, infantCount: 0,
         };
-        const tt = await fetchJson(fetchImpl, `${base}/search/timetable`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
-        });
-        all.push(...pairWizzFares(tt, route, weekends, seenAt));
-        if (pauseMs) await jitter(pauseMs / 3, pauseMs);
+        try {
+          // Su 429/503 (Wizz blocca per circa un minuto se si va troppo veloci) attende e riprova
+          const tt = await fetchRetry(fetchImpl, `${base}/search/timetable`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+          }, { retries: 2, baseMs: retryBaseMs });
+          all.push(...pairWizzFares(tt, route, weekends, seenAt));
+        } finally {
+          // Pausa dopo ogni richiesta, anche se fallita: dopo un errore non si martella Wizz
+          if (pauseMs) await jitter(pauseMs / 3, pauseMs);
+        }
       }
     } catch (err) {
       failed++;

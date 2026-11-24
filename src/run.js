@@ -28,19 +28,23 @@ export async function runMode(mode, dataDir, { sources, now = DateTime.now(), en
   const weekends = upcomingWeekends(now, CONSTRAINTS.weekends);
   let failures = 0;
   const active = sources ?? cfg.sources;
-  for (const [name, fetchSource] of Object.entries(active)) {
+  // Le fonti partono insieme (Ryanair e Wizz sono siti diversi); i risultati si uniscono poi nell'ordine originale
+  const outcomes = await Promise.all(Object.entries(active).map(async ([name, fetchSource]) => {
     const started = Date.now();
     try {
       const itineraries = await fetchSource(weekends, { log });
-      file = mergeSource(file, name, { ok: true, itineraries }, now, origins);
       log(`${name}: ${itineraries.length} trovati in ${Math.round((Date.now() - started) / 1000)} s`);
+      return { name, result: { ok: true, itineraries } };
     } catch (err) {
-      failures++;
       // Qualsiasi cosa venga lanciata (anche senza message), i dati si salvano comunque con lo stato d'errore
       const message = String(err?.message ?? err ?? '').split('\n')[0] || 'errore sconosciuto';
-      file = mergeSource(file, name, { ok: false, error: message }, now, origins);
       log(`${name}: ERRORE ${message}`);
+      return { name, result: { ok: false, error: message } };
     }
+  }));
+  for (const { name, result } of outcomes) {
+    if (!result.ok) failures++;
+    file = mergeSource(file, name, result, now, origins);
   }
   await writeFile(path, JSON.stringify(file, null, 1));
   log(`${fileName}: ${file.itineraries.length} itinerari validi`);

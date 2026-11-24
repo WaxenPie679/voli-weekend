@@ -77,3 +77,24 @@ test('avvisi solo dalla Puglia', async () => {
   assert.ok(logs.puglia.some((m) => m.startsWith('avvisi:')));
   assert.ok(!logs.roma.some((m) => m.startsWith('avvisi:')));
 });
+
+test('direct: le fonti partono in parallelo (sequenziale andrebbe in stallo) e si uniscono in ordine originale', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'voli-'));
+  let started = 0;
+  let release;
+  const bothStarted = new Promise((r) => { release = r; });
+  const start = () => { if (++started === 2) release(); return bothStarted; };
+  const sources = {
+    ryanair: async () => { await start(); await new Promise((r) => setTimeout(r, 20)); return [fare]; },
+    wizz: async () => { await start(); return []; },
+  };
+  const code = await Promise.race([
+    runMode('direct', dir, { ...quiet, sources }),
+    new Promise((_, rej) => setTimeout(() => rej(new Error('stallo: fonti non parallele')), 3000)),
+  ]);
+  assert.equal(code, 0);
+  const file = JSON.parse(await readFile(join(dir, 'direct.json'), 'utf8'));
+  assert.deepEqual(Object.keys(file.sources), ['ryanair', 'wizz']);
+  assert.equal(file.sources.ryanair.status, 'ok');
+  assert.equal(file.sources.wizz.status, 'ok');
+});

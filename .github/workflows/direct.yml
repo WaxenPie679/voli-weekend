@@ -25,7 +25,7 @@ jobs:
           - { gruppo: bergamo, suffix: '-bergamo', state: '', branch: history-bergamo }
           - { gruppo: roma, suffix: '-roma', state: '', branch: history-roma }
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
