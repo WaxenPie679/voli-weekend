@@ -4,7 +4,7 @@ import { isValid } from './filter.js';
  * Aggiorna un file dati con il risultato di una fonte.
  * Se la fonte fallisce si tengono i suoi itinerari precedenti, segnando l'errore.
  */
-export function mergeSource(prevFile, sourceName, result, now) {
+export function mergeSource(prevFile, sourceName, result, now, origins) {
   const nowIso = now.toUTC().toISO();
   const prevItins = prevFile?.itineraries ?? [];
   const prevStatus = prevFile?.sources?.[sourceName];
@@ -13,7 +13,7 @@ export function mergeSource(prevFile, sourceName, result, now) {
 
   const byId = new Map();
   for (const it of [...others, ...own]) {
-    if (!isValid(it, now)) continue;
+    if (!isValid(it, now, origins)) continue;
     const prev = byId.get(it.id);
     if (!prev || it.price < prev.price) byId.set(it.id, it);
   }

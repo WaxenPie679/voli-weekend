@@ -1,6 +1,7 @@
 import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
-import { collectRyanair, collectWizz, fetchRetry } from '../src/history/collect.js';
+import { collectRyanair, collectWizz } from '../src/history/collect.js';
+import { fetchRetry } from '../src/util.js';
 
 const json = (body, status = 200) => ({ ok: status < 400, status, json: async () => body, text: async () => (typeof body === 'string' ? body : JSON.stringify(body)) });
 const status = (s) => ({ ok: false, status: s, json: async () => ({}), text: async () => '' });
@@ -152,6 +153,15 @@ test('collectRyanair: elenco BRI ok ma BDS in errore → routesExpected 0 e rout
   assert.equal(r.meta.routesExpected, 0);
   assert.deepEqual(r.routes, []);
   assert.match(r.meta.stoppedReason, /elenco tratte/);
+});
+
+test('collectRyanair: elenco tratte 404 per un aeroporto (es. LIN) → zero tratte da lì, le altre proseguono', async () => {
+  const { fetchImpl } = ryanairFake(['TRN'], (u) => (u.includes('/airport/BDS') ? status(404) : null));
+  const r = await collectRyanair('2026-11-12', { fetchImpl, pauseMs: false, log: () => {} });
+  assert.equal(r.meta.stoppedReason, null);
+  assert.ok(r.routes.length > 0);
+  assert.ok(r.routes.every((x) => x.origin === 'BRI'));
+  assert.ok(r.meta.routesExpected > 0);
 });
 
 test('collectRyanair: maxRoutes limita tratte e routesExpected', async () => {
