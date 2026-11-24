@@ -132,3 +132,12 @@ test('confirmedOn: compagnia senza resoconto o senza tratte quel giorno → no',
   assert.equal(confirmedOn(meta('ryanair', { routesExpected: 0, routesOk: 0, stoppedReason: '429' }), o('ryanair', 'BRI', 'BUD', '2027-04-03')), false);
   assert.equal(confirmedOn(null, o('ryanair', 'BRI', 'BUD', '2027-04-03')), false);
 });
+
+test('confirmedOn: mese o finestra senza voli (empty) → il prezzo vecchio non conta come confermato', () => {
+  const ry = meta('ryanair', { empty: ['BRI-BUD 2027-04'] });
+  assert.equal(confirmedOn(ry, o('ryanair', 'BRI', 'BUD', '2027-04-03')), false);
+  assert.equal(confirmedOn(ry, o('ryanair', 'BRI', 'BUD', '2027-05-01')), true);
+  const wz = meta('wizz', { empty: ['BUD-BRI 2027-04-01'] });
+  assert.equal(confirmedOn(wz, o('wizz', 'BUD', 'BRI', '2027-04-04')), false);
+  assert.equal(confirmedOn(wz, o('wizz', 'BRI', 'BUD', '2027-04-03')), true);
+});

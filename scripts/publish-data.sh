@@ -5,6 +5,9 @@
 # Più job (uno per gruppo, più diretti e scali) pubblicano sullo stesso branch: 8 tentativi, con attesa casuale per non scontrarsi sempre insieme.
 set -euo pipefail
 dir="$1"; shift
+# Deve essere il worktree del branch `data` (scripts/prepare-data.sh): in una cartella qualsiasi i comandi git
+# agirebbero sul repository che la contiene e pubblicherebbero su `data` tutt'altro
+if [ ! -e "$dir/.git" ]; then echo "publish-data: $dir non è un worktree del branch data, niente da pubblicare" >&2; exit 1; fi
 tmp="$(mktemp -d)"
 for f in "$@"; do
   if [ -f "$dir/$f" ]; then cp "$dir/$f" "$tmp/"; fi

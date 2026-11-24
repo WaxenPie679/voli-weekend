@@ -6,7 +6,7 @@ import { parseRyanairRoutes, parseRyanairDays, parseWizzDays } from './observe.j
 
 /** @typedef {import('./observe.js').Obs} Obs */
 /** @typedef {import('./store.js').Coverage} Coverage */
-/** @typedef {{routesExpected:number, routesOk:number, requestsOk:number, requestsFailed:number, missing:string[], stoppedReason:string|null}} AirlineMeta */
+/** @typedef {{routesExpected:number, routesOk:number, requestsOk:number, requestsFailed:number, missing:string[], empty:string[], stoppedReason:string|null}} AirlineMeta */
 /** @typedef {{airline:string, origin:string, code:string, city:string, country:string}} RouteInfo */
 
 const MONTHS = 12;
@@ -15,7 +15,8 @@ const WIZZ_HORIZON_DAYS = 365;
 /** Richieste fallite di fila dopo cui la compagnia si ferma (blocco prolungato). */
 const MAX_CONSECUTIVE_FAILURES = 10;
 
-const emptyMeta = () => ({ routesExpected: 0, routesOk: 0, requestsOk: 0, requestsFailed: 0, missing: [], stoppedReason: null });
+// `empty`: mesi Ryanair / finestre Wizz riletti ma senza voli (stessi formati di `missing`), per il file Premium
+const emptyMeta = () => ({ routesExpected: 0, routesOk: 0, requestsOk: 0, requestsFailed: 0, missing: [], empty: [], stoppedReason: null });
 
 /** Pausa tra richieste: nessuna se `pauseMs` è falso. */
 const pause = (pauseMs, min, max) => (pauseMs ? jitter(min, max) : undefined);
@@ -100,7 +101,7 @@ export async function collectRyanair(today, { fetchImpl = fetch, pauseMs = true,
           if (json.outbound.fares.length > 0) {
             observations.push(...parseRyanairDays(json, from, to, today));
             coverage.push({ airline: 'ryanair', origin: from, dest: to, from: m.from, to: m.to });
-          }
+          } else meta.empty.push(`${from}-${to} ${m.month}`);
           stop.ok();
         } catch (err) {
           routeOk = false;
@@ -179,6 +180,7 @@ export async function collectWizz(today, { fetchImpl = fetch, pauseMs = true, lo
         directions.forEach(([list, from, to], i) => {
           observations.push(...parsed[i]);
           if (list.length > 0) coverage.push({ airline: 'wizz', origin: from, dest: to, from: win.from, to: win.to });
+          else meta.empty.push(`${from}-${to} ${win.from}`);
         });
         stop.ok();
       } catch (err) {

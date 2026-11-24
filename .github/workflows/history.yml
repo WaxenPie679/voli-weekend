@@ -36,7 +36,8 @@ jobs:
       - run: bash scripts/prepare-history.sh ${{ matrix.branch }}
       # Cartella ./data = branch `data`, dove va il file Premium (Weekend mesi 4–12, Weekend lunghi mesi 1–12)
       # Se non riesce, la raccolta parte lo stesso (solo il file Premium non verrà pubblicato)
-      - run: bash scripts/prepare-data.sh
+      - id: prepare_data
+        run: bash scripts/prepare-data.sh
         continue-on-error: true
       # Sotto il timeout del job (120): così il passo di pubblicazione ha tempo di girare
       - run: node src/history/run.js --dir ./history --premium ./data/premium${{ matrix.suffix }}.json
@@ -52,8 +53,8 @@ jobs:
       - id: publish_history
         if: always()
         run: bash scripts/publish-history.sh ./history ${{ matrix.branch }}
-      # File Premium sul branch `data`: se manca o fallisce, lo storico resta pubblicato
-      - if: always()
+      # File Premium sul branch `data`, solo se ./data è il suo worktree: se manca o fallisce, lo storico resta pubblicato
+      - if: always() && steps.prepare_data.outcome == 'success'
         run: bash scripts/publish-data.sh ./data premium${{ matrix.suffix }}.json
         timeout-minutes: 5
         continue-on-error: true

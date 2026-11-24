@@ -21,7 +21,8 @@ const WIZZ_WINDOW_DAYS = 30;
  * Vero se il resoconto (meta) di una notte dice che il prezzo di `o` è stato riletto quella notte. Lo storico
  * salva solo i cambi: senza questo controllo un prezzo rimasto uguale sembrerebbe vecchio.
  * In `missing` ci sono le tratte saltate («BRI-BUD», entrambe le direzioni), i mesi Ryanair («BRI-BUD 2027-04»)
- * e le finestre Wizz («BRI-BUD 2027-04-01») non riletti; in `notListed` le tratte sparite dall'elenco.
+ * e le finestre Wizz («BRI-BUD 2027-04-01») non riletti; in `empty`, con gli stessi formati, quelli riletti ma senza
+ * voli (un prezzo vecchio lì non è confermato); in `notListed` le tratte sparite dall'elenco.
  */
 export function confirmedOn(meta, o) {
   const m = meta?.airlines?.[o.airline];
@@ -29,7 +30,7 @@ export function confirmedOn(meta, o) {
   const pair = `${o.origin}-${o.dest}`;
   const reverse = `${o.dest}-${o.origin}`;
   if ((m.notListed ?? []).some((r) => r === pair || r === reverse)) return false;
-  for (const miss of m.missing ?? []) {
+  for (const miss of [...(m.missing ?? []), ...(m.empty ?? [])]) {
     const [route, tag] = miss.split(' ');
     if (!tag) { if (route === pair || route === reverse) return false; continue; }
     if (route !== pair) continue;
