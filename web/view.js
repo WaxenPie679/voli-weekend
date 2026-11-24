@@ -13,6 +13,32 @@ export function combine(direct) {
   return [...byId.values()].sort(byPrice);
 }
 
+const AIRLINE_NAMES = { ryanair: 'Ryanair', wizz: 'Wizz Air' };
+
+/** Gamba dello storico → segmento. Ryanair «HH:MM-HH:MM» (partenza-arrivo); Wizz «HH:MM HH:MM» (partenze del giorno, arrivo ignoto). */
+function premiumSegment(leg, from, to) {
+  const t = leg.time ?? '';
+  const ry = /^(\d{2}:\d{2})-(\d{2}:\d{2})$/.exec(t);
+  const deps = t.match(/\d{2}:\d{2}/g) ?? [];
+  const dep = `${leg.date}T${ry ? ry[1] : deps[0] ?? '00:00'}`;
+  const arr = ry ? `${leg.date}T${ry[2]}` : dep;
+  return { segment: { from, to, dep, arr, airline: AIRLINE_NAMES[leg.airline] ?? leg.airline }, known: Boolean(ry), times: deps.join(' · ') };
+}
+
+/** Voce del file Premium (src/history/premium.js) → itinerario mostrabile come gli altri. */
+export function fromPremium(e) {
+  const out = premiumSegment(e.out, e.origin, e.destination.code);
+  const back = premiumSegment(e.back, e.destination.code, e.origin);
+  return {
+    id: e.id, source: 'storico', kind: e.kind, origin: e.origin, destination: e.destination, weekend: e.weekend, price: e.price,
+    outbound: { segments: [out.segment], times: out.known ? null : out.times },
+    inbound: { segments: [back.segment], times: back.known ? null : back.times },
+    arrivalUnknown: !out.known || !back.known,
+    seenOn: e.out.seenOn < e.back.seenOn ? e.out.seenOn : e.back.seenOn,
+    bookingUrl: e.out.bookingUrl, returnUrl: e.back.bookingUrl,
+  };
+}
+
 export function groupByWeekend(its) {
   const groups = new Map();
   for (const it of [...its].sort(byPrice)) {
@@ -22,12 +48,13 @@ export function groupByWeekend(its) {
   return [...groups.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([weekend, items]) => ({ weekend, items }));
 }
 
-export function applyFilters(its, { origin, maxPrice, airline, weekend, minStay } = {}) {
-  return its.filter((it) => (!origin || it.origin === origin)
+export function applyFilters(its, { tipo, origin, maxPrice, airline, weekend, minStay } = {}) {
+  return its.filter((it) => (tipo === 'lungo' ? it.kind === 'lungo' : it.kind !== 'lungo')
+    && (!origin || it.origin === origin)
     && (maxPrice == null || it.price <= maxPrice)
     && (!airline || it.outbound.segments[0].airline === airline)
     && (!weekend || it.weekend === weekend)
-    && (!minStay || stayHours(it) >= minStay));
+    && (!minStay || (!it.arrivalUnknown && stayHours(it) >= minStay)));
 }
 
 /** Una carta per destinazione: la più economica tra tutti i weekend e gli aeroporti. */

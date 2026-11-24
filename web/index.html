@@ -63,6 +63,13 @@
       <summary><span>Filtri</span><span class="filters-summary" id="filters-summary"></span></summary>
       <form class="filters" id="filters" aria-label="Filtri">
       <fieldset class="seg-field">
+        <legend>Durata</legend>
+        <div class="seg">
+          <label><input type="radio" name="tipo" value="weekend" checked><span>Weekend</span></label>
+          <label><input type="radio" name="tipo" value="lungo"><span>Weekend lungo</span></label>
+        </div>
+      </fieldset>
+      <fieldset class="seg-field">
         <legend>Partenza</legend>
         <div class="seg">
           <label><input type="radio" name="origin" value="" checked><span>Tutte</span></label>
@@ -134,7 +141,8 @@
         <p class="weekend"></p>
         <p class="price"><span class="amount"></span> <span class="unit">€</span></p>
         <p class="price-note">andata e ritorno</p>
-        <a class="btn-book" target="_blank" rel="noopener">Prenota<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2h6v6M10 2 3 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></a>
+        <a class="btn-book" target="_blank" rel="noopener"><span class="btn-label">Prenota</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2h6v6M10 2 3 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></a>
+        <a class="btn-book btn-return" target="_blank" rel="noopener" hidden>Ritorno<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2h6v6M10 2 3 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></a>
       </div>
     </li>
   </template>

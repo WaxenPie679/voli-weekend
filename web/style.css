@@ -161,6 +161,8 @@ h1 { font-size: var(--fs-title); line-height: 1.2; font-weight: 500; letter-spac
 .btn-book { background: var(--accent); color: #fff; margin-top: auto; }
 .btn-book svg { width: 11px; height: 11px; }
 .btn-book:hover { background: #333; }
+.btn-return { margin-top: 6px; background: var(--raised); color: var(--text); }
+.btn-return:hover { background: var(--border); }
 .btn-book:active, .btn-secondary:active { transform: scale(.97); }
 .btn-secondary { background: var(--raised); color: var(--text); border: 0; }
 .btn-secondary:hover { background: var(--border); }
@@ -223,6 +225,9 @@ h1 { font-size: var(--fs-title); line-height: 1.2; font-weight: 500; letter-spac
   .price { grid-area: price; margin-top: 2px; }
   .price-note { grid-area: note; margin: 0; }
   .btn-book { grid-area: btn; margin: 0; height: 44px; padding: 0 18px; }
+  /* Voci dallo storico: «Andata» sopra, «Ritorno» sotto */
+  .pass-stub:has(.btn-return:not([hidden])) { grid-template-areas: "weekend btn" "price btn" "note ret"; }
+  .btn-book.btn-return { grid-area: ret; margin-top: 6px; justify-content: center; }
 }
 
 @media (prefers-reduced-motion: reduce) {

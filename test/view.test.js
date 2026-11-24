@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { combine, groupByWeekend, applyFilters, freshness, bestPerDestination, stayHours, airlinesOf, legTimes, stayWindow, notDeparted, romeNow } from '../web/view.js';
+import { combine, groupByWeekend, applyFilters, freshness, bestPerDestination, stayHours, airlinesOf, legTimes, stayWindow, notDeparted, romeNow, fromPremium } from '../web/view.js';
 
 const leg = (from, to, dep, arr, airline = 'Ryanair', hubs = []) => ({
   segments: hubs.length
@@ -92,4 +92,43 @@ test('applyFilters minStay: tiene solo i soggiorni di almeno N ore', () => {
   assert.deepEqual(applyFilters([short, long], { minStay: 24 }).map((x) => x.id), ['long']);
   assert.equal(applyFilters([short, long], { minStay: 0 }).length, 2);
   assert.equal(applyFilters([short, long], { minStay: 10 }).length, 2);
+});
+
+// --- Voci Premium (dallo storico) ---
+const pleg = (date, airline, time, price, seenOn = '2026-11-25') => ({ date, airline, time, price, seenOn, bookingUrl: `https://${airline}.test/${date}` });
+const entry = (kind, out, back, extra = {}) => ({
+  id: `storico|${kind}|BRI|BUD|2027-04-03`, kind, origin: 'BRI', destination: { code: 'BUD', city: 'Budapest', country: 'Ungheria' },
+  saturday: '2027-04-03', weekend: '2027-04-02', price: out.price + back.price, out, back, ...extra,
+});
+
+test('fromPremium: Ryanair conserva orari di partenza e arrivo', () => {
+  const x = fromPremium(entry('weekend', pleg('2027-04-03', 'ryanair', '06:10-08:00', 30), pleg('2027-04-04', 'ryanair', '20:00-21:40', 40)));
+  assert.equal(x.source, 'storico');
+  assert.equal(x.kind, 'weekend');
+  assert.equal(x.outbound.segments[0].dep, '2027-04-03T06:10');
+  assert.equal(x.outbound.segments[0].arr, '2027-04-03T08:00');
+  assert.equal(x.outbound.segments[0].airline, 'Ryanair');
+  assert.equal(x.arrivalUnknown, false);
+  assert.equal(x.price, 70);
+  assert.equal(x.weekend, '2027-04-02');
+  assert.equal(x.bookingUrl, 'https://ryanair.test/2027-04-03');
+  assert.equal(x.returnUrl, 'https://ryanair.test/2027-04-04');
+});
+
+test('fromPremium: Wizz con più partenze → parte dalla prima, arrivo sconosciuto; seenOn è il più vecchio', () => {
+  const x = fromPremium(entry('lungo', pleg('2027-04-01', 'wizz', '18:30 21:10', 30, '2026-11-22'), pleg('2027-04-05', 'ryanair', '20:00-21:40', 40)));
+  assert.equal(x.outbound.segments[0].dep, '2027-04-01T18:30');
+  assert.equal(x.outbound.segments[0].airline, 'Wizz Air');
+  assert.equal(x.arrivalUnknown, true);
+  assert.equal(x.seenOn, '2026-11-22');
+});
+
+test('applyFilters: tipo lungo → solo i lunghi; tipo weekend → tutto il resto; «Sul posto» toglie gli arrivi sconosciuti', () => {
+  const diretto = it('d');
+  const pw = fromPremium(entry('weekend', pleg('2027-04-03', 'wizz', '09:00', 30), pleg('2027-04-04', 'ryanair', '20:00-21:40', 40)));
+  const pl = fromPremium(entry('lungo', pleg('2027-04-01', 'ryanair', '09:00-11:00', 30), pleg('2027-04-05', 'ryanair', '20:00-21:40', 40)));
+  const all = [diretto, pw, pl];
+  assert.deepEqual(applyFilters(all, { tipo: 'lungo' }).map((x) => x.kind), ['lungo']);
+  assert.deepEqual(applyFilters(all, { tipo: 'weekend' }).map((x) => x.id), [diretto.id, pw.id]);
+  assert.deepEqual(applyFilters(all, { tipo: 'weekend', minStay: 12 }).map((x) => x.id), [diretto.id]);
 });

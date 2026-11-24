@@ -1,0 +1,180 @@
+{
+ "generatedAt": "2026-11-24T04:10:00.000Z",
+ "day": "2026-11-24",
+ "entries": [
+  {
+   "id": "storico|lungo|BDS|BGY|2027-01-09",
+   "kind": "lungo",
+   "origin": "BDS",
+   "destination": {
+    "code": "BGY",
+    "city": "Bergamo",
+    "country": "Italia"
+   },
+   "saturday": "2027-01-09",
+   "weekend": "2027-01-08",
+   "price": 22.98,
+   "out": {
+    "date": "2027-01-07",
+    "airline": "ryanair",
+    "time": "21:05-22:45",
+    "price": 9.99,
+    "seenOn": "2026-11-24",
+    "bookingUrl": "https://www.ryanair.com/it/it/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2027-01-07&isReturn=false&originIata=BDS&destinationIata=BGY"
+   },
+   "back": {
+    "date": "2027-01-10",
+    "airline": "ryanair",
+    "time": "09:40-11:20",
+    "price": 12.99,
+    "seenOn": "2026-11-24",
+    "bookingUrl": "https://www.ryanair.com/it/it/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2027-01-10&isReturn=false&originIata=BGY&destinationIata=BDS"
+   }
+  },
+  {
+   "id": "storico|lungo|BRI|BUD|2026-12-12",
+   "kind": "lungo",
+   "origin": "BRI",
+   "destination": {
+    "code": "BUD",
+    "city": "Budapest",
+    "country": "Ungheria"
+   },
+   "saturday": "2026-12-12",
+   "weekend": "2026-12-11",
+   "price": 34.98,
+   "out": {
+    "date": "2026-12-10",
+    "airline": "ryanair",
+    "time": "06:10-08:00",
+    "price": 14.99,
+    "seenOn": "2026-11-24",
+    "bookingUrl": "https://www.ryanair.com/it/it/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-10&isReturn=false&originIata=BRI&destinationIata=BUD"
+   },
+   "back": {
+    "date": "2026-12-14",
+    "airline": "ryanair",
+    "time": "20:30-22:10",
+    "price": 19.99,
+    "seenOn": "2026-11-24",
+    "bookingUrl": "https://www.ryanair.com/it/it/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2026-12-14&isReturn=false&originIata=BUD&destinationIata=BRI"
+   }
+  },
+  {
+   "id": "storico|weekend|BRI|TIA|2027-05-15",
+   "kind": "weekend",
+   "origin": "BRI",
+   "destination": {
+    "code": "TIA",
+    "city": "Tirana",
+    "country": "Albania"
+   },
+   "saturday": "2027-05-15",
+   "weekend": "2027-05-14",
+   "price": 41.99,
+   "out": {
+    "date": "2027-05-14",
+    "airline": "wizz",
+    "time": "19:20 21:40",
+    "price": 19.99,
+    "seenOn": "2026-11-24",
+    "bookingUrl": "https://wizzair.com/it-it/booking/select-flight/BRI/TIA/2027-05-14/null/1/0/0/null"
+   },
+   "back": {
+    "date": "2027-05-16",
+    "airline": "ryanair",
+    "time": "18:00-19:05",
+    "price": 22,
+    "seenOn": "2026-11-24",
+    "bookingUrl": "https://www.ryanair.com/it/it/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2027-05-16&isReturn=false&originIata=TIA&destinationIata=BRI"
+   }
+  },
+  {
+   "id": "storico|weekend|BRI|BUD|2027-04-03",
+   "kind": "weekend",
+   "origin": "BRI",
+   "destination": {
+    "code": "BUD",
+    "city": "Budapest",
+    "country": "Ungheria"
+   },
+   "saturday": "2027-04-03",
+   "weekend": "2027-04-02",
+   "price": 56.49,
+   "out": {
+    "date": "2027-04-03",
+    "airline": "ryanair",
+    "time": "06:10-08:00",
+    "price": 24.99,
+    "seenOn": "2026-11-24",
+    "bookingUrl": "https://www.ryanair.com/it/it/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2027-04-03&isReturn=false&originIata=BRI&destinationIata=BUD"
+   },
+   "back": {
+    "date": "2027-04-04",
+    "airline": "ryanair",
+    "time": "20:30-22:10",
+    "price": 31.5,
+    "seenOn": "2026-11-24",
+    "bookingUrl": "https://www.ryanair.com/it/it/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2027-04-04&isReturn=false&originIata=BUD&destinationIata=BRI"
+   }
+  },
+  {
+   "id": "storico|lungo|BRI|KRK|2027-04-24",
+   "kind": "lungo",
+   "origin": "BRI",
+   "destination": {
+    "code": "KRK",
+    "city": "Cracovia",
+    "country": "Polonia"
+   },
+   "saturday": "2027-04-24",
+   "weekend": "2027-04-23",
+   "price": 65.98,
+   "out": {
+    "date": "2027-04-22",
+    "airline": "wizz",
+    "time": "10:15",
+    "price": 29.99,
+    "seenOn": "2026-11-21",
+    "bookingUrl": "https://wizzair.com/it-it/booking/select-flight/BRI/KRK/2027-04-22/null/1/0/0/null"
+   },
+   "back": {
+    "date": "2027-04-26",
+    "airline": "wizz",
+    "time": "13:05",
+    "price": 35.99,
+    "seenOn": "2026-11-24",
+    "bookingUrl": "https://wizzair.com/it-it/booking/select-flight/KRK/BRI/2027-04-26/null/1/0/0/null"
+   }
+  },
+  {
+   "id": "storico|weekend|BDS|STN|2027-06-12",
+   "kind": "weekend",
+   "origin": "BDS",
+   "destination": {
+    "code": "STN",
+    "city": "Londra",
+    "country": "Regno Unito"
+   },
+   "saturday": "2027-06-12",
+   "weekend": "2027-06-11",
+   "price": 229,
+   "out": {
+    "date": "2027-06-12",
+    "airline": "ryanair",
+    "time": "07:00-09:10",
+    "price": 89,
+    "seenOn": "2026-11-24",
+    "bookingUrl": "https://www.ryanair.com/it/it/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2027-06-12&isReturn=false&originIata=BDS&destinationIata=STN"
+   },
+   "back": {
+    "date": "2027-06-13",
+    "airline": "ryanair",
+    "time": "17:40-21:30",
+    "price": 140,
+    "seenOn": "2026-11-24",
+    "bookingUrl": "https://www.ryanair.com/it/it/trip/flights/select?adults=1&teens=0&children=0&infants=0&dateOut=2027-06-13&isReturn=false&originIata=STN&destinationIata=BDS"
+   }
+  }
+ ]
+}
