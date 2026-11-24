@@ -1,6 +1,6 @@
 # Motore prezzi: voli fino a 400 € e weekend fino a 12 mesi
 
-Data: 24/11/2026 · Issue DoVai: WaxenPie679/voli-weekend-servizio#40 · Stato: da approvare
+Data: 24/11/2026 · Issue DoVai: WaxenPie679/voli-weekend-servizio#40 · Stato: approvato da Bruno il 24/11/2026
 Ramo: `feat/bacini-milano-roma` (contiene già i gruppi Milano, Bergamo, Roma; vedi `2026-11-24-bacini-milano-roma-design.md`)
 
 ## Perché
@@ -58,9 +58,7 @@ Definizioni (le stesse della scheda «Quando partire», `web/storico-view.js`):
 Bruno non vuole altra complessità. Con questo lavoro:
 
 - **Via i voli con scalo di Google, del tutto:** `src/sources/google.js`, la modalità `connections` di `src/run.js`, il workflow `connections.yml`, i file `connections*.json`, i controlli nel check-up, la parte dell'app che li legge e li mostra, i test, la dipendenza `playwright` se non serve ad altro. Restano solo Ryanair e Wizz diretti. Se un giorno serviranno, si recuperano dalla cronologia di git.
-- **Via Telegram, del tutto:** niente più messaggi né dalla ricerca né dalle tratte seguite; `src/telegram.js`, il workflow `telegram-test.yml`, i segreti nei workflow. **Restano le notifiche nell'app (push)**, sia per «sotto 80 €» sia per le tratte seguite.
-- **Il check-up notturno** oggi scrive su Telegram quando qualcosa non va: d'ora in poi manda una **notifica nell'app**, e non controlla più il bot Telegram. **Scelta del costruttore** (senza un canale il check-up non avviserebbe più nessuno).
-- I segreti `TELEGRAM_BOT_TOKEN` e `TELEGRAM_CHAT_ID` su GitHub li cancella Bruno a mano, dopo il merge.
+- **Telegram solo per i problemi:** niente più messaggi di voli, né dalla ricerca («sotto 80 €») né dalle tratte seguite: questi arrivano **solo come notifica nell'app (push)**. Su Telegram resta soltanto il **check-up notturno**, che scrive quando qualcosa non va. `src/telegram.js`, `telegram-test.yml` e i segreti in `health.yml` restano; i segreti Telegram si tolgono da `direct.yml` e `tracking.yml`.
 
 ## Come funziona
 
@@ -104,7 +102,7 @@ Bruno non vuole altra complessità. Con questo lavoro:
 ## Fatto quando
 
 - `direct*.json` contiene voli fino a 400 € e 13 weekend, e nessun weekend lungo.
-- Nessun pezzo di Google o Telegram resta nel codice e nei workflow; le notifiche nell'app funzionano ancora (avvisi, tratte seguite, check-up).
+- Nessun pezzo di Google resta nel codice e nei workflow; avvisi e tratte seguite arrivano solo come notifica nell'app; il check-up scrive ancora su Telegram.
 - `premium*.json` esiste per ogni gruppo con i Weekend dei mesi 4–12 e i Weekend lunghi dei mesi 1–12.
 - La ricerca diretta resta sotto il suo tempo per tutti i gruppi (misurata su un giro vero).
 - La webapp di Bruno mostra cursore fino a 400 €, 12 mesi e l'interruttore Weekend / Weekend lungo.
