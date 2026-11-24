@@ -6,10 +6,6 @@ on:
     - cron: '7,22,37,52 * * * *'
   workflow_dispatch:
 
-concurrency:
-  group: direct
-  cancel-in-progress: false
-
 permissions:
   contents: write
 
@@ -24,8 +20,14 @@ jobs:
           - { gruppo: milano, suffix: '-milano', state: '', branch: history-milano }
           - { gruppo: bergamo, suffix: '-bergamo', state: '', branch: history-bergamo }
           - { gruppo: roma, suffix: '-roma', state: '', branch: history-roma }
+    # Una coda per bacino: Roma e Milano (oltre 100 e 58 tratte Wizz, 4 finestre per 13 weekend) possono superare
+    # i 15 minuti senza far aspettare la Puglia, che resta ogni 15 minuti. Un solo giro alla volta per bacino,
+    # così Wizz non riceve richieste in parallelo dallo stesso bacino.
+    concurrency:
+      group: direct-${{ matrix.gruppo }}
+      cancel-in-progress: false
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
