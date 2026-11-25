@@ -61,6 +61,10 @@
   --larghezza: 1100px;
   --raggio: 16px;
   --uscita: cubic-bezier(.22, 1, .36, 1);
+  --arrivo: cubic-bezier(.16, 1, .3, 1); /* entrate decise che rallentano */
+  --ombra-biglietto: 0 1px 2px rgb(42 26 20 / .14), 0 12px 28px -16px rgb(42 26 20 / .5);
+  --ombra-biglietto-su: 0 2px 4px rgb(42 26 20 / .12), 0 22px 40px -18px rgb(42 26 20 / .55);
+  --altezza-testata: 64px;
   --fondo: var(--carta); /* il colore del foglio sotto: serve ai tagli della perforazione */
 
   color-scheme: light;
@@ -73,7 +77,11 @@
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  /* L'intestazione resta in alto: le ancore e il biglietto aperto da ?volo= non finiscono sotto. */
+  scroll-padding-top: calc(var(--altezza-testata) + 16px);
+  scrollbar-color: var(--moro-chiaro) var(--carta);
 }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 
 body {
   margin: 0;
@@ -164,13 +172,14 @@ img, svg { display: block; max-width: 100%; }
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
-  transition: background-color .2s var(--uscita), transform .2s var(--uscita);
+  transition: background-color .2s var(--uscita), transform .2s var(--uscita), box-shadow .2s var(--uscita);
 }
-.bottone:active { transform: translateY(1px); }
+@media (hover: hover) { .bottone:hover { transform: translateY(-1px); } }
+.bottone:active { transform: translateY(1px); transition-duration: .08s; }
 .bottone--grande { min-height: 52px; padding-inline: 26px; font-size: 1.25rem; }
 
 .bottone--kiwi { background: var(--ruggine); color: var(--carta); }
-.bottone--kiwi:hover { background: var(--ruggine-scura); }
+.bottone--kiwi:hover { background: var(--ruggine-scura); box-shadow: 0 8px 18px -10px rgb(142 53 25 / .7); }
 
 .bottone--contorno { border-color: var(--moro); color: var(--moro); background: transparent; }
 .bottone--contorno:hover { background: rgb(42 26 20 / .06); }
@@ -196,8 +205,41 @@ img, svg { display: block; max-width: 100%; }
   stroke-linejoin: round;
 }
 
-/* ---------- Intestazione: la firma moro su limone ---------- */
-.intestazione { background: var(--limone); }
+/* ---------- Vai al contenuto: il primo tasto Tab ---------- */
+.salta {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 20;
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: var(--moro);
+  color: var(--carta);
+  font-weight: 700;
+  text-decoration: none;
+  translate: 0 -160%;
+  transition: translate .2s var(--uscita);
+}
+.salta:focus-visible { translate: 0 0; outline-color: var(--limone); }
+
+/* ---------- Intestazione: la firma moro su limone, resta in alto ---------- */
+.intestazione {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--limone);
+}
+/* Appena si scorre, l'intestazione si stacca dalla pagina con un'ombra (solo dove il browser lo sa fare). */
+@supports (animation-timeline: scroll()) {
+  .intestazione {
+    animation: testata-staccata linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 48px;
+  }
+  @keyframes testata-staccata {
+    to { box-shadow: 0 1px 0 rgb(42 26 20 / .12), 0 10px 24px -18px rgb(42 26 20 / .6); }
+  }
+}
 .intestazione__riga {
   display: flex;
   align-items: center;
@@ -209,13 +251,121 @@ img, svg { display: block; max-width: 100%; }
 .intestazione__logo img { height: 34px; width: auto; }
 .intestazione__menu { display: flex; gap: clamp(14px, 3vw, 28px); }
 .intestazione__menu a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   font-weight: 500;
   font-size: 1rem;
   text-decoration: none;
-  padding-block: 10px;
 }
-.intestazione__menu a:hover { text-decoration: underline; text-decoration-thickness: 2px; }
+/* La sottolineatura si disegna da sinistra; sulla pagina in cui sei resta disegnata. */
+.intestazione__menu a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 8px;
+  height: 2px;
+  background: currentColor;
+  scale: 0 1;
+  transform-origin: left;
+  transition: scale .3s var(--arrivo);
+}
+.intestazione__menu a:hover::after,
+.intestazione__menu a[aria-current="page"]::after { scale: 1 1; }
+.intestazione__menu a[aria-current="page"] { font-weight: 700; }
 .intestazione :focus-visible { outline-color: var(--moro); }
+
+/* ---------- Striscia delle partenze (GUIDA §7): limone, mono maiuscolo, da destra a sinistra ---------- */
+.striscia {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  background: var(--limone);
+  border-block: 1px solid rgb(42 26 20 / .16);
+  color: var(--moro);
+}
+.striscia__binario {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  /* Le voci entrano ed escono sfumando sui bordi. */
+  mask-image: linear-gradient(90deg, transparent, #000 32px, #000 calc(100% - 32px), transparent);
+}
+.striscia__scorre { display: flex; width: max-content; }
+.striscia__nastro {
+  display: flex;
+  flex: none;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.striscia__voce {
+  display: flex;
+  align-items: center;
+  gap: .6em;
+  min-height: 44px;
+  padding-inline: 22px;
+  font-family: var(--font-dati);
+  font-weight: 700;
+  font-size: .8125rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+/* Tra una voce e l'altra un punto pieno, come sui tabelloni. */
+.striscia__voce::after {
+  content: "";
+  width: 5px;
+  height: 5px;
+  margin-left: 22px;
+  margin-right: -22px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: .55;
+}
+.striscia__voce--slogan { font-family: var(--font-titolo); font-weight: 800; font-size: .9375rem; letter-spacing: 0; text-transform: none; }
+/* Il prezzo resta scritto come vuole la guida: «30 € a/r», non in maiuscolo. */
+.striscia__prezzo { text-transform: none; color: var(--ruggine-scura); }
+
+.striscia__pausa {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  border-left: 1px solid rgb(42 26 20 / .16);
+  cursor: pointer;
+}
+.striscia__pausa:hover { background: rgb(42 26 20 / .06); }
+.striscia__pausa:has(:focus-visible) { outline: 3px solid var(--moro); outline-offset: -3px; }
+.striscia__ferma { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.striscia__icona { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.striscia__icona--vai { display: none; fill: currentColor; stroke-width: 1.5; }
+.striscia:has(.striscia__ferma:checked) .striscia__icona--pausa { display: none; }
+.striscia:has(.striscia__ferma:checked) .striscia__icona--vai { display: block; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .striscia__scorre { animation: striscia-scorre 48s linear infinite; }
+  @keyframes striscia-scorre { to { translate: -50% 0; } }
+  /* Si ferma col pulsante, sotto il puntatore e quando ci si arriva con la tastiera. */
+  .striscia:has(.striscia__ferma:checked) .striscia__scorre,
+  .striscia__binario:hover .striscia__scorre,
+  .striscia:focus-within .striscia__scorre { animation-play-state: paused; }
+}
+/* Movimento ridotto: la striscia è ferma e si scorre a mano; il pulsante non serve. */
+@media (prefers-reduced-motion: reduce) {
+  .striscia__binario { overflow-x: auto; scrollbar-width: none; }
+  .striscia__pausa { display: none; }
+}
+/* Sul telefono la striscia è più bassa: il primo biglietto deve restare nel primo schermo. */
+@media (max-width: 639px) {
+  .striscia__voce { min-height: 34px; padding-inline: 14px; font-size: .75rem; }
+  .striscia__voce--slogan { font-size: .875rem; }
+  .striscia__voce::after { margin-left: 14px; margin-right: -14px; }
+  .striscia__pausa { width: 40px; }
+}
 
 /* ---------- Filtri ---------- */
 .filtri {
@@ -350,7 +500,7 @@ img, svg { display: block; max-width: 100%; }
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 12px;
   border-radius: 999px;
   font-weight: 500;
@@ -364,6 +514,9 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
 
 .filtri__premium {
   align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   font-size: .875rem;
   font-weight: 500;
   color: var(--moro-chiaro);
@@ -375,7 +528,7 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
 /* Cursore del prezzo: binario moro, pomello ruggine (il prezzo) */
 .filtri input[type="range"] {
   width: 100%;
-  height: 32px;
+  height: 44px;
   margin: 0;
   background: transparent;
   appearance: none;
@@ -417,7 +570,7 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
 }
 .filtri__riepilogo { flex: 1 1 16rem; font-weight: 500; font-size: .9375rem; line-height: 1.4; }
 .filtri__riepilogo:empty { display: none; }
-.filtri__togli { font-weight: 500; padding-block: 8px; }
+.filtri__togli { display: inline-flex; align-items: center; min-height: 44px; font-weight: 500; }
 .filtri__invia { margin-left: auto; }
 /* Con JavaScript la lista cambia mentre si sceglie: il bottone serve solo senza. */
 .filtri--vivo .filtri__invia { display: none; }
@@ -443,7 +596,19 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
   background: var(--moro);
   color: var(--carta);
   border-radius: var(--raggio);
-  box-shadow: 0 1px 2px rgb(42 26 20 / .14), 0 12px 28px -16px rgb(42 26 20 / .5);
+  box-shadow: var(--ombra-biglietto);
+  scroll-margin-top: calc(var(--altezza-testata) + 16px);
+  transition: transform .35s var(--arrivo), box-shadow .35s var(--arrivo);
+}
+/* Sotto il puntatore il biglietto si alza appena e il timbro si inclina un po' di più. */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .biglietti .biglietto:hover { transform: translateY(-2px); box-shadow: var(--ombra-biglietto-su); }
+  .biglietti .biglietto:hover .bollino { transform: rotate(-9deg) scale(1.04); }
+}
+/* I biglietti aggiunti con «Mostra altri voli» arrivano in fila (al massimo mezzo secondo in tutto). */
+@media (prefers-reduced-motion: no-preference) {
+  .biglietto--arriva { animation: biglietto-arriva .5s var(--arrivo) both; animation-delay: calc(var(--i, 0) * 40ms); }
+  @keyframes biglietto-arriva { from { opacity: 0; translate: 0 14px; } }
 }
 .biglietto :focus-visible { outline-color: var(--limone); }
 .biglietto .matrice :focus-visible { outline-color: var(--ruggine); }
@@ -494,6 +659,7 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
   line-height: 1;
   white-space: nowrap;
   transform: rotate(-6deg);
+  transition: transform .35s var(--arrivo);
 }
 
 .biglietto__quando {
@@ -617,9 +783,11 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
   gap: 10px 16px;
 }
 .o-su {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   font-weight: 500;
   font-size: .9375rem;
-  padding-block: 8px;
 }
 .nota-kiwi { font-size: .8125rem; color: var(--moro-chiaro); }
 
@@ -628,8 +796,10 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
   display: inline-flex;
   align-items: center;
   gap: .5em;
+  min-height: 44px;
   margin-top: 4px;
-  padding: 6px 12px 6px 14px;
+  padding: 6px 14px 6px 16px;
+  transition: border-color .2s var(--uscita), background-color .2s var(--uscita);
   border: 1px solid var(--linea);
   border-radius: 999px;
   font-weight: 500;
@@ -642,14 +812,16 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
   color: var(--moro-chiaro);
   font-size: .875rem;
 }
-.premium-chiuso:hover { border-color: var(--moro); }
+.premium-chiuso:hover { border-color: var(--moro); background: rgb(42 26 20 / .04); }
 .premium-chiuso:hover .lucchetto { color: var(--moro); }
 
 /* Aperto: la matrice aperta prende il posto di quella chiusa */
 .biglietto:has(> .biglietto__dettagli[open]) > .matrice--chiusa { display: none; }
 
 .perche summary {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   font-size: .875rem;
   font-weight: 500;
   text-decoration: underline;
@@ -677,15 +849,17 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
 .altre li + li { border-top: 1px solid var(--linea); }
 .altre a {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
+  min-height: 44px;
   padding: 10px 0;
   font-size: .875rem;
   text-decoration: none;
 }
 .altre a:hover .dato { text-decoration: underline; }
 .altre__prezzo { font-family: var(--font-titolo); font-weight: 800; color: var(--ruggine); white-space: nowrap; }
-.ricevilo { justify-self: start; font-weight: 500; font-size: .9375rem; padding-block: 4px; }
+.ricevilo { justify-self: start; display: inline-flex; align-items: center; min-height: 44px; font-weight: 500; font-size: .9375rem; }
 
 /* Il biglietto si apre sul posto: si srotola, se il browser lo sa fare e se il movimento va bene */
 @media (prefers-reduced-motion: no-preference) {
@@ -759,19 +933,32 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
 /* ---------- Piede: la chiusura in testa di moro ---------- */
 .piede {
   margin-top: clamp(56px, 8vw, 96px);
-  padding-block: 40px 48px;
+  padding-block: clamp(48px, 7vw, 88px) 40px;
   background: var(--moro);
   color: var(--carta);
   font-size: .9375rem;
 }
 .piede .contenitore { display: grid; gap: 16px; }
+/* Il payoff come chiusura: la frase grande, la seconda metà in limone (su moro si legge, 11:1). */
+.piede p.piede__payoff {
+  max-width: 14ch;
+  margin-bottom: clamp(16px, 3vw, 32px);
+  color: var(--carta);
+  font-family: var(--font-titolo);
+  font-weight: 800;
+  font-size: clamp(2.5rem, 1.2rem + 5.5vw, 5.5rem);
+  line-height: .95;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+.piede__payoff span { color: var(--limone); }
 .piede p { max-width: 70ch; color: var(--carta-tenue); }
 .piede :focus-visible { outline-color: var(--limone); }
 .piede__marchio { display: flex; align-items: center; gap: 14px; }
 .piede p.piede__marchio { color: var(--carta); font-family: var(--font-titolo); font-weight: 700; font-size: 1.125rem; }
 .piede__marchio img { height: 34px; width: auto; }
 .piede__menu { display: flex; flex-wrap: wrap; gap: 4px 20px; margin-bottom: 8px; }
-.piede__menu a { color: var(--carta); font-weight: 500; padding-block: 6px; }
+.piede__menu a { display: inline-flex; align-items: center; min-height: 44px; color: var(--carta); font-weight: 500; }
 .piede__fondo {
   display: flex;
   flex-wrap: wrap;
@@ -779,23 +966,115 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
   padding-top: 18px;
   border-top: 1px solid var(--linea-scura);
 }
-.piede__fondo a { color: var(--carta); }
+.piede__fondo a { display: inline-flex; align-items: center; min-height: 44px; color: var(--carta); }
+.piede__fondo { align-items: center; }
 
 /* ---------- Pagine: apertura, sezioni, testi lunghi ---------- */
-.apertura { padding-block: clamp(12px, 3.5vw, 48px) clamp(8px, 1.5vw, 16px); }
-.apertura__riga { font-size: .9375rem; color: var(--moro-chiaro); margin-bottom: 6px; }
-.apertura h1 { font-size: clamp(1.875rem, 1.1rem + 3.8vw, 3.75rem); }
-.apertura__sotto { margin-top: 10px; max-width: 52ch; font-size: clamp(1rem, .95rem + .35vw, 1.1875rem); line-height: 1.45; }
+.apertura { padding-block: clamp(16px, 4vw, 56px) clamp(16px, 2.5vw, 32px); }
+.apertura h1 { font-size: clamp(1.875rem, 1.1rem + 3.8vw, 3.75rem); letter-spacing: -0.02em; }
+.apertura__sotto { margin-top: 12px; max-width: 52ch; font-size: clamp(1rem, .95rem + .35vw, 1.1875rem); line-height: 1.45; }
+.apertura .intro { display: grid; gap: 6px; margin-top: 14px; }
+.apertura .intro > * { max-width: 60ch; }
+
+/* Con il volo del giorno: da computer testo a sinistra e biglietto a destra, allineati in basso. */
+.apertura__griglia { display: grid; gap: 28px; }
+.del-giorno { display: none; }
+@media (min-width: 900px) {
+  .apertura--giorno .apertura__griglia {
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 400px);
+    align-items: end;
+    column-gap: clamp(32px, 5vw, 72px);
+  }
+  .apertura--giorno h1 { font-size: clamp(2.5rem, 1rem + 3.6vw, 4rem); }
+  .del-giorno { display: grid; gap: 10px; }
+}
+.del-giorno__etichetta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: .9375rem;
+}
+/* Il pallino: il prezzo è di oggi. Pulsa due volte dopo il timbro, poi sta fermo. */
+.del-giorno__etichetta::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ruggine);
+  box-shadow: 0 0 0 0 rgb(166 64 31 / .5);
+}
+.biglietto--giorno { box-shadow: var(--ombra-biglietto-su); }
+.biglietto--giorno .biglietto__corpo {
+  grid-template-areas:
+    "tratta  bollino"
+    "quando  bollino"
+    "resta   resta"
+    "note    note";
+  padding: 26px 24px 22px;
+  cursor: auto;
+}
+.biglietto--giorno .tratta { font-size: 1.375rem; }
+.biglietto--giorno .bollino { font-size: 1.5rem; }
+.biglietto--giorno .matrice { padding: 24px 24px 22px; border-radius: 0 0 var(--raggio) var(--raggio); }
+.del-giorno__dettagli { display: inline-flex; align-items: center; min-height: 44px; margin-left: auto; font-weight: 500; font-size: .9375rem; }
+
+/* Il momento dell'apertura: il biglietto arriva, la perforazione si disegna, il timbro batte il prezzo.
+   Senza movimento il biglietto è già lì, timbrato. */
+@media (prefers-reduced-motion: no-preference) {
+  .apertura__testo > * { animation: apertura-testo .7s var(--arrivo) both; }
+  .apertura__testo > :nth-child(2) { animation-delay: .08s; }
+  .apertura__testo > :nth-child(3) { animation-delay: .16s; }
+  @keyframes apertura-testo { from { opacity: 0; translate: 0 16px; } }
+
+  .del-giorno__etichetta { animation: apertura-testo .6s var(--arrivo) .15s both; }
+  .del-giorno__etichetta::before { animation: pallino 1.6s ease-out 1.6s 2; }
+  @keyframes pallino { 70%, 100% { box-shadow: 0 0 0 10px rgb(166 64 31 / 0); } }
+
+  .biglietto--giorno { animation: giorno-arriva .8s var(--arrivo) .1s both; }
+  @keyframes giorno-arriva {
+    from { opacity: 0; transform: translateY(36px) rotate(2.5deg); box-shadow: var(--ombra-biglietto); }
+  }
+  .biglietto--giorno .perforazione { animation: perforazione .7s var(--arrivo) .55s both; }
+  @keyframes perforazione { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+
+  .bollino--timbro { animation: timbro .55s ease-out .85s both; }
+  @keyframes timbro {
+    0% { opacity: 0; transform: rotate(-22deg) scale(1.9); }
+    55% { opacity: 1; transform: rotate(-4deg) scale(.92); }
+    100% { opacity: 1; transform: rotate(-6deg) scale(1); }
+  }
+  /* L'inchiostro che si allarga sotto il timbro, una volta sola. */
+  .bollino--timbro { position: relative; }
+  .bollino--timbro::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid var(--limone);
+    opacity: 0;
+    animation: inchiostro .7s var(--arrivo) 1.12s both;
+  }
+  @keyframes inchiostro { from { opacity: .9; scale: 1; } to { opacity: 0; scale: 1.45; } }
+}
 
 .sezione { padding-block: clamp(20px, 4vw, 40px); }
 .sezione > .contenitore { display: grid; gap: 20px; }
 .sezione__sotto { max-width: 52ch; }
 .intro > * { max-width: 64ch; }
 .intro__locale { font-family: var(--font-titolo); font-weight: 700; font-size: clamp(1.125rem, 1rem + .6vw, 1.375rem); line-height: 1.2; }
-/* L'introduzione del bacino fa parte dell'apertura: i biglietti devono stare nel primo schermo. */
-.sezione--intro { padding-block: 0 4px; }
-.sezione--intro > .contenitore { gap: 6px; }
-.sezione--voli { padding-top: 12px; }
+.sezione--voli { padding-top: 16px; }
+/* Telefono: apertura stretta come prima, così la striscia non spinge i biglietti fuori dal primo schermo. */
+@media (max-width: 639px) {
+  .apertura { padding-block: 12px 10px; }
+  .apertura__sotto { margin-top: 8px; }
+  .apertura .intro { margin-top: 8px; gap: 4px; }
+  .sezione--voli { padding-top: 10px; }
+  .sezione--voli > .contenitore { gap: 12px; }
+  .filtri { gap: 8px 24px; padding-top: 10px; }
+  .filtri__campo { gap: 5px; }
+  .filtri__fondo { padding-top: 8px; }
+}
 .sezione--voli > .contenitore { gap: 16px; }
 
 /* L'attributo hidden vince anche sulle regole con display (es. .altri). */
@@ -824,7 +1103,11 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
   border-radius: 12px;
   text-decoration: none;
 }
-.mete a:hover { border-color: var(--moro); }
+.mete a {
+  transition: background-color .2s var(--uscita), border-color .2s var(--uscita), transform .25s var(--arrivo);
+}
+.mete a:hover { background: var(--limone); border-color: var(--moro); }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) { .mete a:hover { transform: translateY(-2px); } }
 .mete__nome { font-family: var(--font-titolo); font-weight: 700; font-size: 1.125rem; }
 .aeroporti { display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 0; padding: 0; list-style: none; color: var(--moro-chiaro); }
 
