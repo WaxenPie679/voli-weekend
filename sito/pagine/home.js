@@ -2,6 +2,8 @@
 import { h, grezzo } from '../statico/js/html.js';
 import { filtri, mesiDeiVoli } from '../parti/filtri.js';
 import { riquadroCanale, riquadroPremium } from '../parti/riquadri.js';
+import { striscia } from '../parti/striscia.js';
+import { delGiorno } from '../parti/del-giorno.js';
 import { KIWI_AFFILIATO } from '../config.js';
 import { documento, apertura, voliIniziali, riepilogo, elencoBiglietti, elencoMete, SCRIPT_ESPLORA } from './comune.js';
 
@@ -26,12 +28,14 @@ export function pagina({ voli, bacini, adesso, affiliato = KIWI_AFFILIATO }) {
   const mete = metePiuBasse(bacini);
   const lista = elencoBiglietti({ voli: iniziali, tutti: voli, adesso, affiliato, riquadro: riquadroCanale(), dopo: CANALE_DOPO, pagina: '/' });
   const corpo = h`${grezzo(apertura({
-    riga: 'Quando parti, DoVai?',
+    giorno: delGiorno(iniziali[0] ?? voli[0], { adesso, affiliato, pagina: '/' }),
     titolo: 'I voli economici del weekend, controllati ogni giorno',
     sottotitolo: 'Da Bari, Brindisi, Milano, Bergamo e Roma. Prezzi andata e ritorno, dal più basso.',
   }))}
-<section class="sezione sezione--voli" aria-label="I voli">
+${grezzo(striscia(voli))}
+<section class="sezione sezione--voli" aria-labelledby="titolo-voli">
   <div class="contenitore">
+    <h2 class="nascosto" id="titolo-voli">I voli</h2>
     ${grezzo(filtri({ mesi: mesiDeiVoli(voli), riepilogo: riepilogo(iniziali.length, 'da tutti gli aeroporti') }))}
     ${grezzo(lista)}
   </div>

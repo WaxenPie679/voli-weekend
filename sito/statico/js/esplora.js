@@ -162,6 +162,11 @@ async function avvia() {
     mostrati += BLOCCO;
     lista.insertAdjacentHTML('beforeend', voli.slice(prima, mostrati).map(scheda).join(''));
     altri.parentElement.hidden = voli.length <= mostrati;
+    // I nuovi arrivano in fila (il CSS li anima solo se il movimento va bene).
+    [...lista.querySelectorAll('article.biglietto')].slice(prima).forEach((a, i) => {
+      a.style.setProperty('--i', String(Math.min(i, 12)));
+      a.classList.add('biglietto--arriva');
+    });
     // Chi usa la tastiera continua dal primo biglietto nuovo.
     lista.querySelectorAll('article.biglietto')[prima]?.querySelector('summary')?.focus();
   });
