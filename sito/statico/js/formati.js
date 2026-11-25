@@ -1,0 +1,77 @@
+// Formati di date, permanenza, «visto alle», prezzi e link Kiwi.
+// Funzioni pure, senza import: lo stesso file gira in Node e nel browser.
+
+const GIORNI = ['dom', 'lun', 'mar', 'mer', 'gio', 'ven', 'sab'];
+const MESI = ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'];
+
+// Data e ora locali dell'aeroporto, scritte come '2026-12-12T18:40' (nessun fuso).
+function parti(iso) {
+  return { anno: +iso.slice(0, 4), mese: +iso.slice(5, 7), giorno: +iso.slice(8, 10) };
+}
+
+export function giornoBreve(iso) {
+  const { anno, mese, giorno } = parti(iso);
+  const settimana = new Date(Date.UTC(anno, mese - 1, giorno)).getUTCDay();
+  return `${GIORNI[settimana]} ${giorno} ${MESI[mese - 1]}`;
+}
+
+export const ora = iso => iso.slice(11, 16);
+
+const plurale = (n, uno, molti) => `${n} ${n === 1 ? uno : molti}`;
+
+// Sotto le 24 ore si dice in ore; da un giorno in su «N giorni e M ore» (ore 0: solo giorni).
+export function permanenza(minuti, citta) {
+  const ore = Math.floor(minuti / 60);
+  const giorni = Math.floor(ore / 24);
+  const resto = ore % 24;
+  let testo;
+  if (giorni === 0) testo = plurale(ore, 'ora', 'ore');
+  else if (resto === 0) testo = plurale(giorni, 'giorno', 'giorni');
+  else testo = `${plurale(giorni, 'giorno', 'giorni')} e ${plurale(resto, 'ora', 'ore')}`;
+  return `${testo} a ${citta}`;
+}
+
+const FORMATO_ROMA = new Intl.DateTimeFormat('it-IT', {
+  timeZone: 'Europe/Rome',
+  year: 'numeric',
+  month: 'numeric',
+  day: 'numeric',
+  hour: 'numeric',
+  minute: 'numeric',
+  hourCycle: 'h23',
+});
+
+function romano(data) {
+  const p = Object.fromEntries(FORMATO_ROMA.formatToParts(data).map(x => [x.type, x.value]));
+  return { anno: +p.year, mese: +p.month, giorno: +p.day, ore: +p.hour, minuti: +p.minute };
+}
+
+// «visto alle 9:30» / «visto ieri alle 22:10» / «visto il 22 nov alle 9:30», in ora di Roma.
+export function visto(seenAtIso, adesso) {
+  const v = romano(new Date(seenAtIso));
+  const n = romano(adesso);
+  const giorniDiDifferenza =
+    (Date.UTC(n.anno, n.mese - 1, n.giorno) - Date.UTC(v.anno, v.mese - 1, v.giorno)) / 86400e3;
+  const orario = `${v.ore}:${String(v.minuti).padStart(2, '0')}`;
+  if (giorniDiDifferenza === 0) return `visto alle ${orario}`;
+  if (giorniDiDifferenza === 1) return `visto ieri alle ${orario}`;
+  return `visto il ${v.giorno} ${MESI[v.mese - 1]} alle ${orario}`;
+}
+
+export const prezzo = euro => `${euro} € a/r`;
+
+// Identificatore stabile di un volo, es. 'bri-cdg-2026-12-12-1840'.
+export function chiaveVolo({ o, d, va }) {
+  const dep = va[0];
+  return `${o}-${d}-${dep.slice(0, 10)}-${dep.slice(11, 13)}${dep.slice(14, 16)}`.toLowerCase();
+}
+
+export function linkKiwi(volo, affiliato = '') {
+  const { o, d, va, ri } = volo;
+  const base = `https://www.kiwi.com/it/search/results/${o}/${d}/${va[0].slice(0, 10)}/${ri[0].slice(0, 10)}?adults=1`;
+  return affiliato ? `${base}&affilid=${affiliato}` : base;
+}
+
+// Per la ricerca: minuscolo e senza accenti.
+export const normalizza = testo =>
+  testo.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
