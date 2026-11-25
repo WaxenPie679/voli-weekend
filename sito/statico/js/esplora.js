@@ -7,6 +7,22 @@ const modulo = document.querySelector('form.filtri');
 const esploratore = document.querySelector('.esploratore');
 
 const ATTESA_INDIRIZZO = 250;
+// Sotto questa larghezza il volo del giorno non sta nell'apertura (vedi .del-giorno nel CSS).
+const TELEFONO = matchMedia('(max-width: 899px)');
+
+// Il movimento della lista (View Transitions): solo dove il browser lo sa fare e il movimento va bene.
+// Altrove la lista cambia di colpo, come prima.
+const muovi = () => typeof document.startViewTransition === 'function'
+  && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Ogni biglietto ha il suo nome di transizione (dalla chiave del volo): così chi resta scorre al nuovo posto.
+function nomina(lista) {
+  for (const a of lista.querySelectorAll('article[data-k]')) {
+    a.style.viewTransitionName = `v-${a.dataset.k.replace(/[^\w-]/g, '-')}`;
+  }
+  const riquadro = lista.querySelector('.riquadro');
+  if (riquadro) riquadro.style.viewTransitionName = 'riquadro-canale';
+}
 
 // Cambia la query dell'indirizzo senza ricaricare, tenendo l'eventuale #ancora.
 // Alcuni browser limitano o vietano replaceState: allora l'indirizzo resta com'è.
@@ -82,9 +98,11 @@ async function avvia() {
   let filtri;
   let voli = [];
   let mostrati = 0;
+  let primoDisegno = true;
 
-  const scheda = v => biglietto(v, {
+  const scheda = (v, tabellone = false) => biglietto(v, {
     adesso,
+    tabellone,
     affiliato: p.affiliato,
     altre: futuri.filter(a => a.k !== v.k && a.o === v.o && a.citta === v.citta),
   });
@@ -93,13 +111,19 @@ async function avvia() {
   function disegna() {
     const primi = voli.slice(0, mostrati);
     const pezzi = primi.length
-      ? primi.map((v, i) => scheda(v) + (i + 1 === p.dopo ? p.riquadro : ''))
+      ? primi.map((v, i) => scheda(v, primoDisegno && i === 0) + (i + 1 === p.dopo ? p.riquadro : ''))
       : [nessunVolo(p.pagina)];
     if (primi.length < p.dopo) pezzi.push(p.riquadro);
     lista.innerHTML = pezzi.join('');
     altri.parentElement.hidden = voli.length <= mostrati;
     riga.textContent = riepilogo(voli.length, filtri, p.nomi);
     if (valoreMax) valoreMax.textContent = String(filtri.max);
+    // Sul telefono il volo del giorno è il primo della lista: al primo disegno il suo prezzo gira
+    // come un tabellone e poi il timbro batte (da computer lo fa il biglietto dell'apertura).
+    if (primoDisegno && TELEFONO.matches && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      lista.querySelector('article .bollino')?.classList.add('bollino--gira');
+    }
+    primoDisegno = false;
   }
 
   function applica(nuovi) {
@@ -109,28 +133,61 @@ async function avvia() {
     disegna();
   }
 
-  // Prima apertura: filtri dall'indirizzo. ?volo= apre sempre quel biglietto se il volo esiste:
-  // se i filtri lo escludono, si allargano quanto basta e il modulo e l'indirizzo lo dicono.
+  // Quando cambia un filtro i biglietti che restano scorrono al nuovo posto, gli esclusi escono, i nuovi arrivano.
+  // Se la lista non cambia (stessi voli, stesso ordine) non si anima niente. Mentre si trascina il cursore
+  // del prezzo, una transizione nuova chiude subito quella in corso.
+  let inCorso = null;
+  const chiavi = () => voli.slice(0, mostrati).map(v => v.k).join();
+  function applicaMuovendo(nuovi) {
+    const prima = chiavi();
+    if (!muovi()) return applica(nuovi);
+    inCorso?.skipTransition();
+    let cambiata = false;
+    const radice = document.documentElement;
+    radice.classList.add('vt-lista');
+    nomina(lista);
+    const t = document.startViewTransition(() => {
+      applica(nuovi);
+      cambiata = chiavi() !== prima;
+      if (cambiata) nomina(lista);
+    });
+    inCorso = t;
+    t.ready.then(() => { if (!cambiata) t.skipTransition(); }).catch(() => {});
+    t.finished.finally(() => {
+      if (inCorso === t) { inCorso = null; radice.classList.remove('vt-lista'); }
+    });
+  }
+
+  // Apre un volo nella lista: se i filtri lo escludono si allargano quanto basta, e il modulo e l'indirizzo
+  // lo dicono. Mostra abbastanza biglietti da arrivarci, lo apre e lo restituisce.
+  let testoMeta = '';
+  function apriVolo(cercato) {
+    const escluso = !voli.includes(cercato);
+    if (escluso) {
+      applica(filtriPerVolo(filtri, cercato, opzioni));
+      if (!filtri.a) testoMeta = '';
+    }
+    if (escluso) {
+      const query = [scriviFiltri(filtri, { bacino: p.bacino }), `volo=${encodeURIComponent(cercato.k)}`].filter(Boolean).join('&');
+      scriviIndirizzo(`?${query}`);
+    }
+    riempiModulo(filtri, testoMeta);
+    const posto = voli.indexOf(cercato);
+    if (posto < 0) return null;
+    mostrati = Math.max(mostrati, Math.ceil((posto + 1) / BLOCCO) * BLOCCO);
+    disegna();
+    const articolo = [...lista.querySelectorAll('article[data-k]')].find(a => a.dataset.k === cercato.k);
+    articolo?.querySelector('details')?.setAttribute('open', '');
+    return articolo ?? null;
+  }
+
+  // Prima apertura: filtri dall'indirizzo. ?volo= apre sempre quel biglietto se il volo esiste.
   const params = new URLSearchParams(location.search);
   applica(leggiFiltri(params, opzioni));
-  let testoMeta = (params.get('a') ?? '').trim();
-  const chiave = params.get('volo');
-  const cercato = futuri.find(v => v.k === chiave);
-  if (cercato && !voli.includes(cercato)) {
-    applica(filtriPerVolo(filtri, cercato, opzioni));
-    if (!filtri.a) testoMeta = '';
-    const query = [scriviFiltri(filtri, { bacino: p.bacino }), `volo=${encodeURIComponent(chiave)}`].filter(Boolean).join('&');
-    scriviIndirizzo(`?${query}`);
-  }
-  riempiModulo(filtri, testoMeta);
-  const posto = cercato ? voli.indexOf(cercato) : -1;
-  if (posto >= 0) {
-    mostrati = Math.ceil((posto + 1) / BLOCCO) * BLOCCO;
-    disegna();
-    const articolo = [...lista.querySelectorAll('article[data-k]')].find(a => a.dataset.k === chiave);
-    articolo?.querySelector('details')?.setAttribute('open', '');
-    articolo?.scrollIntoView({ block: 'start' });
-  }
+  testoMeta = (params.get('a') ?? '').trim();
+  const cercato = futuri.find(v => v.k === params.get('volo'));
+  if (cercato) apriVolo(cercato)?.scrollIntoView({ block: 'start' });
+  else riempiModulo(filtri, testoMeta);
 
   // Le mete suggerite nel campo «Dove vuoi andare».
   const mete = modulo.querySelector('#f-a-mete');
@@ -146,13 +203,13 @@ async function avvia() {
     scriviIndirizzo(query ? `?${query}` : '');
   };
   modulo.addEventListener('input', () => {
-    applica(leggiFiltri(new URLSearchParams(new FormData(modulo)), opzioni));
+    applicaMuovendo(leggiFiltri(new URLSearchParams(new FormData(modulo)), opzioni));
     clearTimeout(attesa);
     attesa = setTimeout(indirizzoDeiFiltri, ATTESA_INDIRIZZO);
   });
   modulo.addEventListener('submit', evento => {
     evento.preventDefault();
-    applica(leggiFiltri(new URLSearchParams(new FormData(modulo)), opzioni));
+    applicaMuovendo(leggiFiltri(new URLSearchParams(new FormData(modulo)), opzioni));
     clearTimeout(attesa);
     indirizzoDeiFiltri();
   });
