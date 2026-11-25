@@ -1,18 +1,13 @@
 // Riduzione dei dati grezzi dei voli in ciò che serve al sito. Solo Node.
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { chiaveVolo } from './statico/js/formati.js';
 import { BACINI, DATI_URL, PREZZO_INIZIALE, PREZZO_MAX, VECCHIO_ORE, AEROPORTI_NOMI } from './config.js';
 
 const ORA_MS = 3600e3;
 const MINUTO_MS = 60e3;
 const GIORNO_MIN = 1440;
 const METE_MAX = 8;
-
-// Stessa forma di `chiaveVolo` di formati.js (es. 'bri-cdg-2026-12-12-1840'): qui è
-// ripetuta perché formati.js nasce nel compito successivo; poi si può far importare da lì.
-function chiave(o, d, dep) {
-  return `${o}-${d}-${dep.slice(0, 10)}-${dep.slice(11, 13)}${dep.slice(14, 16)}`.toLowerCase();
-}
 
 // Orari locali senza fuso, letti entrambi come UTC: la differenza resta giusta perché
 // arrivo e partenza sono nello stesso fuso, quello della destinazione.
@@ -29,7 +24,7 @@ function aVolo(it) {
   const va = [andata[0].dep, andata.at(-1).arr];
   const ri = [ritorno[0].dep, ritorno.at(-1).arr];
   return {
-    k: chiave(it.origin, it.destination.code, va[0]),
+    k: chiaveVolo({ o: it.origin, d: it.destination.code, va }),
     o: it.origin,
     d: it.destination.code,
     citta: it.destination.city,
