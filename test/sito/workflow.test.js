@@ -26,3 +26,7 @@ test('workflow sito: i segreti Cloudflare solo nei passi che li usano', () => {
 test('workflow sito: wrangler a versione esatta', () => {
   assert.match(passo('Pubblica su Cloudflare Pages'), /npx --yes wrangler@\d+\.\d+\.\d+ pages deploy/);
 });
+
+test('workflow sito: si pubblica anche quando cambiano le functions del contatore', () => {
+  assert.match(yml, /paths: \[[^\]]*'functions\/\*\*'/);
+});

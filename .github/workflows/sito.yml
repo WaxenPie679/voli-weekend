@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['sito/**', '.github/workflows/sito.yml']
+    paths: ['sito/**', 'functions/**', '.github/workflows/sito.yml']
 
 permissions:
   contents: read
