@@ -119,7 +119,8 @@ test('sito privato: si pubblica senza titolare, robots chiude tutto, _worker.js 
   assert.ok(!w.includes('prova-segreta'));
   assert.ok(w.includes(createHash('sha256').update('prova-segreta').digest('hex')));
   for (const f of ['privacy/index.html', 'note-legali/index.html'].filter(f => existsSync(join(out, f))))
-    assert.doesNotMatch(readFileSync(join(out, f), 'utf8'), /titolare|\[Nome e cognome\]/);
+    assert.doesNotMatch(readFileSync(join(out, f), 'utf8'), /\[Nome e cognome\]/);
+  for (const f of ['privacy/index.html', 'note-legali/index.html']) assert.match(readFileSync(join(out, f), 'utf8'), /gestito da una persona fisica/);
 });
 
 test('worker privato: senza password giusta 401, con password giusta passa', async () => {

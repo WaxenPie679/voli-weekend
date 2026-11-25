@@ -10,3 +10,6 @@ spike/*.html
 /history/
 /summary/
 sito/dist/
+
+# Configurazione locale delle anteprime (contiene percorsi del Mac)
+.claude/launch.json
