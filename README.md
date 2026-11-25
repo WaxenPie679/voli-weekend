@@ -50,7 +50,7 @@ Apri `sito/titolare.js` e scrivi `nome` (nome e cognome) e `citta` tra gli apici
 
 **Pubblicazione automatica**
 
-Il workflow `Sito dovaivoli.it` gira ogni ora (al minuto 41), a ogni modifica di `sito/` su `main` e a mano da Actions. Prepara il sito, esegue i test e lo pubblica su Cloudflare Pages. Se i segreti di Cloudflare non ci sono ancora, salta solo la pubblicazione e lascia un avviso.
+Il workflow `Sito dovaivoli.it` gira ogni ora (al minuto 41), a ogni modifica di `sito/` su `main` e a mano da Actions. Esegue i test, prepara il sito e lo pubblica su Cloudflare Pages. Se i segreti di Cloudflare non ci sono ancora, salta solo la pubblicazione e lascia un avviso.
 
 **Cosa devi fare tu su Cloudflare, una volta sola**
 
