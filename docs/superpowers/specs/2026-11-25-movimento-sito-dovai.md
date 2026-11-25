@@ -2,7 +2,7 @@
 
 25/11/2026 · vale per `sito/`.
 
-**Decisione di Bruno (25/11/2026):** sì a 1 (riordino filtri) e 2 (tabellone del prezzo), il 3 (biglietto che vola) va provato in anteprima, sì al 5 (rotta in Come funziona). No al 4 per ora.
+**Decisione di Bruno (25/11/2026):** sì a 1 (riordino filtri) e 2 (tabellone del prezzo), sì al 5 (rotta in Come funziona). No al 4 per ora. Il 3 (biglietto che vola) è stato provato in anteprima e **tolto** su richiesta di Bruno (25/11). Sul telefono il tabellone gira sul primo biglietto della lista, perché lì il biglietto del giorno non c'è.
 
 ## Cosa c'è oggi
 

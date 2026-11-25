@@ -82,6 +82,18 @@ function altreDate(v, altre) {
   </div>`;
 }
 
+// Il prezzo come un tabellone delle partenze: ogni cifra è un rullo 0–9 (due giri) che si ferma sulla sua.
+// Il testo vero sta in .nascosto per i lettori di schermo; i rulli sono solo per gli occhi. Fermi (senza
+// animazione, col movimento ridotto o senza CSS) mostrano già la cifra giusta. Lo fa girare il CSS.
+const RULLO = '0123456789'.repeat(2).split('').map(c => `<span>${c}</span>`).join('');
+export function tabellone(euro) {
+  const cifre = String(euro).split('');
+  const colonne = cifre.map((c, i) => /\d/.test(c)
+    ? `<span class="cifra" style="--c:${c};--n:${cifre.length - 1 - i}"><span class="cifra__fine">${c}</span><span class="cifra__rullo">${RULLO}</span></span>`
+    : `<span>${c}</span>`).join('');
+  return `<span class="nascosto">${prezzo(euro)}</span><span class="tabellone" aria-hidden="true">${colonne}&nbsp;€ a/r</span>`;
+}
+
 // Il link della compagnia viene dai dati: solo https, mai javascript: o data:.
 const SICURO = /^https:\/\//;
 
@@ -91,8 +103,9 @@ function compagnia(v, classe, testo) {
 }
 
 // volo: { k, o, d, citta, va, ri, cia, p, url, visto, resta }
-// opzioni: adesso (Date), aperto (biglietto già aperto), affiliato (codice Kiwi), altre (altri voli per la stessa città)
-export function biglietto(volo, { adesso, aperto = false, affiliato = '', altre = [] } = {}) {
+// opzioni: adesso (Date), aperto (biglietto già aperto), affiliato (codice Kiwi), altre (altri voli per la stessa città),
+// tabellone (il prezzo a rulli: solo il primo biglietto, al primo disegno nel browser)
+export function biglietto(volo, { adesso, aperto = false, affiliato = '', altre = [], tabellone: rulli = false } = {}) {
   const v = volo;
   const vistoTesto = visto(v.visto, adesso ?? new Date());
   const idTitolo = `t-${v.k}`;
@@ -100,7 +113,7 @@ export function biglietto(volo, { adesso, aperto = false, affiliato = '', altre 
   <details class="biglietto__dettagli"${grezzo(aperto ? ' open' : '')}>
     <summary class="biglietto__corpo">
       <h3 class="tratta" id="${idTitolo}">${tratta(v)}</h3>
-      <span class="bollino">${prezzo(v.p)}</span>
+      <span class="bollino">${grezzo(rulli ? tabellone(v.p) : h`${prezzo(v.p)}`)}</span>
       <span class="biglietto__quando dato">${grezzo(quando(v))}</span>
       <span class="biglietto__resta">${permanenza(v.resta, v.citta)}</span>
       <span class="biglietto__note"><span>solo zaino</span><span>${v.cia}</span>${grezzo(vistoTesto ? h`<span class="biglietto__visto">${vistoTesto}</span>` : '')}</span>
