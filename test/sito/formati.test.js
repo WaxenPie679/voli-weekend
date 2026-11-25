@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { giornoBreve, ora, permanenza, visto, prezzo, chiaveVolo, linkKiwi, normalizza } from '../../sito/statico/js/formati.js';
 
-const volo = { o: 'BRI', d: 'CDG', va: ['2026-12-12T18:40', '2026-12-12T21:10'], ri: ['2026-12-14T07:00', '2026-12-14T09:30'] };
+const volo = { o: 'BRI', d: 'CDG', citta: 'Parigi', paese: 'Francia', va: ['2026-12-12T18:40', '2026-12-12T21:10'], ri: ['2026-12-14T07:00', '2026-12-14T09:30'] };
 
 test('giornoBreve e ora lavorano sulla stringa locale', () => {
   assert.equal(giornoBreve('2026-12-12T18:40'), 'sab 12 dic');
@@ -48,11 +48,20 @@ test('chiaveVolo è minuscola e senza separatori nell\'ora', () => {
   assert.equal(chiaveVolo(volo), 'bri-cdg-2026-12-12-1840');
 });
 
-test('linkKiwi con e senza affiliato', () => {
-  const base = 'https://www.kiwi.com/it/search/results/BRI/CDG/2026-12-12/2026-12-14?adults=1';
+test('linkKiwi con e senza affiliato: città e paese, non i codici', () => {
+  const base = 'https://www.kiwi.com/it/search/results/bari-italia/parigi-francia/2026-12-12/2026-12-14?adults=1';
   assert.equal(linkKiwi(volo), base);
   assert.ok(!linkKiwi(volo).includes('affilid'));
   assert.equal(linkKiwi(volo, 'abc'), base + '&affilid=abc');
+});
+
+test('linkKiwi: accenti, spazi e apostrofi diventano trattini', () => {
+  const su = (o, citta, paese) => linkKiwi({ ...volo, o, citta, paese }).split('/').slice(6, 8).join('/');
+  assert.equal(su('FCO', 'Málaga', 'Spagna'), 'roma-italia/malaga-spagna');
+  assert.equal(su('BGY', 'Reggio Calabria', 'Italia'), 'bergamo-italia/reggio-calabria-italia');
+  assert.equal(su('MXP', 'Londra', 'Regno Unito'), 'milano-italia/londra-regno-unito');
+  assert.equal(su('CIA', "L'Aquila", 'Italia'), 'roma-italia/l-aquila-italia');
+  assert.equal(su('BDS', 'Kraków', 'Polonia'), 'brindisi-italia/krakow-polonia');
 });
 
 test('normalizza toglie accenti e maiuscole', () => {
