@@ -13,6 +13,8 @@ import { pagina as bacino, pagine as bacini } from '../../sito/pagine/bacino.js'
 import { pagina as premium } from '../../sito/pagine/premium.js';
 import { pagine as servizio } from '../../sito/pagine/servizio.js';
 import { pagina as errore } from '../../sito/pagine/errore.js';
+import { striscia } from '../../sito/parti/striscia.js';
+import { delGiorno } from '../../sito/parti/del-giorno.js';
 
 const adesso = new Date('2026-11-25T12:00:00Z');
 
@@ -350,7 +352,7 @@ test('bacino milano-bergamo: «Malpensa e Orio al Serio», mai Linate', () => {
 test('bacino puglia: introduzione coi dati veri e la frase locale di Bruno', () => {
   const html = leggibile(bacino(ctx, 'puglia').html);
   assert.ok(html.includes('Meh, chiudi tutte cose che dobbiamo andare!'));
-  assert.match(html, /<strong>4 voli del weekend<\/strong> fino a 100 € a\/r/);
+  assert.match(html, /<strong>4 voli del weekend<\/strong> fino a <span class="intero">100 € a\/r<\/span>/);
   assert.ok(html.includes('<strong>Bari → Parigi a 40 € a/r</strong>'));
   assert.ok(html.includes('Il più basso dei prossimi tre mesi: 40 € a/r.'));
   assert.ok(!html.includes('Lisbona →') && !html.includes('→ Lisbona'), 'solo i voli del bacino');
@@ -518,4 +520,37 @@ test('servizio: i prezzi vengono dai siti delle compagnie, non dai motori di ric
   for (const p of servizio(ctx)) assert.ok(!p.html.includes('motori di ricerca'), p.percorso);
   assert.ok(servizio(ctx)[0].html.includes('Controlliamo i prezzi ogni giorno sui siti delle compagnie aeree.'));
   assert.ok(servizio(ctx)[3].html.includes('DoVai mostra voli trovati sui siti delle compagnie aeree. Non vendiamo biglietti'));
+});
+
+test('striscia: apre con lo slogan, una voce per tratta, la copia che scorre è nascosta ai lettori', () => {
+  const html = striscia([volo, { ...volo, k: 'altro', p: 80 }, { ...volo, k: 'terzo', citta: 'Londra', d: 'STN', p: 90 }]);
+  assert.ok(html.includes('Quando parti, DoVai?'));
+  assert.equal((html.match(/Bari → Parigi/g) ?? []).length, 2, 'una volta per nastro, anche se ci sono due voli');
+  assert.equal((html.match(/aria-hidden="true">\s*<li class="striscia__voce striscia__voce--slogan"/g) ?? []).length, 1);
+  assert.ok(html.includes('69 € a/r'));
+  assert.ok(html.includes('Ferma la striscia'));
+  assert.equal(striscia([]), '');
+});
+
+test('volo del giorno: dati e bottoni del biglietto, nota affiliato solo col codice', () => {
+  const senza = delGiorno(volo, { adesso, pagina: '/puglia/' });
+  assert.ok(senza.includes('Bari → Parigi'));
+  assert.ok(senza.includes('69 € a/r'));
+  assert.ok(senza.includes('solo zaino'));
+  assert.ok(senza.includes(`href="/puglia/?volo=${volo.k}"`));
+  assert.ok(!senza.includes('link affiliato'));
+  assert.ok(delGiorno(volo, { adesso, affiliato: 'abc' }).includes('Con Kiwi sostieni DoVai · link affiliato'));
+  assert.ok(!delGiorno({ ...volo, url: 'javascript:alert(1)' }, { adesso }).includes('javascript:'));
+  assert.equal(delGiorno(undefined), '');
+});
+
+test('intestazione: il primo link salta al contenuto, la pagina in cui sei è segnata', () => {
+  const html = intestazione({ percorso: '/premium/' });
+  assert.ok(html.indexOf('href="#contenuto"') < html.indexOf('<header'));
+  assert.match(html, /<a href="\/premium\/" aria-current="page">Premium<\/a>/);
+  assert.ok(!html.includes('href="/come-funziona/" aria-current'));
+});
+
+test('piede: chiude col payoff', () => {
+  assert.ok(piede().includes('Più weekend, <span>quando conviene.</span>'));
 });

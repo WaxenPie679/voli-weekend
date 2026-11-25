@@ -4,6 +4,8 @@ import { h, grezzo } from '../statico/js/html.js';
 import { tratta } from '../statico/js/biglietto-html.js';
 import { filtri, mesiDeiVoli } from '../parti/filtri.js';
 import { riquadroCanale } from '../parti/riquadri.js';
+import { striscia } from '../parti/striscia.js';
+import { delGiorno } from '../parti/del-giorno.js';
 import { BACINI, KIWI_AFFILIATO, PREZZO_INIZIALE } from '../config.js';
 import { documento, apertura, voliIniziali, riepilogo, elencoBiglietti, elencoMete, SCRIPT_ESPLORA } from './comune.js';
 
@@ -53,8 +55,8 @@ function introduzione(t, stato, slug) {
   const { numero, piuBasso } = stato;
   const soglia = PREZZO_INIZIALE;
   const conta = numero > 0
-    ? h`${t.inizio} <strong>${numero} ${numero === 1 ? 'volo' : 'voli'} del weekend</strong> fino a ${soglia} € a/r.`
-    : h`${t.inizioZero} voli del weekend fino a ${soglia} € a/r.`;
+    ? h`${t.inizio} <strong>${numero} ${numero === 1 ? 'volo' : 'voli'} del weekend</strong> fino a <span class="intero">${soglia} € a/r</span>.`
+    : h`${t.inizioZero} voli del weekend fino a <span class="intero">${soglia} € a/r</span>.`;
   const piu = slug === 'puglia' || numero === 0
     ? h` Il più basso è <strong>${tratta(piuBasso)} a ${piuBasso.p} € a/r</strong>.`
     : '';
@@ -83,7 +85,7 @@ export function pagina({ voli, bacini, adesso, affiliato = KIWI_AFFILIATO }, slu
 
   if (!stato?.pronto || !stato.piuBasso) {
     const altri = BACINI.filter(b => b.slug !== slug).map(b => grezzo(h`<a class="bottone bottone--contorno" href="/${b.slug}/">${b.nome}</a>`));
-    const corpo = h`${grezzo(apertura({ riga: 'Quando parti, DoVai?', titolo: t.titolo, sottotitolo: t.sottotitolo }))}
+    const corpo = h`${grezzo(apertura({ titolo: t.titolo, sottotitolo: t.sottotitolo }))}
 <section class="sezione">
   <div class="contenitore">
     <p class="vuoto"><strong>Stiamo iniziando a seguire i voli da qui.</strong> I primi prezzi arrivano a giorni.</p>
@@ -107,14 +109,16 @@ export function pagina({ voli, bacini, adesso, affiliato = KIWI_AFFILIATO }, slu
   const suoi = voli.filter(v => config.aeroporti.includes(v.o));
   const iniziali = voliIniziali(suoi);
   const lista = elencoBiglietti({ voli: iniziali, tutti: suoi, adesso, affiliato, riquadro: riquadroCanale({ bacino: slug }), dopo: CANALE_DOPO, pagina: percorso });
-  const corpo = h`${grezzo(apertura({ riga: 'Quando parti, DoVai?', titolo: t.titolo, sottotitolo: t.sottotitolo }))}
-<section class="sezione sezione--intro">
-  <div class="contenitore intro">
-    ${grezzo(introduzione(t, stato, slug))}
-  </div>
-</section>
-<section class="sezione sezione--voli" aria-label="I voli">
+  const corpo = h`${grezzo(apertura({
+    titolo: t.titolo,
+    sottotitolo: t.sottotitolo,
+    extra: h`<div class="intro">${grezzo(introduzione(t, stato, slug))}</div>`,
+    giorno: delGiorno(iniziali[0] ?? suoi[0], { adesso, affiliato, pagina: percorso }),
+  }))}
+${grezzo(striscia(suoi))}
+<section class="sezione sezione--voli" aria-labelledby="titolo-voli">
   <div class="contenitore">
+    <h2 class="nascosto" id="titolo-voli">I voli</h2>
     ${grezzo(filtri({ bacino: slug, mesi: mesiDeiVoli(suoi), riepilogo: riepilogo(iniziali.length, `da ${config.nome}`) }))}
     ${grezzo(lista)}
   </div>
