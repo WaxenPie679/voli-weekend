@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { giornoBreve, ora, permanenza, visto, prezzo, chiaveVolo, linkKiwi, normalizza } from '../../sito/statico/js/formati.js';
+import { giornoBreve, ora, permanenza, visto, prezzo, chiaveVolo, linkKiwi, normalizza, oraDiRoma } from '../../sito/statico/js/formati.js';
 
 const volo = { o: 'BRI', d: 'CDG', citta: 'Parigi', paese: 'Francia', va: ['2026-12-12T18:40', '2026-12-12T21:10'], ri: ['2026-12-14T07:00', '2026-12-14T09:30'] };
 
@@ -71,4 +71,10 @@ test('linkKiwi: accenti, spazi e apostrofi diventano trattini', () => {
 test('normalizza toglie accenti e maiuscole', () => {
   assert.equal(normalizza('Málaga'), 'malaga');
   assert.equal(normalizza('LISBONA'), 'lisbona');
+});
+
+test('oraDiRoma: come gli orari dei voli, con ora solare e legale', () => {
+  assert.equal(oraDiRoma(new Date('2026-12-12T17:40:00Z')), '2026-12-12T18:40');
+  assert.equal(oraDiRoma(new Date('2026-07-10T22:05:00Z')), '2026-07-11T00:05');
+  assert.equal(oraDiRoma(new Date('2027-01-01T08:03:00Z')), '2027-01-01T09:03');
 });

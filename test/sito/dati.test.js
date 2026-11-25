@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { readFileSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { riduci, scaricaDati } from '../../sito/dati.js';
+import { riduci, scaricaDati, cittaPulita } from '../../sito/dati.js';
+import { linkKiwi } from '../../sito/statico/js/formati.js';
 
 const mini = JSON.parse(readFileSync(new URL('./fixtures/direct-mini.json', import.meta.url), 'utf8'));
 const ADESSO = new Date(mini.generatedAt);
@@ -171,4 +172,105 @@ test('scaricaDati legge da una cartella locale e mette null i file mancanti o il
   assert.equal(dati['direct-roma.json'], null);
   assert.equal(dati['direct-milano.json'], null);
   assert.equal(dati['direct-bergamo.json'], null);
+});
+
+// Un itinerario Wizz con il nome di destinazione così come arriva dal raccoglitore.
+const wizz = (origin, code, city, country, price = 50, extra = {}) => {
+  const base = itinerario(origin, city, price, extra);
+  const seg = s => ({ ...s, airline: 'Wizz Air', from: s.from === 'XXX' ? code : s.from, to: s.to === 'XXX' ? code : s.to });
+  return {
+    ...base, source: 'wizz', destination: { code, city, country },
+    outbound: { ...base.outbound, segments: base.outbound.segments.map(seg) },
+    inbound: { ...base.inbound, segments: base.inbound.segments.map(seg) },
+  };
+};
+
+test('nomi delle destinazioni: dalla mappa, per ogni caso visto nei dati veri', () => {
+  const casi = [
+    ['WSW', 'Warsaw Any', 'Polonia', 'Varsavia'],
+    ['WAW', 'Varsavia Chopin', 'Polonia', 'Varsavia'],
+    ['WMI', 'Varsavia Modlin', 'Polonia', 'Varsavia'],
+    ['LON', 'Londra (tutti gli aeroporti)', 'Regno Unito', 'Londra'],
+    ['LTN', 'Londra Luton', 'Regno Unito', 'Londra'],
+    ['PAR', 'Parigi (tutti gli aeroporti)', 'Francia', 'Parigi'],
+    ['ORY', 'Parigi Orly', 'Francia', 'Parigi'],
+    ['TFS', 'Tenerife (Isole Canerie)', 'Spagna', 'Tenerife'],
+    ['PMO', 'Palermo (Sicilia)', 'Italia', 'Palermo'],
+    ['OTP', 'Bucarest Henri Coandă', 'Romania', 'Bucarest'],
+    ['BBU', 'Bucarest Baneasa', 'Romania', 'Bucarest'],
+    ['BCN', 'Barcellona El Prat', 'Spagna', 'Barcellona'],
+    ['BER', 'Berlino Brandenburgo', 'Germania', 'Berlino'],
+    ['VAR', 'Varna (Mar Nero)', 'Bulgaria', 'Varna'],
+    ['LUX', 'Luxembourg', 'Lussemburgo', 'Lussemburgo'],
+    ['ZAG', 'Zagreb', 'Croazia', 'Zagabria'],
+    ['CPH', 'Copenhagen', 'Danimarca', 'Copenaghen'],
+    ['SUF', 'Lamezia', 'Italia', 'Lamezia Terme'],
+  ];
+  for (const [code, city, , attesa] of casi) assert.equal(cittaPulita(code, city), attesa, `${code} ${city}`);
+  // Nel volo ridotto e nel link Kiwi c'è la città pulita.
+  const { voli } = riduci({ 'direct-milano.json': file([wizz('MXP', 'TFS', 'Tenerife (Isole Canerie)', 'Spagna')]) }, { adesso: ADESSO });
+  assert.equal(voli[0].citta, 'Tenerife');
+  assert.match(linkKiwi(voli[0]), /\/milano-italia\/tenerife-spagna\//);
+});
+
+test('nomi delle destinazioni: per i codici nuovi si toglie « (…)» e « Any» in fondo', () => {
+  assert.equal(cittaPulita('XYZ', 'Spalato (Croazia)'), 'Spalato');
+  assert.equal(cittaPulita('XYZ', 'Riga Any'), 'Riga');
+  assert.equal(cittaPulita('XYZ', 'Lisbona'), 'Lisbona');
+  assert.equal(cittaPulita('XYZ', 'Reggio Calabria'), 'Reggio Calabria');
+});
+
+test('lo stesso volo sotto il codice della città e quello dell\'aeroporto resta una volta, col codice vero', () => {
+  const fresco = file([
+    wizz('MXP', 'WSW', 'Warsaw Any', 'Polonia', 42.98),
+    wizz('MXP', 'WAW', 'Varsavia Chopin', 'Polonia', 42.98),
+    wizz('BGY', 'BBU', 'Bucarest Baneasa', 'Romania', 47.98),
+    wizz('BGY', 'OTP', 'Bucarest Henri Coandă', 'Romania', 47.98),
+    wizz('MXP', 'LON', 'Londra (tutti gli aeroporti)', 'Regno Unito', 59.98),
+    wizz('MXP', 'LTN', 'Londra Luton', 'Regno Unito', 59.98),
+    // Stessa città e stessi orari ma un'altra compagnia: è un altro volo.
+    itinerario('MXP', 'Londra', 59, { destination: { code: 'STN', city: 'Londra', country: 'Regno Unito' } }),
+  ]);
+  const { voli, bacini } = riduci({ 'direct-milano.json': fresco }, { adesso: ADESSO });
+  const codici = voli.map(v => `${v.o}-${v.d}`).sort();
+  assert.deepEqual(codici, ['BGY-OTP', 'MXP-LTN', 'MXP-STN', 'MXP-WAW']);
+  assert.deepEqual(bacini['milano-bergamo'].mete.map(m => m.citta).sort(), ['Bucarest', 'Londra', 'Varsavia']);
+});
+
+test('lo stesso volo sotto due aeroporti veri resta uno solo, il più economico', () => {
+  const fresco = file([
+    wizz('BGY', 'WMI', 'Varsavia Modlin', 'Polonia', 45),
+    wizz('BGY', 'WAW', 'Varsavia Chopin', 'Polonia', 42.98),
+    wizz('BGY', 'WSW', 'Warsaw Any', 'Polonia', 40),
+  ]);
+  const { voli } = riduci({ 'direct-bergamo.json': fresco }, { adesso: ADESSO });
+  assert.equal(voli.length, 1);
+  assert.equal(voli[0].d, 'WAW', 'il codice della città perde anche se costa meno');
+});
+
+test('riduci scarta (e conta) gli itinerari con più di una tratta', () => {
+  const conScalo = itinerario('FCO', 'Oslo', 40);
+  conScalo.outbound.segments = [
+    { from: 'FCO', to: 'CPH', dep: '2027-01-16T06:45', arr: '2027-01-16T09:10', flight: 'FR1', airline: 'Ryanair' },
+    { from: 'CPH', to: 'OSL', dep: '2027-01-16T10:00', arr: '2027-01-16T11:10', flight: 'FR3', airline: 'Ryanair' },
+  ];
+  const ritornoConScalo = itinerario('FCO', 'Bergen', 40);
+  ritornoConScalo.inbound.segments = [...ritornoConScalo.inbound.segments, ritornoConScalo.inbound.segments[0]];
+  const { voli, scartati } = riduci({ 'direct-roma.json': file([conScalo, ritornoConScalo, itinerario('FCO', 'Parigi', 50)]) }, { adesso: ADESSO });
+  assert.equal(scartati, 2);
+  assert.deepEqual(voli.map(v => v.citta), ['Parigi']);
+});
+
+test('riduci toglie i voli già partiti, in ora di Roma', () => {
+  // 16 gennaio 2027, 05:45 UTC = 06:45 a Roma: il volo delle 06:45 è appena partito.
+  const adesso = new Date('2027-01-16T05:45:00Z');
+  const recente = file([
+    itinerario('FCO', 'Parigi', 50),
+    itinerario('FCO', 'Londra', 60, {
+      outbound: { segments: [{ from: 'FCO', to: 'LON', dep: '2027-01-16T06:46', arr: '2027-01-16T08:40', flight: 'FR1', airline: 'Ryanair' }] },
+    }),
+  ], adesso.toISOString());
+  const { voli, bacini } = riduci({ 'direct-roma.json': recente }, { adesso });
+  assert.deepEqual(voli.map(v => v.citta), ['Londra']);
+  assert.deepEqual(bacini.roma.mete.map(m => m.citta), ['Londra']);
 });

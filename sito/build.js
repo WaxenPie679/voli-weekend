@@ -73,7 +73,7 @@ export async function prepara({ cartella, out = join(QUI, 'dist'), adesso = new 
   const avvisi = [];
   for (const b of BACINI) if (!stati[b.slug].pronto) avvisi.push(`Bacino «${b.nome}» senza dati freschi: la pagina dice che stiamo iniziando a seguirlo.`);
   if (!BACINI.some(b => stati[b.slug].pronto)) throw new Error('Nessun bacino ha dati freschi: il sito non si prepara.');
-  if (scartati > 0) avvisi.push(`${scartati} itinerari malformati saltati.`);
+  if (scartati > 0) avvisi.push(`${scartati} itinerari malformati o con scalo saltati.`);
 
   const ctx = { voli, bacini: stati, adesso };
   const pagine = [home(ctx), ...bacini(ctx), premium(ctx), ...servizio(ctx), errore(ctx)];
