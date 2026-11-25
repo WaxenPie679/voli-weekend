@@ -48,12 +48,15 @@ function romano(data) {
 
 // «visto alle 9:30» / «visto ieri alle 22:10» / «visto il 22 nov alle 9:30», in ora di Roma.
 export function visto(seenAtIso, adesso) {
-  const v = romano(new Date(seenAtIso));
+  const quando = new Date(seenAtIso);
+  if (Number.isNaN(quando.getTime())) return '';
+  const v = romano(quando);
   const n = romano(adesso);
   const giorniDiDifferenza =
     (Date.UTC(n.anno, n.mese - 1, n.giorno) - Date.UTC(v.anno, v.mese - 1, v.giorno)) / 86400e3;
   const orario = `${v.ore}:${String(v.minuti).padStart(2, '0')}`;
-  if (giorniDiDifferenza === 0) return `visto alle ${orario}`;
+  // Orologi sfasati: un «visto» nel futuro conta come oggi.
+  if (giorniDiDifferenza <= 0) return `visto alle ${orario}`;
   if (giorniDiDifferenza === 1) return `visto ieri alle ${orario}`;
   return `visto il ${v.giorno} ${MESI[v.mese - 1]} alle ${orario}`;
 }

@@ -31,6 +31,15 @@ test('visto: ora legale (estate) e cambio mese', () => {
   assert.equal(visto('2026-10-31T10:00:00Z', new Date('2026-11-01T10:00:00Z')), 'visto ieri alle 11:00');
 });
 
+test('visto: orologio sfasato (nel futuro) conta come oggi', () => {
+  assert.equal(visto('2026-11-26T10:00:00Z', new Date('2026-11-25T12:00:00Z')), 'visto alle 11:00');
+});
+
+test('visto: data non valida dà testo vuoto', () => {
+  assert.equal(visto('boh', new Date('2026-11-25T12:00:00Z')), '');
+  assert.equal(visto(undefined, new Date('2026-11-25T12:00:00Z')), '');
+});
+
 test('prezzo', () => {
   assert.equal(prezzo(69), '69 € a/r');
 });
