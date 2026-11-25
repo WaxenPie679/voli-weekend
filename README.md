@@ -46,7 +46,7 @@ Prepara il sito e lo apre su http://127.0.0.1:5190 (da Claude Code la voce `dova
 
 **Nome e città del titolare**
 
-Apri `sito/titolare.js` e scrivi `nome` (nome e cognome) e `citta` tra gli apici. Finché uno dei due è vuoto, la pubblicazione si rifiuta di partire: il passo «node sito/build.js --pubblica» su GitHub diventa rosso e non viene pubblicato nulla. È voluto, serve a non mettere online le pagine legali con i segnaposto.
+Apri `sito/titolare.js` e scrivi `nome` (nome e cognome) e `citta` tra gli apici. Finché uno dei due è vuoto, la pubblicazione si rifiuta di partire: su GitHub il giro finisce comunque verde (così non ricevi un'email di errore ogni ora), con l'avviso «Mancano nome e città del titolare» e senza pubblicare nulla. In locale `node sito/build.js --pubblica` si ferma con un errore. È voluto, serve a non mettere online le pagine legali con i segnaposto.
 
 **Pubblicazione automatica**
 
