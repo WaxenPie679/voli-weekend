@@ -33,13 +33,22 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
-      # Rifiuta di pubblicare finché nome e città in sito/titolare.js sono vuoti: il passo fallisce e non esce nulla
-      - run: node sito/build.js --pubblica
+      # Senza nome e città in sito/titolare.js non si pubblica, ma il giro resta verde (niente email di errore ogni ora)
+      - name: Controllo titolare
+        id: titolare
+        run: node --input-type=module -e "import('./sito/titolare.js').then(m => console.log('completo=' + m.titolareCompleto())).catch(e => { console.error(e); process.exit(1); })" >> "$GITHUB_OUTPUT"
+      - name: Avviso, titolare mancante
+        if: steps.titolare.outputs.completo != 'true'
+        run: echo "::notice::Mancano nome e città del titolare in sito/titolare.js: il sito non si pubblica."
+      # Anche in locale --pubblica rifiuta finché nome e città sono vuoti
+      - name: Prepara il sito
+        if: steps.titolare.outputs.completo == 'true'
+        run: node sito/build.js --pubblica
         env:
           CF_BEACON: ${{ vars.CF_BEACON }}
       - name: Pubblica su Cloudflare Pages
-        if: env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != ''
+        if: steps.titolare.outputs.completo == 'true' && env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ACCOUNT_ID != ''
         run: npx --yes wrangler@3 pages deploy sito/dist --project-name dovai --branch main
       - name: Avviso, segreti Cloudflare mancanti
-        if: env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ACCOUNT_ID == ''
+        if: steps.titolare.outputs.completo == 'true' && (env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ACCOUNT_ID == '')
         run: echo "::notice::Mancano i segreti CLOUDFLARE_API_TOKEN e CLOUDFLARE_ACCOUNT_ID, quindi non è stato pubblicato nulla."
