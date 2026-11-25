@@ -1,7 +1,7 @@
 // Preparazione completa del sito DoVai in sito/dist: scarica i dati, li riduce, scrive pagine e file di servizio.
 // Uso: node sito/build.js [--data <cartella>] [--out <cartella>] [--pubblica]
 import { mkdir, writeFile, rm, cp, realpath, stat, readdir } from 'node:fs/promises';
-import { dirname, join, resolve, sep } from 'node:path';
+import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { BACINI, SITO, PRIVATO } from './config.js';
@@ -71,10 +71,26 @@ function intestazioni(pagine) {
 
 // Sito privato: _worker.js davanti a tutte le pagine chiede la password (accesso del browser, nome utente libero).
 // Nel worker finisce solo l'impronta SHA-256 della password; senza password il sito resta chiuso a tutti.
-export function workerPrivato(password = '') {
+// Con `contatore` (percorso della cartella functions/ visto dal worker): Cloudflare ignora functions/ quando c'è
+// _worker.js, quindi il worker passa lui al contatore /api/conta (POST) e la pagina dei numeri, che ha la sua chiave.
+// wrangler pages deploy impacchetta _worker.js con i moduli che importa.
+export function workerPrivato(password = '', { contatore = '' } = {}) {
   const impronta = password ? createHash('sha256').update(password, 'utf8').digest('hex') : '';
+  const importa = contatore
+    ? `import { onRequestPost as conta } from '${contatore}/api/conta.js';
+import { onRequestGet as numeriJson } from '${contatore}/api/numeri.js';
+import { onRequestGet as numeriPagina } from '${contatore}/numeri/index.js';
+`
+    : '';
+  const instrada = contatore
+    ? `    const { pathname } = new URL(request.url);
+    if (pathname === '/api/conta' && request.method === 'POST') return conta({ request, env });
+    if (pathname === '/api/numeri' && request.method === 'GET') return numeriJson({ request, env });
+    if ((pathname === '/numeri/' || pathname === '/numeri') && request.method === 'GET') return numeriPagina({ request, env });
+`
+    : '';
   return `// Prodotto da sito/build.js: sito privato, si entra solo con la password.
-const IMPRONTA = ${JSON.stringify(impronta)};
+${importa}const IMPRONTA = ${JSON.stringify(impronta)};
 const NOINDEX = 'noindex, nofollow, noarchive';
 
 async function sha256(testo) {
@@ -98,7 +114,7 @@ async function autorizzato(request) {
 
 export default {
   async fetch(request, env) {
-    if (!(await autorizzato(request))) {
+${instrada}    if (!(await autorizzato(request))) {
       return new Response('<!doctype html><meta charset="utf-8"><title>Sito privato</title><p style="font-family:sans-serif;margin:3rem">Sito privato.</p>', {
         status: 401,
         headers: { 'Content-Type': 'text/html; charset=utf-8', 'WWW-Authenticate': 'Basic realm="DoVai", charset="UTF-8"', 'Cache-Control': 'no-store', 'X-Robots-Tag': NOINDEX },
@@ -137,7 +153,10 @@ export async function prepara({ cartella, out = join(QUI, 'dist'), adesso = new 
   await scrivi(fuori, 'sitemap.xml', sitemap(pagine));
   await scrivi(fuori, 'robots.txt', privato ? 'User-agent: *\nDisallow: /\n' : `User-agent: *\nAllow: /\n\nSitemap: ${SITO}/sitemap.xml\n`);
   await scrivi(fuori, '_headers', intestazioni(pagine));
-  if (privato) await scrivi(fuori, '_worker.js', workerPrivato(password));
+  if (privato) {
+    const contatore = relative(fuori, join(RADICE_REPO, 'functions')).split(sep).join('/');
+    await scrivi(fuori, '_worker.js', workerPrivato(password, { contatore: contatore.startsWith('.') ? contatore : './' + contatore }));
+  }
   return { pagine: pagine.length, voli: voli.length, avvisi };
 }
 
