@@ -1,7 +1,8 @@
 // Preparazione completa del sito DoVai in sito/dist: scarica i dati, li riduce, scrive pagine e file di servizio.
 // Uso: node sito/build.js [--data <cartella>] [--out <cartella>] [--pubblica]
 import { mkdir, writeFile, rm, cp } from 'node:fs/promises';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, resolve, sep } from 'node:path';
+import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { BACINI, SITO } from './config.js';
 import { scaricaDati, riduci } from './dati.js';
@@ -13,6 +14,16 @@ import { pagine as servizio } from './pagine/servizio.js';
 import { pagina as errore } from './pagine/errore.js';
 
 const QUI = dirname(fileURLToPath(import.meta.url));
+const RADICE_REPO = resolve(QUI, '..');
+
+// La cartella di uscita viene svuotata: mai la radice del disco, la home, il repo, la cartella corrente o un loro antenato.
+function controllaUscita(fuori) {
+  const protette = [resolve(homedir()), RADICE_REPO, resolve(process.cwd())];
+  const antenatoDelRepo = (RADICE_REPO + sep).startsWith(fuori.endsWith(sep) ? fuori : fuori + sep);
+  if (fuori === resolve('/') || antenatoDelRepo || protette.includes(fuori)) {
+    throw new Error(`La cartella di uscita ${fuori} non si può svuotare: scegline un'altra.`);
+  }
+}
 export const MSG_TITOLARE = 'Mancano nome e città del titolare in sito/titolare.js: il sito non si pubblica.';
 
 // Dove va scritto un percorso: `/puglia/` diventa puglia/index.html, `/404.html` resta com'è.
@@ -52,6 +63,7 @@ export async function prepara({ cartella, out = join(QUI, 'dist'), adesso = new 
   const pagine = [home(ctx), ...bacini(ctx), premium(ctx), ...servizio(ctx), errore(ctx)];
 
   const fuori = resolve(out);
+  controllaUscita(fuori);
   await rm(fuori, { recursive: true, force: true });
   await mkdir(fuori, { recursive: true });
   await cp(join(QUI, 'statico'), fuori, { recursive: true });

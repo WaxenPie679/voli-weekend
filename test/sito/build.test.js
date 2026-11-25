@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, copyFileSync, readFileSync, existsSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { tmpdir } from 'node:os';
+import { join, resolve, dirname } from 'node:path';
+import { tmpdir, homedir } from 'node:os';
 import { prepara, MSG_TITOLARE } from '../../sito/build.js';
 import { riduci } from '../../sito/dati.js';
 
@@ -69,4 +69,11 @@ test('riduci salta un itinerario malformato e lo conta', () => {
   const { voli, scartati } = riduci({ 'direct.json': f }, { adesso: ADESSO });
   assert.equal(scartati, 1);
   assert.ok(voli.length > 0);
+});
+
+test('prepara rifiuta uscite pericolose prima di cancellare qualcosa', async () => {
+  const { dati } = cartelle();
+  for (const out of ['/', homedir(), process.cwd(), resolve('sito/..'), resolve('..'), dirname(process.cwd())]) {
+    await assert.rejects(prepara({ cartella: dati, out, adesso: ADESSO }), /non si può svuotare/, out);
+  }
 });
