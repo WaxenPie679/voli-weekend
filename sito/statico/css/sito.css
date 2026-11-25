@@ -706,3 +706,52 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
   border-top: 1px solid var(--linea-scura);
 }
 .piede__fondo a { color: var(--carta); }
+
+/* ---------- Pagine: apertura, sezioni, testi lunghi ---------- */
+.apertura { padding-block: clamp(32px, 6vw, 72px) clamp(16px, 3vw, 32px); }
+.apertura__riga { font-size: .9375rem; color: var(--moro-chiaro); margin-bottom: 12px; }
+.apertura__sotto { margin-top: 16px; max-width: 46ch; font-size: 1.1875rem; }
+
+.sezione { padding-block: clamp(20px, 4vw, 40px); }
+.sezione > .contenitore { display: grid; gap: 20px; }
+.sezione__sotto { max-width: 52ch; }
+.intro { gap: 8px; max-width: 64ch; }
+.intro__locale { font-family: var(--font-titolo); font-weight: 700; font-size: 1.375rem; line-height: 1.2; }
+
+.altri, .azioni { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 0; }
+.altri { justify-content: center; margin-top: 8px; }
+.vuoto { display: grid; gap: 14px; padding: 24px; background: var(--panna); border: 1px solid var(--linea); border-radius: var(--raggio); }
+
+.mete {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mete a {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--panna);
+  border: 1px solid var(--linea);
+  border-radius: 12px;
+  text-decoration: none;
+}
+.mete a:hover { border-color: var(--moro); }
+.mete__nome { font-family: var(--font-titolo); font-weight: 700; font-size: 1.125rem; }
+.aeroporti { display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 0; padding: 0; list-style: none; color: var(--moro-chiaro); }
+
+.testo > * { max-width: 68ch; }
+.testo__grande { font-size: 1.25rem; }
+.testo__sezione { display: grid; gap: 10px; margin-bottom: 28px; }
+.testo__sezione h2, .testo h2 { font-size: clamp(1.25rem, 1.05rem + 1vw, 1.625rem); line-height: 1.15; }
+.testo ul { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; }
+.testo .tabella-scorri { max-width: none; }
+.tabella-scorri { overflow-x: auto; }
+.tabella { border-collapse: collapse; width: 100%; font-size: .9375rem; }
+.tabella th, .tabella td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--linea); }
+.tabella th { font-family: var(--font-titolo); font-weight: 700; }
