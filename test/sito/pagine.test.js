@@ -510,8 +510,11 @@ test('domande: canale e riassunto email dicono solo che non ci sono ancora', () 
   assert.ok(!/martedì|22|clic in fondo|cancell/.test(html.replace(/<svg[\s\S]*?<\/svg>/g, '')));
 });
 
-test('privacy: i conteggi non nominano i clic sui bottoni', () => {
-  assert.ok(!servizio(ctx)[2].html.includes('clic sui bottoni'));
+test('privacy: i conteggi anonimi nominano i bottoni toccati, senza IP né dati del browser', () => {
+  const html = leggibile(servizio(ctx)[2].html);
+  assert.ok(html.includes('quali bottoni vengono toccati'));
+  assert.ok(html.includes('senza indirizzo IP né dati del browser'));
+  assert.ok(html.includes('Ospita il sito e tiene i conteggi anonimi, senza cookie'));
 });
 
 test('mete: oltre il prezzo iniziale il link porta anche il prezzo massimo, così la lista non è vuota', () => {
@@ -578,4 +581,32 @@ test('ogni pagina carica conta.js con la versione', () => {
 test('la voce Premium di menù e piede ha data-conta="premium-menu"', () => {
   assert.match(intestazione({ percorso: '/' }), /<a href="\/premium\/" data-conta="premium-menu">Premium<\/a>/);
   assert.match(piede({}), /<a href="\/premium\/" data-conta="premium-menu">Premium<\/a>/);
+});
+
+test('premium: prima la scelta tra mensile e annuale, senza finti acquisti', () => {
+  const html = premium(ctx).html;
+  const testo = leggibile(html);
+  assert.ok(testo.includes('Quale ti fa più comodo?'));
+  assert.ok(testo.includes('adesso non paghi niente'));
+  assert.match(html, /<a class="[^"]*" href="#mensile" data-conta="premium-mensile">Mensile · 3 € al mese<\/a>/);
+  assert.match(html, /<a class="[^"]*" href="#annuale" data-conta="premium-annuale">Annuale · 30 € l'anno<\/a>/);
+  assert.ok(testo.includes('Due mesi gratis'));
+});
+
+test('premium: dopo la scelta «non c\'è ancora» con Avvisami che riporta la scelta', () => {
+  const html = premium(ctx).html;
+  for (const [id, nome] of [['mensile', 'il mensile'], ['annuale', "l'annuale"]]) {
+    const blocco = html.match(new RegExp(`<section class="premium-scelta" id="${id}"[\\s\\S]*?</section>`))?.[0];
+    assert.ok(blocco, id);
+    assert.ok(leggibile(blocco).includes(`Hai scelto ${nome}.`), id);
+    assert.ok(leggibile(blocco).includes("Premium non c'è ancora."), id);
+    assert.ok(blocco.includes(`subject=Avvisami%20quando%20parte%20Premium%20(${id})`), id);
+    assert.ok(blocco.includes('data-conta="premium-avvisami"'), id);
+  }
+});
+
+test('riquadro Premium invariato', () => {
+  const r = riquadroPremium();
+  assert.ok(r.includes('>Passa a Premium</a>'));
+  assert.ok(r.includes("3 € al mese o 30 € l'anno. Lo togli quando vuoi."));
 });

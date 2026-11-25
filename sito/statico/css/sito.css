@@ -810,6 +810,16 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
 }
 .nota-kiwi { font-size: .8125rem; color: var(--moro-chiaro); }
 
+/* Pagina Premium (fase 0): prima la scelta, poi «non c'è ancora». Il messaggio si vede solo dopo il clic (#mensile, #annuale). */
+.premium-piani { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: flex-start; margin: 8px 0 4px; }
+.premium-piano { display: flex; flex-direction: column; gap: 6px; margin: 0; }
+.premium-scelta { display: none; margin-top: 32px; padding-top: 24px; border-top: 1px solid rgb(42 26 20 / .12); scroll-margin-top: 96px; }
+.premium-scelta:target { display: block; }
+.premium-scelta h2 { margin: 4px 0 8px; font-family: var(--font-titolo); font-weight: 900; font-size: clamp(1.6rem, 5vw, 2.2rem); line-height: 1.1; }
+.premium-piani__nota { flex-basis: 100%; margin: 0; }
+.premium-scelta__fatta { font-family: var(--font-dati); font-size: .9rem; margin: 0; }
+.testo:has(.premium-scelta:target) .premium-piani { display: none; }
+
 .premium-chiuso {
   align-self: flex-start;
   display: inline-flex;
