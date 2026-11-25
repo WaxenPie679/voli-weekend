@@ -74,11 +74,20 @@ export function riduci(grezzi, { adesso }) {
   const ora = adesso.getTime();
   const ammessi = new Set(Object.keys(AEROPORTI_NOMI));
   const migliori = new Map();
+  let scartati = 0;
   for (const f of Object.values(grezzi)) {
     if (!fileValido(f, ora)) continue;
     for (const it of f.itineraries ?? []) {
-      if (!ammessi.has(it.origin)) continue;
-      const v = aVolo(it);
+      if (!ammessi.has(it?.origin)) continue;
+      // Un itinerario malformato (tratte o destinazione mancanti) si salta e si conta, non fa cadere tutto.
+      let v;
+      try {
+        v = aVolo(it);
+        if (!Number.isFinite(v.p) || !Number.isFinite(v.resta)) throw new Error('itinerario incompleto');
+      } catch {
+        scartati++;
+        continue;
+      }
       if (v.p > PREZZO_MAX) continue;
       const chiaveGruppo = `${v.o}|${v.d}|${v.w}|${fascia(v.resta)}`;
       const attuale = migliori.get(chiaveGruppo);
@@ -87,7 +96,7 @@ export function riduci(grezzi, { adesso }) {
   }
   const voli = [...migliori.values()].sort((a, b) => a.p - b.p || a.va[0].localeCompare(b.va[0]));
   const bacini = Object.fromEntries(BACINI.map(b => [b.slug, statoBacino(b, grezzi, voli, ora)]));
-  return { voli, bacini };
+  return { voli, bacini, scartati };
 }
 
 async function leggi(percorsoOUrl, daCartella) {
@@ -95,7 +104,7 @@ async function leggi(percorsoOUrl, daCartella) {
     const testo = daCartella
       ? await readFile(percorsoOUrl, 'utf8')
       : await (async () => {
-          const r = await fetch(percorsoOUrl);
+          const r = await fetch(percorsoOUrl, { signal: AbortSignal.timeout(30000) });
           if (!r.ok) throw new Error(`HTTP ${r.status}`);
           return r.text();
         })();

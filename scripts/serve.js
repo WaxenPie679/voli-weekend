@@ -40,7 +40,9 @@ export function createServer({ root = ROOT, port = PORT } = {}) {
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const server = createServer();
+  // Cartella da servire: primo argomento (es. sito/dist); senza, la webapp in web/.
+  const radice = process.argv[2] ? resolve(process.argv[2]) : undefined;
+  const server = createServer({ root: radice });
   server.on('error', (err) => {
     if (err.code === 'EADDRINUSE') console.error(`La porta ${PORT} è già occupata: Voli Weekend è forse già aperto su http://127.0.0.1:${PORT}`);
     else console.error(err.message);

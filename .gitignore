@@ -9,3 +9,4 @@ spike/*.html
 .secrets/
 /history/
 /summary/
+sito/dist/
