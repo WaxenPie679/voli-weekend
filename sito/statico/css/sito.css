@@ -283,12 +283,12 @@ img, svg { display: block; max-width: 100%; }
 .intestazione__menu a[aria-current="page"] { font-weight: 700; }
 .intestazione :focus-visible { outline-color: var(--moro); }
 
-/* ---------- Striscia delle partenze (GUIDA §7): limone, mono maiuscolo, da destra a sinistra ---------- */
+/* ---------- Striscia delle partenze (GUIDA §7): foglia (sul sito, dal 25/11/2026), mono maiuscolo, da destra a sinistra ---------- */
 .striscia {
   position: relative;
   display: flex;
   align-items: stretch;
-  background: var(--limone);
+  background: var(--foglia);
   border-block: 1px solid rgb(42 26 20 / .16);
   color: var(--moro);
 }

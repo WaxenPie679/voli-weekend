@@ -1,4 +1,4 @@
-// La striscia delle partenze (GUIDA §7): limone, testo moro in mono maiuscolo, scorre da destra a sinistra.
+// La striscia delle partenze (GUIDA §7): sul sito in foglia, testo moro in mono maiuscolo, scorre da destra a sinistra.
 // Apre con lo slogan, poi le tratte più economiche del giorno. Funziona senza JavaScript:
 // si ferma col pulsante (una casella), passandoci sopra, e resta ferma se il movimento è ridotto.
 import { h, grezzo } from '../statico/js/html.js';
