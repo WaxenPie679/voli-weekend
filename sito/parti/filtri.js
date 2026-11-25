@@ -1,16 +1,15 @@
 // I filtri della lista (HOME §2): un modulo GET, così l'indirizzo si può condividere.
 // Weekend lungo e i mesi dopo quelli coi dati stanno dietro il lucchetto Premium.
 import { h, grezzo, lucchetto } from '../statico/js/html.js';
+import { mesiDeiVoli } from '../statico/js/logica.js';
 import { BACINI, AEROPORTI_NOMI, PREZZO_MIN, PREZZO_MAX, PREZZO_INIZIALE } from '../config.js';
 
 const MESI = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
 
 const MESE = /^(\d{4})-(0[1-9]|1[0-2])$/;
 
-// I mesi di calendario che contengono i weekend dei voli (dal venerdì `w`), in ordine e senza doppioni.
-export function mesiDeiVoli(voli) {
-  return [...new Set(voli.map(v => String(v.w ?? '').slice(0, 7)).filter(m => MESE.test(m)))].sort();
-}
+// La stessa regola dei mesi serve al browser per leggere l'indirizzo: sta in logica.js.
+export { mesiDeiVoli };
 
 function voceMese(valore) {
   const [, , mese] = valore.match(MESE);

@@ -1,6 +1,6 @@
 // Pezzi che le pagine hanno in comune: il documento intero, l'apertura, l'elenco dei biglietti e le mete.
 import { h, grezzo } from '../statico/js/html.js';
-import { biglietto } from '../statico/js/biglietto-html.js';
+import { biglietto, nessunVolo } from '../statico/js/biglietto-html.js';
 import { normalizza } from '../statico/js/formati.js';
 import { testa } from '../parti/testa.js';
 import { intestazione } from '../parti/intestazione.js';
@@ -40,9 +40,10 @@ export const voliIniziali = voli => voli.filter(v => v.p <= PREZZO_INIZIALE);
 const riepilogo = (n, da) => `${n} ${n === 1 ? 'volo' : 'voli'} ${da}, Weekend, fino a ${PREZZO_INIZIALE} € a/r`;
 export { riepilogo };
 
-// Il primo blocco di biglietti; il riquadro (se c'è) sta dopo il biglietto `dopo`.
-// «Mostra altri voli» compare solo se ce ne sono altri: lo accende il browser, a blocchi di BLOCCO.
-export function elencoBiglietti({ voli, tutti = voli, adesso, affiliato, riquadro = '', dopo }) {
+// Lo script dell'esploratore: lo caricano solo le pagine con la lista dei voli.
+export const SCRIPT_ESPLORA = '<script type="module" src="/js/esplora.js" defer></script>';
+
+function biglietti({ voli, tutti, adesso, affiliato, riquadro, dopo }) {
   const primi = voli.slice(0, BLOCCO);
   const pezzi = primi.map((v, i) => {
     const altre = tutti.filter(a => a.k !== v.k && a.o === v.o && a.citta === v.citta);
@@ -51,17 +52,23 @@ export function elencoBiglietti({ voli, tutti = voli, adesso, affiliato, riquadr
   });
   // Se i biglietti sono meno del punto scelto, il riquadro chiude comunque la lista.
   if (riquadro && primi.length < dopo) pezzi.push(grezzo(riquadro));
+  return pezzi;
+}
+
+// La lista dei voli con il primo blocco di biglietti; il riquadro (se c'è) sta dopo il biglietto `dopo`.
+// Senza voli: «Con questi filtri non c'è niente.» e poi il riquadro.
+// «Mostra altri voli» compare solo se ce ne sono altri: lo accende il browser, a blocchi di BLOCCO.
+// data-affiliato e data-dopo servono a esplora.js per ridisegnare la lista uguale.
+export function elencoBiglietti({ voli, tutti = voli, adesso, affiliato = '', riquadro = '', dopo, pagina = '/' }) {
+  const pezzi = voli.length
+    ? biglietti({ voli, tutti, adesso, affiliato, riquadro, dopo })
+    : [grezzo(nessunVolo(pagina)), grezzo(riquadro)];
   const altri = voli.length > BLOCCO
     ? h`<p class="altri"><button class="bottone bottone--contorno" type="button" data-altri>Mostra altri voli</button></p>`
     : '';
-  return h`<div class="biglietti">${pezzi}</div>
-${grezzo(altri)}`;
-}
-
-export function nessunVolo() {
-  return h`<div class="vuoto">
-  <p><strong>Con questi filtri non c'è niente.</strong> Prova ad alzare il prezzo o a scegliere Weekend lungo.</p>
-  <p><a class="bottone bottone--contorno" href="/" data-conta="filtro">Togli i filtri</a></p>
+  return h`<div class="esploratore" data-affiliato="${affiliato}" data-dopo="${dopo ?? ''}">
+<div class="biglietti">${pezzi}</div>
+${grezzo(altri)}
 </div>`;
 }
 

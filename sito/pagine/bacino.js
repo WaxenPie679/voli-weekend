@@ -5,7 +5,7 @@ import { tratta } from '../statico/js/biglietto-html.js';
 import { filtri, mesiDeiVoli } from '../parti/filtri.js';
 import { riquadroCanale } from '../parti/riquadri.js';
 import { BACINI, KIWI_AFFILIATO, PREZZO_INIZIALE } from '../config.js';
-import { documento, apertura, voliIniziali, riepilogo, elencoBiglietti, nessunVolo, elencoMete } from './comune.js';
+import { documento, apertura, voliIniziali, riepilogo, elencoBiglietti, elencoMete, SCRIPT_ESPLORA } from './comune.js';
 
 const CANALE_DOPO = 3;
 const NON_PRONTO = 'Stiamo iniziando a seguire i voli da qui. I primi prezzi arrivano a giorni.';
@@ -106,9 +106,7 @@ export function pagina({ voli, bacini, adesso, affiliato = KIWI_AFFILIATO }, slu
 
   const suoi = voli.filter(v => config.aeroporti.includes(v.o));
   const iniziali = voliIniziali(suoi);
-  const lista = iniziali.length
-    ? elencoBiglietti({ voli: iniziali, tutti: suoi, adesso, affiliato, riquadro: riquadroCanale({ bacino: slug }), dopo: CANALE_DOPO })
-    : nessunVolo();
+  const lista = elencoBiglietti({ voli: iniziali, tutti: suoi, adesso, affiliato, riquadro: riquadroCanale({ bacino: slug }), dopo: CANALE_DOPO, pagina: percorso });
   const corpo = h`${grezzo(apertura({ riga: 'Quando parti, DoVai?', titolo: t.titolo, sottotitolo: t.sottotitolo }))}
 <section class="sezione sezione--intro">
   <div class="contenitore intro">
@@ -132,6 +130,7 @@ ${grezzo(stato.mete.length ? inFondo(t, stato, slug) : '')}`;
       indicizza: true,
       corpo,
       affiliato,
+      extra: SCRIPT_ESPLORA,
     }),
   };
 }
