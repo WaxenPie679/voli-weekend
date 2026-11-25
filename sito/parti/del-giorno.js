@@ -2,22 +2,10 @@
 // Non è un <details>: i dettagli stanno nella lista, il link «Tutti i dettagli» apre lì lo stesso volo.
 // Sul telefono non c'è: il primo biglietto della lista è già lui, subito sotto i filtri.
 import { h, grezzo } from '../statico/js/html.js';
-import { tratta } from '../statico/js/biglietto-html.js';
-import { giornoBreve, ora, permanenza, visto, prezzo, linkKiwi } from '../statico/js/formati.js';
+import { tratta, tabellone } from '../statico/js/biglietto-html.js';
+import { giornoBreve, ora, permanenza, visto, linkKiwi } from '../statico/js/formati.js';
 
 const SICURO = /^https:\/\//;
-
-// Il prezzo come un tabellone delle partenze: ogni cifra è un rullo 0–9 (due giri) che si ferma sulla sua.
-// Il testo vero sta in .nascosto per i lettori di schermo; i rulli sono solo per gli occhi. Senza movimento
-// (o senza CSS) i rulli sono già fermi sulla cifra giusta.
-const RULLO = '0123456789'.repeat(2).split('').map(c => `<span>${c}</span>`).join('');
-function tabellone(euro) {
-  const cifre = String(euro).split('');
-  const colonne = cifre.map((c, i) => /\d/.test(c)
-    ? `<span class="cifra" style="--c:${c};--n:${cifre.length - 1 - i}"><span class="cifra__fine">${c}</span><span class="cifra__rullo">${RULLO}</span></span>`
-    : `<span>${c}</span>`).join('');
-  return `<span class="nascosto">${prezzo(euro)}</span><span class="tabellone" aria-hidden="true">${colonne}&nbsp;€ a/r</span>`;
-}
 
 export function delGiorno(v, { adesso, affiliato = '', pagina = '/' } = {}) {
   if (!v) return '';

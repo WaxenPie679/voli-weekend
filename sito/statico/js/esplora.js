@@ -7,6 +7,8 @@ const modulo = document.querySelector('form.filtri');
 const esploratore = document.querySelector('.esploratore');
 
 const ATTESA_INDIRIZZO = 250;
+// Sotto questa larghezza il volo del giorno non sta nell'apertura (vedi .del-giorno nel CSS).
+const TELEFONO = matchMedia('(max-width: 899px)');
 
 // Il movimento della lista (View Transitions): solo dove il browser lo sa fare e il movimento va bene.
 // Altrove la lista cambia di colpo, come prima.
@@ -96,9 +98,11 @@ async function avvia() {
   let filtri;
   let voli = [];
   let mostrati = 0;
+  let primoDisegno = true;
 
-  const scheda = v => biglietto(v, {
+  const scheda = (v, tabellone = false) => biglietto(v, {
     adesso,
+    tabellone,
     affiliato: p.affiliato,
     altre: futuri.filter(a => a.k !== v.k && a.o === v.o && a.citta === v.citta),
   });
@@ -107,13 +111,19 @@ async function avvia() {
   function disegna() {
     const primi = voli.slice(0, mostrati);
     const pezzi = primi.length
-      ? primi.map((v, i) => scheda(v) + (i + 1 === p.dopo ? p.riquadro : ''))
+      ? primi.map((v, i) => scheda(v, primoDisegno && i === 0) + (i + 1 === p.dopo ? p.riquadro : ''))
       : [nessunVolo(p.pagina)];
     if (primi.length < p.dopo) pezzi.push(p.riquadro);
     lista.innerHTML = pezzi.join('');
     altri.parentElement.hidden = voli.length <= mostrati;
     riga.textContent = riepilogo(voli.length, filtri, p.nomi);
     if (valoreMax) valoreMax.textContent = String(filtri.max);
+    // Sul telefono il volo del giorno è il primo della lista: al primo disegno il suo prezzo gira
+    // come un tabellone e poi il timbro batte (da computer lo fa il biglietto dell'apertura).
+    if (primoDisegno && TELEFONO.matches && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      lista.querySelector('article .bollino')?.classList.add('bollino--gira');
+    }
+    primoDisegno = false;
   }
 
   function applica(nuovi) {
@@ -151,13 +161,13 @@ async function avvia() {
   // Apre un volo nella lista: se i filtri lo escludono si allargano quanto basta, e il modulo e l'indirizzo
   // lo dicono. Mostra abbastanza biglietti da arrivarci, lo apre e lo restituisce.
   let testoMeta = '';
-  function apriVolo(cercato, { scriviSempre = false } = {}) {
+  function apriVolo(cercato) {
     const escluso = !voli.includes(cercato);
     if (escluso) {
       applica(filtriPerVolo(filtri, cercato, opzioni));
       if (!filtri.a) testoMeta = '';
     }
-    if (escluso || scriviSempre) {
+    if (escluso) {
       const query = [scriviFiltri(filtri, { bacino: p.bacino }), `volo=${encodeURIComponent(cercato.k)}`].filter(Boolean).join('&');
       scriviIndirizzo(`?${query}`);
     }
@@ -178,39 +188,6 @@ async function avvia() {
   const cercato = futuri.find(v => v.k === params.get('volo'));
   if (cercato) apriVolo(cercato)?.scrollIntoView({ block: 'start' });
   else riempiModulo(filtri, testoMeta);
-
-  // «Tutti i dettagli» sul volo del giorno: invece di ricaricare la pagina, il biglietto dell'apertura
-  // vola al suo posto nella lista e si apre lì. Senza transizioni la lista salta subito al biglietto aperto.
-  const giorno = document.querySelector('.biglietto--giorno');
-  const dettagli = giorno?.querySelector('.del-giorno__dettagli');
-  dettagli?.addEventListener('click', evento => {
-    if (evento.button || evento.metaKey || evento.ctrlKey || evento.shiftKey || evento.altKey) return;
-    const url = new URL(dettagli.href);
-    const volo = futuri.find(v => v.k === url.searchParams.get('volo'));
-    if (url.pathname !== location.pathname || !volo) return;
-    evento.preventDefault();
-    let articolo = null;
-    const arriva = () => {
-      articolo = apriVolo(volo, { scriviSempre: true });
-      articolo?.scrollIntoView({ block: 'start', behavior: 'instant' });
-    };
-    const fuoco = () => articolo?.querySelector('summary')?.focus({ preventScroll: true });
-    if (!muovi()) { arriva(); fuoco(); return; }
-    inCorso?.skipTransition();
-    inCorso = null;
-    document.documentElement.classList.remove('vt-lista');
-    for (const a of lista.querySelectorAll('article[data-k]')) a.style.viewTransitionName = '';
-    giorno.style.viewTransitionName = 'volo-scelto';
-    const t = document.startViewTransition(() => {
-      giorno.style.viewTransitionName = '';
-      arriva();
-      if (articolo) articolo.style.viewTransitionName = 'volo-scelto';
-    });
-    t.finished.finally(() => {
-      if (articolo) articolo.style.viewTransitionName = '';
-      fuoco();
-    });
-  });
 
   // Le mete suggerite nel campo «Dove vuoi andare».
   const mete = modulo.querySelector('#f-a-mete');

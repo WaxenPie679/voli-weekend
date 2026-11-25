@@ -622,9 +622,6 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
   ::view-transition-new(*.biglietto):only-child { animation: vt-entra .32s var(--arrivo) .06s both; }
   @keyframes vt-esce { to { opacity: 0; scale: .96; } }
   @keyframes vt-entra { from { opacity: 0; scale: .97; translate: 0 10px; } }
-  /* «Tutti i dettagli»: il biglietto del giorno vola al suo posto nella lista, la pagina sotto si dissolve. */
-  ::view-transition-group(volo-scelto) { animation-duration: .55s; animation-timing-function: var(--arrivo); }
-  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .3s; }
 }
 .biglietto :focus-visible { outline-color: var(--limone); }
 .biglietto .matrice :focus-visible { outline-color: var(--ruggine); }
@@ -1079,6 +1076,11 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
   }
   .bollino--timbro .cifra__rullo {
     animation: rullo calc(.75s - var(--n, 0) * .12s) cubic-bezier(.25, .7, .2, 1) .4s both;
+  }
+  /* Sul telefono lo stesso tabellone gira sul primo biglietto della lista, appena disegnato (esplora.js). */
+  .bollino--gira { animation: timbro .4s ease-out .8s; }
+  .bollino--gira .cifra__rullo {
+    animation: rullo calc(.75s - var(--n, 0) * .12s) cubic-bezier(.25, .7, .2, 1) .05s both;
   }
   @keyframes rullo {
     from { translate: 0 0; filter: blur(.5px); }
