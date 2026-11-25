@@ -45,13 +45,17 @@ function aVolo(it) {
   };
 }
 
+// Un file conta solo se c'è e il suo generatedAt non è più vecchio di VECCHIO_ORE:
+// i prezzi di un file vecchio non si mostrano mai.
+function fileValido(f, adesso) {
+  const t = Date.parse(f?.generatedAt);
+  return Number.isFinite(t) && adesso - t <= VECCHIO_ORE * ORA_MS;
+}
+
 function statoBacino(bacino, grezzi, voli, adesso) {
-  const file = bacino.file.map(f => grezzi[f] ?? null);
-  const generati = file.map(f => f?.generatedAt).filter(g => Number.isFinite(Date.parse(g)));
-  const completo = file.every(Boolean) && generati.length === file.length;
-  const aggiornato = completo ? generati.reduce((a, b) => (Date.parse(b) < Date.parse(a) ? b : a)) : null;
-  const pronto = completo && adesso - Date.parse(aggiornato) <= VECCHIO_ORE * ORA_MS;
-  if (!pronto) return { pronto, aggiornato, numero: 0, piuBasso: null, mete: [] };
+  const validi = bacino.file.map(n => grezzi[n]).filter(f => fileValido(f, adesso));
+  if (!validi.length) return { pronto: false, aggiornato: null, numero: 0, piuBasso: null, mete: [] };
+  const aggiornato = validi.map(f => f.generatedAt).reduce((a, b) => (Date.parse(b) > Date.parse(a) ? b : a));
 
   const suoi = voli.filter(v => bacino.aeroporti.includes(v.o));
   const mete = [];
@@ -63,7 +67,7 @@ function statoBacino(bacino, grezzi, voli, adesso) {
     if (mete.length === METE_MAX) break;
   }
   return {
-    pronto,
+    pronto: true,
     aggiornato,
     numero: suoi.filter(v => v.p <= PREZZO_INIZIALE).length,
     piuBasso: suoi[0] ?? null,
@@ -72,10 +76,12 @@ function statoBacino(bacino, grezzi, voli, adesso) {
 }
 
 export function riduci(grezzi, { adesso }) {
+  const ora = adesso.getTime();
   const ammessi = new Set(Object.keys(AEROPORTI_NOMI));
   const migliori = new Map();
   for (const f of Object.values(grezzi)) {
-    for (const it of f?.itineraries ?? []) {
+    if (!fileValido(f, ora)) continue;
+    for (const it of f.itineraries ?? []) {
       if (!ammessi.has(it.origin)) continue;
       const v = aVolo(it);
       if (v.p > PREZZO_MAX) continue;
@@ -85,7 +91,7 @@ export function riduci(grezzi, { adesso }) {
     }
   }
   const voli = [...migliori.values()].sort((a, b) => a.p - b.p || a.va[0].localeCompare(b.va[0]));
-  const bacini = Object.fromEntries(BACINI.map(b => [b.slug, statoBacino(b, grezzi, voli, adesso.getTime())]));
+  const bacini = Object.fromEntries(BACINI.map(b => [b.slug, statoBacino(b, grezzi, voli, ora)]));
   return { voli, bacini };
 }
 
