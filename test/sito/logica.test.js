@@ -77,6 +77,13 @@ test('filtra: resta 2 esclude un volo da 1500 minuti', () => {
   assert.deepEqual(k, ['c']);
 });
 
+test('filtra: un volo senza resta conta come 0 minuti', () => {
+  const senza = { ...VOLI[0], k: 'z', resta: undefined };
+  assert.deepEqual(filtra([senza], INIZIALI, BACINI).map(v => v.k), ['z']);
+  assert.deepEqual(filtra([senza], { ...INIZIALI, resta: 1 }, BACINI), []);
+  assert.equal(filtriPerVolo({ ...INIZIALI, resta: 1 }, senza, { bacini: BACINI }).resta, 0);
+});
+
 test('filtra: prezzo, bacino, aeroporto e mese; dal più economico', () => {
   assert.deepEqual(filtra(VOLI, INIZIALI, BACINI).map(v => v.k), ['e', 'b', 'c', 'a']);
   assert.deepEqual(filtra(VOLI, { ...INIZIALI, da: 'puglia' }, BACINI).map(v => v.k), ['b', 'a']);

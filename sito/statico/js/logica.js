@@ -69,7 +69,7 @@ export function filtra(voli, filtri, bacini = []) {
     .filter(v => !aeroporti || aeroporti.includes(v.o))
     .filter(v => filtri.mese === 'tre' || String(v.w ?? '').startsWith(filtri.mese))
     .filter(v => v.p <= filtri.max)
-    .filter(v => v.resta >= filtri.resta * GIORNO_MIN)
+    .filter(v => (v.resta ?? 0) >= filtri.resta * GIORNO_MIN)
     .filter(v => !filtri.a || normalizza(v.citta ?? '').includes(filtri.a))
     .sort((x, y) => x.p - y.p || String(x.va?.[0]).localeCompare(String(y.va?.[0])) || String(x.k).localeCompare(String(y.k)));
 }
@@ -92,7 +92,7 @@ export function filtriPerVolo(filtri, volo, { bacino, bacini = [] } = {}) {
   }
   if (filtri.mese !== 'tre' && !String(volo.w ?? '').startsWith(filtri.mese)) nuovi.mese = 'tre';
   if (volo.p > filtri.max) nuovi.max = Math.min(PREZZO_MAX, Math.max(PREZZO_MIN, Math.ceil(volo.p)));
-  if (volo.resta < filtri.resta * GIORNO_MIN) nuovi.resta = 0;
+  if ((volo.resta ?? 0) < filtri.resta * GIORNO_MIN) nuovi.resta = 0;
   if (filtri.a && !normalizza(volo.citta ?? '').includes(filtri.a)) nuovi.a = '';
   return nuovi;
 }

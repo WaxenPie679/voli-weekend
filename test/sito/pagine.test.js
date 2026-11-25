@@ -294,6 +294,7 @@ test('home: 12 biglietti fino a 100 €, canale dopo il sesto, «Mostra altri vo
   assert.equal((html.match(/<article class="biglietto"/g) ?? []).length, 12);
   assert.ok(!html.includes('Cara'), 'sopra i 100 € non si vede');
   assert.ok(html.includes('Mostra altri voli'));
+  assert.match(html, /<p class="altri" hidden><button[^>]*data-altri>Mostra altri voli/, 'nascosto finché non lo accende il browser');
   const posCanale = html.indexOf('id="te-lo-scriviamo"');
   const biglietti = [...html.matchAll(/<article class="biglietto"/g)].map(m => m.index);
   assert.ok(biglietti[5] < posCanale && posCanale < biglietti[6]);
