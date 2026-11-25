@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, copyFileSync, readFileSync, existsSync, writeFileSync } from 'node:fs';
-import { join, resolve, dirname } from 'node:path';
+import { mkdtempSync, mkdirSync, copyFileSync, readFileSync, existsSync, writeFileSync, symlinkSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { tmpdir, homedir } from 'node:os';
 import { prepara, MSG_TITOLARE } from '../../sito/build.js';
 import { riduci } from '../../sito/dati.js';
@@ -71,9 +71,38 @@ test('riduci salta un itinerario malformato e lo conta', () => {
   assert.ok(voli.length > 0);
 });
 
-test('prepara rifiuta uscite pericolose prima di cancellare qualcosa', async () => {
-  const { dati } = cartelle();
-  for (const out of ['/', homedir(), process.cwd(), resolve('sito/..'), resolve('..'), dirname(process.cwd())]) {
-    await assert.rejects(prepara({ cartella: dati, out, adesso: ADESSO }), /non si può svuotare/, out);
-  }
+const RIFIUTO = /non è una cartella del sito: non la svuoto/;
+
+test('prepara rifiuta una cartella piena senza marcatore e la lascia intatta', async () => {
+  const { dati, out } = cartelle();
+  mkdirSync(out);
+  writeFileSync(join(out, 'mio.txt'), 'importante');
+  await assert.rejects(prepara({ cartella: dati, out, adesso: ADESSO }), RIFIUTO);
+  assert.equal(readFileSync(join(out, 'mio.txt'), 'utf8'), 'importante');
+});
+
+test('prepara rifà una cartella già preparata (marcatore) e accetta una vuota', async () => {
+  const { dati, out } = cartelle();
+  await prepara({ cartella: dati, out, adesso: ADESSO });
+  assert.ok(existsSync(join(out, '.dovai-dist')));
+  writeFileSync(join(out, 'vecchio.txt'), 'x');
+  await prepara({ cartella: dati, out, adesso: ADESSO });
+  assert.ok(!existsSync(join(out, 'vecchio.txt')));
+  assert.doesNotMatch(readFileSync(join(out, 'sitemap.xml'), 'utf8'), /dovai-dist/);
+  const vuota = join(out, '..', 'vuota');
+  mkdirSync(vuota);
+  await prepara({ cartella: dati, out: vuota, adesso: ADESSO });
+  assert.ok(existsSync(join(vuota, 'index.html')));
+});
+
+test('prepara rifiuta radice, home, repo, cwd, antenati, maiuscole diverse e link a cartelle piene', async () => {
+  const { dati, out } = cartelle();
+  const piena = join(out, '..', 'piena');
+  mkdirSync(piena);
+  writeFileSync(join(piena, 'a.txt'), 'a');
+  symlinkSync(piena, out);
+  const scelte = ['/', homedir(), process.cwd(), resolve('sito'), resolve('..'), out];
+  if (existsSync('/users')) scelte.push('/users');
+  for (const o of scelte) await assert.rejects(prepara({ cartella: dati, out: o, adesso: ADESSO }), RIFIUTO, o);
+  assert.ok(existsSync(join(piena, 'a.txt')));
 });
