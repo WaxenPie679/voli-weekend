@@ -220,16 +220,17 @@ img, svg { display: block; max-width: 100%; }
 /* ---------- Filtri ---------- */
 .filtri {
   display: grid;
-  gap: 20px 24px;
-  padding: 20px;
+  gap: 12px 24px;
+  padding: 12px 14px 14px;
   background: var(--panna);
   border: 1px solid var(--linea);
   border-radius: var(--raggio);
 }
-@media (min-width: 640px) { .filtri { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 24px; } }
-@media (min-width: 1000px) { .filtri { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+/* Partenza, tipo e prezzo in una riga da 900 px; sotto, «Altri filtri» e il riepilogo su tutta la riga. */
+@media (min-width: 640px) { .filtri { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 18px 20px 20px; } }
+@media (min-width: 900px) { .filtri { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
-.filtri__campo { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.filtri__campo { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .filtri__campo > label,
 .filtri__etichetta {
   font-weight: 700;
@@ -261,7 +262,80 @@ img, svg { display: block; max-width: 100%; }
 .filtri input[type="search"]:hover { border-color: var(--moro); }
 .filtri input::placeholder { color: var(--moro-chiaro); opacity: 1; }
 
-.filtri__spiega { font-size: .875rem; line-height: 1.45; color: var(--moro-chiaro); }
+.filtri__spiega { font-size: .875rem; line-height: 1.4; color: var(--moro-chiaro); }
+
+/* Sul telefono «Tipo di weekend» resta solo per i lettori di schermo: i due segmenti si spiegano da soli. */
+@media (max-width: 639px) {
+  .filtri__campo--tipo > .filtri__etichetta {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* Prezzo: etichetta sopra, poi «30 € [cursore] 400 €» in una riga. */
+.filtri__campo--prezzo {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-content: start;
+  align-items: center;
+  gap: 6px 10px;
+}
+.filtri__campo--prezzo > label { grid-column: 1 / -1; }
+.filtri__campo--prezzo > input { grid-column: 2; grid-row: 2; }
+.filtri__campo--prezzo > .filtri__scala { display: contents; }
+.filtri__scala > :first-child { grid-column: 1; grid-row: 2; }
+.filtri__scala > :last-child { grid-column: 3; grid-row: 2; }
+
+/* Tra 640 e 899 px partenza e tipo stanno affiancati e il prezzo prende la riga sotto, intera. */
+@media (min-width: 640px) and (max-width: 899px) { .filtri__campo--prezzo { grid-column: 1 / -1; } }
+
+/* «Altri filtri»: quando, quanto resti, dove. Chiuso all'apertura; esplora.js lo apre se l'indirizzo li usa. */
+/* «Togli i filtri» sta sulla riga del titolo di «Altri filtri», a destra; aperto, i campi usano tutta la larghezza. */
+.filtri__altri-riga { grid-column: 1 / -1; position: relative; }
+.filtri__altri-riga > .filtri__togli {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding-block: 0;
+  white-space: nowrap;
+}
+.filtri__altri-titolo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding-inline: 2px;
+  font-weight: 700;
+  font-size: .9375rem;
+  cursor: pointer;
+  list-style: none;
+  border-radius: 8px;
+}
+.filtri__altri-titolo::-webkit-details-marker { display: none; }
+.filtri__altri-titolo::after {
+  content: "";
+  width: 16px;
+  height: 16px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='%232A1A14' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center / 16px;
+  transition: rotate .2s var(--uscita);
+}
+.filtri__altri[open] > .filtri__altri-titolo::after { rotate: 180deg; }
+.filtri__altri-titolo:hover { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: .2em; }
+.filtri__altri-campi {
+  display: grid;
+  gap: 14px 24px;
+  padding-block: 6px 4px;
+}
+@media (min-width: 640px) { .filtri__altri-campi { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 900px) { .filtri__altri-campi { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (prefers-reduced-motion: reduce) { .filtri__altri-titolo::after { transition: none; } }
 
 .segmenti {
   display: grid;
@@ -328,8 +402,6 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
   box-shadow: 0 1px 3px rgb(42 26 20 / .35);
 }
 .filtri__scala {
-  display: flex;
-  justify-content: space-between;
   font-size: .8125rem;
   color: var(--moro-chiaro);
 }
@@ -339,14 +411,16 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px 20px;
-  padding-top: 16px;
+  gap: 4px 20px;
+  padding-top: 10px;
   border-top: 1px solid var(--linea);
 }
-.filtri__riepilogo { flex: 1 1 16rem; font-weight: 500; }
+.filtri__riepilogo { flex: 1 1 16rem; font-weight: 500; font-size: .9375rem; line-height: 1.4; }
 .filtri__riepilogo:empty { display: none; }
 .filtri__togli { font-weight: 500; padding-block: 8px; }
 .filtri__invia { margin-left: auto; }
+/* Con JavaScript la lista cambia mentre si sceglie: il bottone serve solo senza. */
+.filtri--vivo .filtri__invia { display: none; }
 
 /* ---------- Lista dei biglietti ---------- */
 .biglietti {
@@ -708,15 +782,21 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
 .piede__fondo a { color: var(--carta); }
 
 /* ---------- Pagine: apertura, sezioni, testi lunghi ---------- */
-.apertura { padding-block: clamp(32px, 6vw, 72px) clamp(16px, 3vw, 32px); }
-.apertura__riga { font-size: .9375rem; color: var(--moro-chiaro); margin-bottom: 12px; }
-.apertura__sotto { margin-top: 16px; max-width: 46ch; font-size: 1.1875rem; }
+.apertura { padding-block: clamp(12px, 3.5vw, 48px) clamp(8px, 1.5vw, 16px); }
+.apertura__riga { font-size: .9375rem; color: var(--moro-chiaro); margin-bottom: 6px; }
+.apertura h1 { font-size: clamp(1.875rem, 1.1rem + 3.8vw, 3.75rem); }
+.apertura__sotto { margin-top: 10px; max-width: 52ch; font-size: clamp(1rem, .95rem + .35vw, 1.1875rem); line-height: 1.45; }
 
 .sezione { padding-block: clamp(20px, 4vw, 40px); }
 .sezione > .contenitore { display: grid; gap: 20px; }
 .sezione__sotto { max-width: 52ch; }
-.intro { gap: 8px; max-width: 64ch; }
-.intro__locale { font-family: var(--font-titolo); font-weight: 700; font-size: 1.375rem; line-height: 1.2; }
+.intro > * { max-width: 64ch; }
+.intro__locale { font-family: var(--font-titolo); font-weight: 700; font-size: clamp(1.125rem, 1rem + .6vw, 1.375rem); line-height: 1.2; }
+/* L'introduzione del bacino fa parte dell'apertura: i biglietti devono stare nel primo schermo. */
+.sezione--intro { padding-block: 0 4px; }
+.sezione--intro > .contenitore { gap: 6px; }
+.sezione--voli { padding-top: 12px; }
+.sezione--voli > .contenitore { gap: 16px; }
 
 /* L'attributo hidden vince anche sulle regole con display (es. .altri). */
 [hidden] { display: none !important; }

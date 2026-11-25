@@ -38,3 +38,13 @@ Copie locali in `statico/caratteri/` (OFL, vedi LEGGIMI): Gabarito (titoli, prez
 ## Griglia
 
 Telefono prima: un biglietto per riga. `.biglietti` = `auto-fill, minmax(320px, 1fr)` → 2 colonne da tablet, 3 su computer; contenuto al massimo 1100 px, margine 16–40 px. I riquadri occupano tutta la riga.
+
+## Filtri e primo schermo
+
+«Appena entri vedi i biglietti»: il primo biglietto deve cominciare dentro il primo schermo (375×812 e 1024×768, home e pagine dei bacini). Per questo:
+
+- In vista solo **Da dove parti**, **Weekend / Weekend lungo** e **Fino a … € a/r** (cursore in una riga, «30 € [cursore] 400 €»), più il riepilogo.
+- **Quando**, **Quanto resti**, **Dove vuoi andare** stanno in «Altri filtri» (`<details>`, va anche senza JavaScript). esplora.js lo apre se l'indirizzo usa `?mese`, `?resta` o `?a`. «Togli i filtri» sta a destra del suo titolo.
+- Con JavaScript la lista cambia mentre si sceglie e «Mostra i voli» si nasconde; senza, resta.
+- Sul telefono l'etichetta «Tipo di weekend» c'è solo per i lettori di schermo.
+- Apertura e introduzione del bacino strette: niente spazio in più tra titolo, sottotitolo e frase locale.

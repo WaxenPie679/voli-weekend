@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { leggiFiltri, scriviFiltri, filtra, riepilogo, mesiDeiVoli, filtriPerVolo } from '../../sito/statico/js/logica.js';
+import { leggiFiltri, scriviFiltri, filtra, riepilogo, mesiDeiVoli, filtriPerVolo, altriFiltriAttivi } from '../../sito/statico/js/logica.js';
 
 const BACINI = [
   { slug: 'puglia', nome: 'Puglia', aeroporti: ['BRI', 'BDS'] },
@@ -119,4 +119,12 @@ test('filtriPerVolo: allarga solo quello che esclude il volo', () => {
   assert.deepEqual(filtriPerVolo(largo, caro, { bacini: BACINI }), largo);
   assert.equal(filtriPerVolo(INIZIALI, { ...caro, p: 999 }, { bacini: BACINI }).max, 400);
   assert.deepEqual(filtra([caro], filtriPerVolo({ ...stretti, da: 'MXP' }, caro, { bacini: BACINI }), BACINI), [caro]);
+});
+
+test('altriFiltriAttivi: solo quando, quanto resti e dove aprono «Altri filtri»', () => {
+  assert.equal(altriFiltriAttivi(INIZIALI), false);
+  assert.equal(altriFiltriAttivi({ ...INIZIALI, da: 'BRI', max: 300 }), false);
+  assert.equal(altriFiltriAttivi({ ...INIZIALI, mese: '2026-12' }), true);
+  assert.equal(altriFiltriAttivi({ ...INIZIALI, resta: 2 }), true);
+  assert.equal(altriFiltriAttivi({ ...INIZIALI, a: 'parigi' }), true);
 });

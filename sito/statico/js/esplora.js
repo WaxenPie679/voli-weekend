@@ -1,7 +1,7 @@
 // L'esploratore nel browser: legge i filtri dall'indirizzo e dal modulo, ridisegna la lista da /voli.json.
 // Senza JavaScript (o se voli.json non arriva) la pagina resta quella preparata e il modulo va col GET.
 import { biglietto, nessunVolo } from './biglietto-html.js';
-import { leggiFiltri, scriviFiltri, filtra, riepilogo, filtriPerVolo, BLOCCO, PREZZO_MAX } from './logica.js';
+import { leggiFiltri, scriviFiltri, filtra, riepilogo, filtriPerVolo, altriFiltriAttivi, BLOCCO, PREZZO_MAX } from './logica.js';
 
 const modulo = document.querySelector('form.filtri');
 const esploratore = document.querySelector('.esploratore');
@@ -51,6 +51,8 @@ function riempiModulo(filtri, testoMeta) {
   campi.max.value = String(filtri.max);
   campi.resta.value = String(filtri.resta);
   campi.a.value = testoMeta;
+  // Se l'indirizzo sceglie mese, permanenza o meta, «Altri filtri» si apre: chi arriva vede cosa è attivo.
+  if (altriFiltriAttivi({ ...filtri, a: testoMeta })) modulo.querySelector('.filtri__altri')?.setAttribute('open', '');
 }
 
 function bottoneAltri() {
@@ -67,6 +69,8 @@ async function avvia() {
   if (!dati) return;
 
   const p = leggiPagina();
+  // Con JavaScript la lista cambia mentre si sceglie: «Mostra i voli» serve solo senza.
+  modulo.classList.add('filtri--vivo');
   const opzioni = { bacino: p.bacino, bacini: dati.bacini, mesi: p.mesi };
   const lista = esploratore.querySelector('.biglietti');
   const altri = bottoneAltri();

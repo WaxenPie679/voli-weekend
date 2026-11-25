@@ -30,7 +30,7 @@ export function pagina({ voli, bacini, adesso, affiliato = KIWI_AFFILIATO }) {
     titolo: 'I voli economici del weekend, controllati ogni giorno',
     sottotitolo: 'Da Bari, Brindisi, Milano, Bergamo e Roma. Prezzi andata e ritorno, dal più basso.',
   }))}
-<section class="sezione" aria-label="I voli">
+<section class="sezione sezione--voli" aria-label="I voli">
   <div class="contenitore">
     ${grezzo(filtri({ mesi: mesiDeiVoli(voli), riepilogo: riepilogo(iniziali.length, 'da tutti gli aeroporti') }))}
     ${grezzo(lista)}

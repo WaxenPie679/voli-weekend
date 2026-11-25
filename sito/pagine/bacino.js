@@ -113,7 +113,7 @@ export function pagina({ voli, bacini, adesso, affiliato = KIWI_AFFILIATO }, slu
     ${grezzo(introduzione(t, stato, slug))}
   </div>
 </section>
-<section class="sezione" aria-label="I voli">
+<section class="sezione sezione--voli" aria-label="I voli">
   <div class="contenitore">
     ${grezzo(filtri({ bacino: slug, mesi: mesiDeiVoli(suoi), riepilogo: riepilogo(iniziali.length, `da ${config.nome}`) }))}
     ${grezzo(lista)}

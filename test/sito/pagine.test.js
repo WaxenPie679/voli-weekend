@@ -152,6 +152,22 @@ test('filtri: cursore 30–400 su 100 € a/r, lucchetti e tutti i controlli', (
   assert.ok(html.indexOf('febbraio') < html.indexOf('Fino a 12 mesi con Premium'));
 });
 
+test('filtri: in vista partenza, tipo e prezzo; quando, quanto resti e dove dentro «Altri filtri»', () => {
+  const html = filtri({ mesi: ['2026-12'], riepilogo: '4 voli' });
+  const altri = html.indexOf('<details class="filtri__altri">');
+  assert.ok(altri > 0, 'manca il riquadro «Altri filtri»');
+  assert.ok(html.includes('<summary class="filtri__altri-titolo">Altri filtri</summary>'));
+  for (const id of ['f-da', 'f-tipo', 'f-max']) assert.ok(html.indexOf(`id="${id}"`) < altri, `${id} deve stare in vista`);
+  const fine = html.indexOf('</details>');
+  for (const id of ['f-mese', 'f-resta', 'f-a']) {
+    const dove = html.indexOf(`id="${id}"`);
+    assert.ok(dove > altri && dove < fine, `${id} deve stare in «Altri filtri»`);
+  }
+  assert.ok(html.indexOf('filtri__riepilogo') > fine, 'il riepilogo resta sempre in vista');
+  assert.match(html, /role="group" aria-labelledby="f-tipo" aria-describedby="f-tipo-spiega"/);
+  assert.ok(!/<details class="filtri__altri" open/.test(html), 'all\'apertura è chiuso');
+});
+
 test('mesiDeiVoli: i mesi dei weekend coi voli, mese in corso compreso', () => {
   const voli = ['2026-11-27', '2026-12-11', '2026-12-04', '2027-01-15', '2027-02-19', 'boh', undefined].map(w => ({ w }));
   assert.deepEqual(mesiDeiVoli(voli), ['2026-11', '2026-12', '2027-01', '2027-02']);
