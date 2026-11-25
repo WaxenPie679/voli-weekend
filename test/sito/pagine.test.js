@@ -306,7 +306,7 @@ test('home: 12 biglietti fino a 100 €, canale dopo il sesto, «Mostra altri vo
 test('home: dove si va, mete uniche e più basse, link al filtro', () => {
   const html = home(ctx).html;
   assert.ok(html.includes('Dove si va nel weekend'));
-  assert.ok(html.includes('Le mete più economiche di questo mese dai nostri aeroporti.'));
+  assert.ok(html.includes('Le mete più economiche dei prossimi tre mesi dai nostri aeroporti.'));
   assert.ok(html.includes('href="/?a=parigi"'));
   assert.equal((html.match(/href="\/\?a=parigi"/g) ?? []).length, 1);
   assert.ok(html.includes('40 € a/r') && !html.includes('da 40'));
@@ -336,9 +336,23 @@ test('bacino puglia: introduzione coi dati veri e la frase locale di Bruno', () 
   assert.ok(html.includes('Meh, chiudi tutte cose che dobbiamo andare!'));
   assert.match(html, /<strong>4 voli del weekend<\/strong> fino a 100 € a\/r/);
   assert.ok(html.includes('<strong>Bari → Parigi a 40 € a/r</strong>'));
-  assert.ok(html.includes('Il più basso di questo mese: 40 € a/r.'));
+  assert.ok(html.includes('Il più basso dei prossimi tre mesi: 40 € a/r.'));
   assert.ok(!html.includes('Lisbona →') && !html.includes('→ Lisbona'), 'solo i voli del bacino');
   assert.ok(html.includes('Le mete più economiche da Bari e Brindisi'));
+});
+
+test('bacino: l\'introduzione conta i voli dei prossimi tre mesi, non «questo mese»', () => {
+  const attesi = {
+    puglia: 'Da Bari e Brindisi nei prossimi tre mesi',
+    'milano-bergamo': 'Nei prossimi tre mesi da Malpensa e Orio al Serio',
+    roma: 'Nei prossimi tre mesi da Fiumicino e Ciampino',
+  };
+  for (const [slug, inizio] of Object.entries(attesi)) {
+    const html = leggibile(bacino(ctx, slug).html);
+    assert.ok(html.includes(inizio), slug);
+    assert.ok(!/questo mese/i.test(html), slug);
+  }
+  assert.ok(!/questo mese/i.test(home(ctx).html));
 });
 
 test('bacino: il canale sta dopo il terzo biglietto, con il suo bacino', () => {

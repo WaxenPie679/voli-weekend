@@ -42,7 +42,7 @@ export function pagina({ voli, bacini, adesso, affiliato = KIWI_AFFILIATO }) {
 ${grezzo(mete.length ? h`<section class="sezione" aria-labelledby="titolo-mete">
   <div class="contenitore">
     <h2 id="titolo-mete">Dove si va nel weekend</h2>
-    <p class="sezione__sotto">Le mete più economiche di questo mese dai nostri aeroporti.</p>
+    <p class="sezione__sotto">Le mete più economiche dei prossimi tre mesi dai nostri aeroporti.</p>
     ${grezzo(elencoMete(mete))}
   </div>
 </section>` : '')}`;
