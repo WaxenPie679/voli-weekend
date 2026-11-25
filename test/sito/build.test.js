@@ -111,6 +111,16 @@ test('prepara rifiuta radice, home, repo, cwd, antenati, maiuscole diverse e lin
   assert.ok(existsSync(join(piena, 'a.txt')));
 });
 
+test('il contatore conosce tutte le pagine scritte da prepara', async () => {
+  const { PERCORSI } = await import('../../functions/_lib/regole.js');
+  const { dati, out } = cartelle();
+  await prepara({ cartella: dati, out, adesso: ADESSO });
+  const pagine = readFileSync(join(out, '_headers'), 'utf8').split('\n')
+    .filter(r => r.startsWith('/') && !r.includes('*') && !['/voli.json', '/sitemap.xml', '/robots.txt'].includes(r));
+  assert.equal(pagine.length, 10);
+  for (const p of pagine) assert.ok(PERCORSI.includes(p), p);
+});
+
 test('sito privato: si pubblica senza titolare, robots chiude tutto, _worker.js chiede la password', async () => {
   const { dati, out } = cartelle();
   await prepara({ cartella: dati, out, adesso: ADESSO, pubblica: true, privato: true, titolare: { nome: '', citta: '' }, password: 'prova-segreta' });
@@ -139,4 +149,32 @@ test('worker privato: senza password giusta 401, con password giusta passa', asy
   writeFileSync(join(dir, 'v.mjs'), workerPrivato(''));
   const v = (await import(join(dir, 'v.mjs'))).default;
   assert.equal((await v.fetch(new Request('https://dovaivoli.it/', { headers: { Authorization: 'Basic ' + btoa('a:') } }), env)).status, 401);
+});
+
+test('worker privato col contatore: /api/conta e /numeri/ passano senza password, il resto no', async () => {
+  const { fintoD1 } = await import('../contatore/finto-d1.js');
+  const dir = mkdtempSync(join(tmpdir(), 'worker-contatore-'));
+  const file = join(dir, 'w.mjs');
+  writeFileSync(file, workerPrivato('segreto', { contatore: new URL('../../functions', import.meta.url).href }));
+  const w = (await import(file)).default;
+  const db = fintoD1();
+  const env = { DB: db, ASSETS: { fetch: async () => new Response('ok') } };
+  const conta = await w.fetch(new Request('https://dovaivoli.it/api/conta', {
+    method: 'POST', headers: { 'content-type': 'text/plain', origin: 'https://dovaivoli.it' }, body: '{"e":"kiwi","p":"/"}',
+  }), env);
+  assert.equal(conta.status, 204);
+  assert.equal(db.righe.size, 1);
+  assert.equal((await w.fetch(new Request('https://dovaivoli.it/numeri/?k=sbagliata'), env)).status, 404);
+  assert.equal((await w.fetch(new Request('https://dovaivoli.it/api/numeri'), env)).status, 404);
+  assert.equal((await w.fetch(new Request('https://dovaivoli.it/'), env)).status, 401);
+  assert.equal((await w.fetch(new Request('https://dovaivoli.it/api/conta'), env)).status, 401, 'GET su /api/conta resta dietro la password');
+});
+
+test('prepara privato: il worker importa il contatore da un percorso che esiste', async () => {
+  const { dati, out } = cartelle();
+  await prepara({ cartella: dati, out, adesso: ADESSO, pubblica: true, privato: true, titolare: { nome: '', citta: '' }, password: 'x' });
+  const w = readFileSync(join(out, '_worker.js'), 'utf8');
+  const percorsi = [...w.matchAll(/from '([^']+)'/g)].map(m => m[1]);
+  assert.equal(percorsi.length, 3);
+  for (const p of percorsi) assert.ok(existsSync(resolve(out, p)), p);
 });

@@ -27,7 +27,7 @@ export function intestazione({ percorso = '', aereo = false } = {}) {
     <a class="intestazione__logo" href="/" aria-label="DoVai, alla pagina iniziale">${grezzo(LOGO)}</a>
     <nav class="intestazione__menu" aria-label="Principale">
       <a href="/come-funziona/"${qui('/come-funziona/')}>Come funziona</a>
-      <a href="/premium/"${qui('/premium/')}>Premium</a>
+      <a href="/premium/" data-conta="premium-menu"${qui('/premium/')}>Premium</a>
     </nav>
   </div>
 </header>${grezzo(aereo ? AVVIO_AEREO : '')}`;

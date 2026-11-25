@@ -92,14 +92,14 @@ function privacy({ affiliato, titolare }) {
     ['Quando', 'Quali dati', 'Perché', 'Base legale', 'Per quanto tempo'],
     [
       ['Visiti il sito', 'Indirizzo IP e dati tecnici del browser, letti da Cloudflare per far funzionare e proteggere il sito', 'Mostrarti le pagine, difendere il sito da attacchi', 'Interesse legittimo (art. 6.1.f GDPR)', 'Il tempo dei registri tecnici di Cloudflare'],
-      ['Visiti il sito', 'Conteggi anonimi: pagine viste, da dove arrivi, telefono o computer', 'Capire cosa funziona sul sito', 'Interesse legittimo (art. 6.1.f GDPR)', 'I conteggi non ti riconoscono: restano come numeri totali'],
+      ['Visiti il sito', 'Conteggi anonimi: pagine viste, da dove arrivi, telefono o computer, e quali bottoni vengono toccati (per esempio «Vedi su Kiwi» o «Passa a Premium»), salvati come totali per giorno e pagina, senza indirizzo IP né dati del browser', 'Capire cosa funziona sul sito', 'Interesse legittimo (art. 6.1.f GDPR)', 'I conteggi non ti riconoscono: restano come numeri totali'],
       ['Ci scrivi', `Email e quello che ci scrivi (anche se ci chiedi di avvisarti quando parte Premium)`, 'Risponderti e, se lo chiedi, scriverti una volta quando Premium parte', 'Rispondere a una tua richiesta (art. 6.1.b GDPR); il tuo consenso (art. 6.1.a GDPR) per l\'avviso su Premium', 'Il tempo che serve, al massimo 12 mesi'],
     ],
   );
   const aiuto = tabella(
     ['Chi', 'Cosa fa', 'Dove'],
     [
-      ['Cloudflare', 'Ospita il sito e conta le visite senza cookie', 'USA e UE; trasferimenti coperti dal Data Privacy Framework UE-USA e dalle clausole contrattuali standard'],
+      ['Cloudflare', 'Ospita il sito e tiene i conteggi anonimi, senza cookie', 'USA e UE; trasferimenti coperti dal Data Privacy Framework UE-USA e dalle clausole contrattuali standard'],
       ['Apple (iCloud+)', `Casella ${EMAIL}`, 'UE (Irlanda) e USA, stesse garanzie'],
     ],
   );
