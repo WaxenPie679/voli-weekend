@@ -17,7 +17,7 @@ import { pagina as errore } from '../../sito/pagine/errore.js';
 const adesso = new Date('2026-11-25T12:00:00Z');
 
 const volo = {
-  k: 'bri-bva-2026-12-12-1840',
+  k: 'bri-bva-2026-12-12-1840-2026-12-14-2135',
   o: 'BRI',
   d: 'BVA',
   citta: 'Parigi',
@@ -60,7 +60,7 @@ test('biglietto: tutte le voci del biglietto chiuso', () => {
     'target="_blank"',
     'Compra o aspetta?',
     'data-conta="premium-lucchetto"',
-    'data-k="bri-bva-2026-12-12-1840"',
+    'data-k="bri-bva-2026-12-12-1840-2026-12-14-2135"',
   ]) {
     assert.ok(html.includes(atteso), `manca «${atteso}»`);
   }
@@ -96,14 +96,14 @@ test('biglietto col codice affiliato: tornano nota e testo completo', () => {
 });
 
 test('biglietto: «Da sapere» solo per gli aeroporti lontani, «Altre date» solo se ci sono', () => {
-  const vicino = { ...volo, d: 'CDG', k: 'bri-cdg-2026-12-12-1840' };
+  const vicino = { ...volo, d: 'CDG', k: 'bri-cdg-2026-12-12-1840-2026-12-14-2135' };
   const html = biglietto(vicino, { adesso });
   assert.ok(!html.includes('Da sapere'));
   assert.ok(!html.includes('Altre date'));
-  const altra = { ...vicino, k: 'bri-cdg-2027-01-09-0700', va: ['2027-01-09T07:00', '2027-01-09T09:15'], ri: ['2027-01-10T20:00', '2027-01-10T22:10'], p: 54 };
+  const altra = { ...vicino, k: 'bri-cdg-2027-01-09-0700-2027-01-10-2000', va: ['2027-01-09T07:00', '2027-01-09T09:15'], ri: ['2027-01-10T20:00', '2027-01-10T22:10'], p: 54 };
   const conAltre = biglietto(vicino, { adesso, altre: [altra] });
   assert.ok(conAltre.includes('Altre date per Parigi'));
-  assert.ok(conAltre.includes('?volo=bri-cdg-2027-01-09-0700'));
+  assert.ok(conAltre.includes('?volo=bri-cdg-2027-01-09-0700-2027-01-10-2000'));
   assert.ok(conAltre.includes('54 € a/r'));
 });
 
