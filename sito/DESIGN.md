@@ -30,7 +30,7 @@ Copie locali in `statico/caratteri/` (OFL, vedi LEGGIMI): Gabarito (titoli, prez
 
 - **Niente riga sopra il titolo.** Lo slogan «Quando parti, DoVai?» apre la striscia delle partenze.
 - **Volo del giorno** (home e bacini, da 900 px in su): titolo a sinistra, a destra il volo più economico (`parti/del-giorno.js`) come biglietto non apribile, con «Vedi su Kiwi», «o su {compagnia}» e «Tutti i dettagli» (`?volo=`, apre lo stesso volo nella lista). Sul telefono non c'è: il primo biglietto della lista è già lui.
-- **Striscia delle partenze** (`parti/striscia.js`, GUIDA §7): fascia limone sotto l'apertura, slogan in Gabarito, poi le 8 tratte più basse in mono maiuscolo. Il prezzo resta `30 € a/r`, in ruggine scura. Scorre da destra a sinistra in 48 s. Si ferma col pulsante (è una casella, va anche senza JavaScript), sotto il puntatore e con la tastiera. Col movimento ridotto è ferma e si scorre a mano. La seconda copia del nastro è `aria-hidden`.
+- **Striscia delle partenze** (`parti/striscia.js`, GUIDA §7): fascia foglia sotto l'apertura (era limone fino al 25/11/2026: la testata gialla ha già il limone, il verde separa la striscia; moro su foglia 9,9:1, ruggine scura 4,65:1), slogan in Gabarito, poi le 8 tratte più basse in mono maiuscolo. Il prezzo resta `30 € a/r`, in ruggine scura. Scorre da destra a sinistra in 48 s. Si ferma col pulsante (è una casella, va anche senza JavaScript), sotto il puntatore e con la tastiera. Col movimento ridotto è ferma e si scorre a mano. La seconda copia del nastro è `aria-hidden`.
 
 ## Movimento
 
