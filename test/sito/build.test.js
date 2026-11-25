@@ -30,7 +30,9 @@ test('prepara scrive pagine, voli.json, sitemap, robots e _headers', async () =>
   const robots = readFileSync(join(out, 'robots.txt'), 'utf8');
   assert.match(robots, /Allow: \//);
   assert.match(robots, /Sitemap: https:\/\/dovaivoli\.it\/sitemap\.xml/);
-  assert.match(readFileSync(join(out, '_headers'), 'utf8'), /\/css\/\*\n  Cache-Control: public, max-age=3600/);
+  const intestazioni = readFileSync(join(out, '_headers'), 'utf8');
+  assert.match(intestazioni, /\/css\/\*\n  Cache-Control: public, max-age=3600/);
+  assert.match(intestazioni, /^\/\*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin$/m);
 });
 
 test('la sitemap ha solo pagine indicizzate, non i bacini senza dati', async () => {
