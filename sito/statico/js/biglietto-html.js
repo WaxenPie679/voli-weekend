@@ -82,8 +82,11 @@ function altreDate(v, altre) {
   </div>`;
 }
 
+// Il link della compagnia viene dai dati: solo https, mai javascript: o data:.
+const SICURO = /^https:\/\//;
+
 function compagnia(v, classe, testo) {
-  if (!v.url) return '';
+  if (!SICURO.test(v.url ?? '')) return '';
   return h`<a class="${classe}" href="${v.url}" target="${ESTERNO.target}" rel="${ESTERNO.rel}" data-conta="compagnia">${testo}</a>`;
 }
 

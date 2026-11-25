@@ -182,6 +182,27 @@ test('lucchetto: svg disegnato con etichetta', () => {
   const html = lucchetto('Premium');
   assert.match(html, /<svg[^>]*aria-hidden="true"/);
   assert.ok(html.includes('Premium'));
+  assert.ok(!html.includes('nascosto'));
+});
+
+test('lucchetto: seguito per i lettori di schermo, ripulito', () => {
+  assert.ok(lucchetto('Weekend lungo', { nascosto: ' (solo Premium)' }).includes('<span class="nascosto"> (solo Premium)</span>'));
+  assert.ok(lucchetto('x', { nascosto: '<b>' }).includes('&lt;b&gt;'));
+});
+
+test('filtri: Weekend lungo dice anche a voce che è solo Premium', () => {
+  const html = filtri();
+  assert.match(html, /data-conta="premium-lucchetto"><span class="lucchetto">.*Weekend lungo<span class="nascosto"> \(solo Premium\)<\/span>/);
+});
+
+test('biglietto: il link della compagnia passa solo se è https', () => {
+  for (const url of ['javascript:alert(1)', 'JAVASCRIPT:alert(1)', 'data:text/html,x', 'http://ryanair.com', '', undefined]) {
+    const html = biglietto({ ...volo, url }, { adesso });
+    assert.ok(!html.includes('data-conta="compagnia"'), `passato: ${url}`);
+    assert.ok(!/javascript:|data:text/i.test(html));
+    assert.ok(html.includes('data-conta="kiwi"'));
+  }
+  assert.ok(biglietto(volo, { adesso }).includes('data-conta="compagnia"'));
 });
 
 test('testa: canonical, noindex, caratteri e beacon solo col token', () => {
