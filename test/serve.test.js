@@ -1,7 +1,7 @@
 import { test, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
-import { createServer } from '../scripts/serve.js';
+import { createServer, portaDa } from '../scripts/serve.js';
 
 const server = createServer({ port: 0 });
 await once(server.listen(0, '127.0.0.1'), 'listening');
@@ -60,4 +60,11 @@ test('serve con root personalizzata: cartella come index.html e traversal 403', 
     const stato = await new Promise(ok => request({ host: '127.0.0.1', port: s.address().port, path: '/..%2f..%2fetc/passwd' }, res => { res.resume(); ok(res.statusCode); }).end());
     assert.equal(stato, 403);
   } finally { s.close(); }
+});
+
+test('la porta si sceglie con PORT, con 5190 se manca o non vale', () => {
+  assert.equal(portaDa({ PORT: '5197' }), 5197);
+  assert.equal(portaDa({}), 5190);
+  assert.equal(portaDa({ PORT: 'abc' }), 5190);
+  assert.equal(portaDa({ PORT: '0' }), 5190);
 });

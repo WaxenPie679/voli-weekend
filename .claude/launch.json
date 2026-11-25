@@ -42,6 +42,18 @@
         "/Users/utente/Progetti/Ricerca voli/web"
       ],
       "port": 5196
+    },
+    {
+      "name": "dovai-sito",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "scripts/serve.js",
+        "sito/dist"
+      ],
+      "env": {
+        "PORT": "5197"
+      },
+      "port": 5197
     }
   ]
 }
