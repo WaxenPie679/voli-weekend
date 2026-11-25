@@ -139,3 +139,12 @@ export function biglietto(volo, { adesso, aperto = false, affiliato = '', altre 
   </div>
 </article>`;
 }
+
+// Nessun volo con questi filtri. `pagina` è dove si torna togliendo i filtri ('/' o '/puglia/').
+// Sta qui perché lo scrivono sia la preparazione sia il browser.
+export function nessunVolo(pagina = '/') {
+  return h`<div class="vuoto">
+  <p><strong>Con questi filtri non c'è niente.</strong> Prova ad alzare il prezzo o a scegliere Weekend lungo.</p>
+  <p><a class="bottone bottone--contorno" href="${pagina}" data-conta="filtro">Togli i filtri</a></p>
+</div>`;
+}

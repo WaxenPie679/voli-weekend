@@ -3,7 +3,7 @@ import { h, grezzo } from '../statico/js/html.js';
 import { filtri, mesiDeiVoli } from '../parti/filtri.js';
 import { riquadroCanale, riquadroPremium } from '../parti/riquadri.js';
 import { KIWI_AFFILIATO } from '../config.js';
-import { documento, apertura, voliIniziali, riepilogo, elencoBiglietti, nessunVolo, elencoMete } from './comune.js';
+import { documento, apertura, voliIniziali, riepilogo, elencoBiglietti, elencoMete, SCRIPT_ESPLORA } from './comune.js';
 
 const METE_IN_HOME = 12;
 const CANALE_DOPO = 6;
@@ -24,9 +24,7 @@ function metePiuBasse(bacini) {
 export function pagina({ voli, bacini, adesso, affiliato = KIWI_AFFILIATO }) {
   const iniziali = voliIniziali(voli);
   const mete = metePiuBasse(bacini);
-  const lista = iniziali.length
-    ? elencoBiglietti({ voli: iniziali, tutti: voli, adesso, affiliato, riquadro: riquadroCanale(), dopo: CANALE_DOPO })
-    : nessunVolo();
+  const lista = elencoBiglietti({ voli: iniziali, tutti: voli, adesso, affiliato, riquadro: riquadroCanale(), dopo: CANALE_DOPO, pagina: '/' });
   const corpo = h`${grezzo(apertura({
     riga: 'Quando parti, DoVai?',
     titolo: 'I voli economici del weekend, controllati ogni giorno',
@@ -58,6 +56,7 @@ ${grezzo(mete.length ? h`<section class="sezione" aria-labelledby="titolo-mete">
       indicizza: true,
       corpo,
       affiliato,
+      extra: SCRIPT_ESPLORA,
     }),
   };
 }

@@ -358,7 +358,7 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
   padding: 0;
   list-style: none;
 }
-.biglietti > .riquadro { grid-column: 1 / -1; }
+.biglietti > .riquadro, .biglietti > .vuoto { grid-column: 1 / -1; }
 
 /* ---------- Biglietto: corpo moro, matrice panna, perforazione oliva ---------- */
 .biglietto {
