@@ -1,6 +1,6 @@
 // Il biglietto di un volo, chiuso e aperto. Stesso HTML nella preparazione (Node) e nel browser.
 // Importa solo formati.js e html.js: niente configurazione, il codice affiliato arriva come argomento.
-import { giornoBreve, ora, permanenza, visto, prezzo, linkKiwi } from './formati.js';
+import { giornoBreve, giorniWeekend, lineaWeekend, ora, permanenza, visto, prezzo, linkKiwi } from './formati.js';
 import { h, grezzo, lucchetto } from './html.js';
 
 // Città di partenza per la tratta (i biglietti dicono la città, non l'aeroporto).
@@ -26,11 +26,6 @@ const ESTERNO = { target: '_blank', rel: 'noopener' };
 
 export const tratta = v => `${CITTA_PARTENZA[v.o] ?? v.o} → ${v.citta}`;
 
-// «sab 12 dic 18:40 → lun 14 dic 21:35»: partenza dell'andata → partenza del ritorno.
-// Le due metà restano intere: se la riga non basta, si va a capo dopo la freccia.
-const quando = v =>
-  h`<span class="intero">${giornoBreve(v.va[0])} ${ora(v.va[0])} →</span> <span class="intero">${giornoBreve(v.ri[0])} ${ora(v.ri[0])}</span>`;
-
 function bottoneKiwi(v, affiliato, classe = '') {
   return h`<a class="bottone bottone--kiwi ${classe}" href="${linkKiwi(v, affiliato)}" target="${ESTERNO.target}" rel="${ESTERNO.rel}" data-conta="kiwi">Vedi su Kiwi</a>`;
 }
@@ -45,11 +40,61 @@ function compraOAspetta() {
   return h`<a class="premium-chiuso" href="/premium/" data-conta="premium-lucchetto">Compra o aspetta? ${grezzo(lucchetto('Premium'))}</a>`;
 }
 
-function tappa(etichetta, [partenza, arrivo], cia) {
+// Una riga del viaggio: «ven 8 gen · 22:55 → 23:45». Il giorno in foglia (il «quando»), gli orari in carta.
+function tappa(etichetta, [partenza, arrivo]) {
   return h`<div class="tappa">
     <dt>${etichetta}</dt>
-    <dd><span class="dato">${giornoBreve(partenza)}</span> <span class="dato">${ora(partenza)} → ${ora(arrivo)}</span> <span class="tappa__cia">${cia}</span></dd>
+    <dd class="dato"><span class="tappa__giorno">${giornoBreve(partenza)}</span> · ${ora(partenza)} → ${ora(arrivo ?? partenza)}</dd>
   </div>`;
+}
+
+// La linea del weekend: i giorni in fila e, pieno, il tempo passato a destinazione.
+function linea(v) {
+  const l = lineaWeekend(v.va, v.ri);
+  const giorni = l.giorni.map(g => grezzo(h`<span>${g.nome}</span>`));
+  return h`<div class="linea">
+    <div class="linea__disegno" aria-hidden="true">
+      <div class="linea__binario" style="--giorni: ${l.giorni.length}"><span class="linea__pieno" style="--da: ${l.da.toFixed(1)}%; --a: ${l.a.toFixed(1)}%"></span></div>
+      <div class="linea__giorni" style="--giorni: ${l.giorni.length}">${giorni}</div>
+    </div>
+    <p class="linea__resta">${permanenza(v.resta, v.citta)}</p>
+  </div>`;
+}
+
+// La parte alta del biglietto, uguale nella lista e nel volo del giorno.
+// I codici grandi sono per l'occhio; il titolo letto ad alta voce resta «Bari → Parigi».
+export function corpoBiglietto(v, { titolo = 'h3', id = '' } = {}) {
+  const da = CITTA_PARTENZA[v.o] ?? v.o;
+  const testa = h`<span class="codici" aria-hidden="true"><span class="codici__da">${v.o}</span> <span class="codici__freccia">→</span> <span>${v.d}</span></span><span class="nascosto">${tratta(v)}</span>`;
+  const intestazione = titolo === 'h3'
+    ? h`<h3 class="tratta" id="${id}">${grezzo(testa)}</h3>`
+    : h`<p class="tratta">${grezzo(testa)}</p>`;
+  return h`${grezzo(intestazione)}
+      <p class="biglietto__meta"><strong>${v.citta}</strong> ${v.paese ? `${v.paese} · ` : ''}da ${da} · diretto</p>
+      <dl class="tappe">
+        ${grezzo(tappa('Andata', v.va))}
+        ${grezzo(tappa('Ritorno', v.ri))}
+      </dl>
+      ${grezzo(linea(v))}`;
+}
+
+// La matrice: weekend, prezzo grande, note oneste e i bottoni per prenotare.
+export function talloncino(v, { adesso, affiliato = '', grande = false } = {}) {
+  const vistoTesto = visto(v.visto, adesso ?? new Date());
+  const compagniaLink = grande
+    ? compagnia(v, 'bottone bottone--contorno', `Vedi su ${v.cia}`)
+    : compagnia(v, 'o-su', `o su ${v.cia}`);
+  return h`<div class="talloncino">
+      <div class="talloncino__info">
+        <p class="talloncino__weekend">Weekend ${giorniWeekend(v.va[0], v.ri[0])}</p>
+        <p class="talloncino__prezzo">${prezzo(v.p)}</p>
+        <p class="talloncino__note">andata e ritorno · solo zaino · ${v.cia}${grezzo(vistoTesto ? h`<span class="talloncino__visto">${vistoTesto}</span>` : '')}</p>
+      </div>
+      <div class="matrice__bottoni">
+        ${grezzo(bottoneKiwi(v, affiliato, grande ? 'bottone--grande' : ''))}
+        ${grezzo(compagniaLink)}
+      </div>
+    </div>`;
 }
 
 function daSapere(v) {
@@ -90,7 +135,7 @@ function compagnia(v, classe, testo) {
   return h`<a class="${classe}" href="${v.url}" target="${ESTERNO.target}" rel="${ESTERNO.rel}" data-conta="compagnia">${testo}</a>`;
 }
 
-// volo: { k, o, d, citta, va, ri, cia, p, url, visto, resta }
+// volo: { k, o, d, citta, paese, va, ri, cia, p, url, visto, resta }
 // opzioni: adesso (Date), aperto (biglietto già aperto), affiliato (codice Kiwi), altre (altri voli per la stessa città)
 export function biglietto(volo, { adesso, aperto = false, affiliato = '', altre = [] } = {}) {
   const v = volo;
@@ -99,25 +144,14 @@ export function biglietto(volo, { adesso, aperto = false, affiliato = '', altre 
   return h`<article class="biglietto" data-k="${v.k}" aria-labelledby="${idTitolo}">
   <details class="biglietto__dettagli"${grezzo(aperto ? ' open' : '')}>
     <summary class="biglietto__corpo">
-      <h3 class="tratta" id="${idTitolo}">${tratta(v)}</h3>
-      <span class="bollino">${prezzo(v.p)}</span>
-      <span class="biglietto__quando dato">${grezzo(quando(v))}</span>
-      <span class="biglietto__resta">${permanenza(v.resta, v.citta)}</span>
-      <span class="biglietto__note"><span>solo zaino</span><span>${v.cia}</span>${grezzo(vistoTesto ? h`<span class="biglietto__visto">${vistoTesto}</span>` : '')}</span>
+      ${grezzo(corpoBiglietto(v, { id: idTitolo }))}
       <span class="biglietto__apri" aria-hidden="true"><span class="biglietto__apri-testo">Dettagli</span><svg viewBox="0 0 16 16" width="16" height="16" focusable="false"><path d="M4 6l4 4 4-4"/></svg></span>
     </summary>
     <div class="biglietto__aperto">
-      <dl class="tappe">
-        ${grezzo(tappa('Andata', v.va, v.cia))}
-        ${grezzo(tappa('Ritorno', v.ri, v.cia))}
-      </dl>
       ${grezzo(daSapere(v))}
       <div class="matrice matrice--aperta">
         <span class="perforazione" aria-hidden="true"></span>
-        <div class="matrice__bottoni">
-          ${grezzo(bottoneKiwi(v, affiliato, 'bottone--grande'))}
-          ${grezzo(compagnia(v, 'bottone bottone--contorno', `Vedi su ${v.cia}`))}
-        </div>
+        ${grezzo(talloncino(v, { adesso, affiliato, grande: true }))}
         ${grezzo(notaKiwi(affiliato))}
         ${grezzo(perche(v, vistoTesto, affiliato))}
         ${grezzo(compraOAspetta())}
@@ -130,10 +164,7 @@ export function biglietto(volo, { adesso, aperto = false, affiliato = '', altre 
   </details>
   <div class="matrice matrice--chiusa">
     <span class="perforazione" aria-hidden="true"></span>
-    <div class="matrice__bottoni">
-      ${grezzo(bottoneKiwi(v, affiliato))}
-      ${grezzo(compagnia(v, 'o-su', `o su ${v.cia}`))}
-    </div>
+    ${grezzo(talloncino(v, { adesso, affiliato }))}
     ${grezzo(notaKiwi(affiliato))}
     ${grezzo(compraOAspetta())}
   </div>

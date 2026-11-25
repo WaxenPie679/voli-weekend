@@ -600,10 +600,9 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
   scroll-margin-top: calc(var(--altezza-testata) + 16px);
   transition: transform .35s var(--arrivo), box-shadow .35s var(--arrivo);
 }
-/* Sotto il puntatore il biglietto si alza appena e il timbro si inclina un po' di più. */
+/* Sotto il puntatore il biglietto si alza appena. */
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   .biglietti .biglietto:hover { transform: translateY(-2px); box-shadow: var(--ombra-biglietto-su); }
-  .biglietti .biglietto:hover .bollino { transform: rotate(-9deg) scale(1.04); }
 }
 /* I biglietti aggiunti con «Mostra altri voli» arrivano in fila (al massimo mezzo secondo in tutto). */
 @media (prefers-reduced-motion: no-preference) {
@@ -613,16 +612,11 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
 .biglietto :focus-visible { outline-color: var(--limone); }
 .biglietto .matrice :focus-visible { outline-color: var(--ruggine); }
 
+/* Il corpo: codici grandi, città, andata e ritorno, la linea del weekend. Si tocca per aprire i dettagli. */
 .biglietto__corpo {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas:
-    "tratta  bollino"
-    "quando  bollino"
-    "resta   resta"
-    "note    apri";
-  gap: 6px 12px;
-  padding: 22px 20px 18px;
+  gap: 4px;
+  padding: 22px 20px 16px;
   list-style: none;
   cursor: pointer;
   border-radius: var(--raggio) var(--raggio) 0 0;
@@ -630,70 +624,76 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
 .biglietto__corpo::-webkit-details-marker { display: none; }
 .biglietto__corpo:focus-visible { outline-offset: -5px; border-radius: calc(var(--raggio) - 2px); }
 
-.tratta {
-  grid-area: tratta;
-  align-self: end;
+.tratta { margin: 0; }
+.codici {
+  display: flex;
+  align-items: baseline;
+  gap: .3em;
   font-family: var(--font-dati);
-  font-weight: 700;
-  font-size: 1.1875rem;
-  line-height: 1.25;
-  letter-spacing: .01em;
-  overflow-wrap: anywhere;
-}
-
-/* Il bollino del prezzo: ovale limone (siamo su fondo scuro), ruotato come un timbro */
-.bollino {
-  grid-area: bollino;
-  align-self: start;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin: -6px -8px 0 0;
-  padding: .95em .85em;
-  border-radius: 50%;
-  background: var(--limone);
-  color: var(--moro);
-  font-family: var(--font-titolo);
-  font-weight: 900;
-  font-size: 1.25rem;
+  font-weight: 800;
+  font-size: clamp(2.25rem, 1.6rem + 2vw, 2.75rem);
   line-height: 1;
-  white-space: nowrap;
-  transform: rotate(-6deg);
-  transition: transform .35s var(--arrivo);
+  letter-spacing: -0.02em;
 }
+.codici__da { color: var(--carta-tenue); }
+.codici__freccia { font-weight: 400; font-size: .72em; color: var(--carta-tenue); }
 
-.biglietto__quando {
-  grid-area: quando;
-  color: var(--foglia);
-  font-size: .875rem;
-  line-height: 1.4;
+.biglietto__meta { margin-top: 8px; font-size: .9375rem; color: var(--carta-tenue); }
+.biglietto__meta strong { margin-right: .25em; font-family: var(--font-titolo); font-weight: 700; font-size: 1.1875rem; color: var(--carta); }
+
+.tappe { display: grid; gap: 6px; margin: 14px 0 0; }
+.tappa {
+  display: grid;
+  grid-template-columns: 3.75rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: 8px;
 }
+.tappa dt { font-size: .875rem; color: var(--carta-tenue); }
+.tappa dd { margin: 0; font-size: .875rem; color: var(--carta); letter-spacing: 0; white-space: nowrap; }
+.tappa__giorno { color: var(--foglia); }
 
-.biglietto__resta {
-  grid-area: resta;
-  margin-top: 6px;
-  font-size: 1rem;
-}
-
-.biglietto__note {
-  grid-area: note;
+/* La linea del weekend: venerdì → domenica, pieno in foglia il tempo a destinazione. */
+.linea {
   display: flex;
   flex-wrap: wrap;
-  column-gap: .5em;
-  align-self: end;
-  font-size: .875rem;
+  align-items: center;
+  gap: 8px 16px;
+  margin-top: 14px;
+}
+.linea__disegno { flex: 1 1 150px; min-width: 0; }
+.linea__binario {
+  position: relative;
+  height: 8px;
+  border-radius: 4px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 calc(100% / var(--giorni) - 1px), rgb(251 245 233 / .28) calc(100% / var(--giorni) - 1px) calc(100% / var(--giorni))),
+    rgb(251 245 233 / .14);
+}
+.linea__pieno {
+  position: absolute;
+  inset-block: 0;
+  left: var(--da);
+  right: calc(100% - var(--a));
+  border-radius: 4px;
+  background: var(--foglia);
+}
+.linea__giorni {
+  display: grid;
+  grid-template-columns: repeat(var(--giorni), 1fr);
+  margin-top: 6px;
+  font-family: var(--font-dati);
+  font-size: .75rem;
   color: var(--carta-tenue);
 }
-.biglietto__note > span + span::before { content: '·'; margin-right: .5em; }
-.biglietto__note > .biglietto__visto { flex-basis: 100%; }
-.biglietto__note > .biglietto__visto::before { content: none; }
+.linea__giorni span { padding-left: 2px; }
+.linea__resta { flex: none; font-weight: 500; font-size: .9375rem; }
 
 .biglietto__apri {
-  grid-area: apri;
-  align-self: end;
+  justify-self: end;
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  margin-top: 6px;
   font-weight: 500;
   font-size: .875rem;
   color: var(--limone);
@@ -711,35 +711,45 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
 .biglietto__corpo:hover .biglietto__apri-testo { text-decoration: underline; text-underline-offset: .2em; }
 .biglietto__dettagli[open] .biglietto__apri svg { transform: rotate(180deg); }
 
+/* Il talloncino: weekend, prezzo grande in ruggine, note oneste, bottoni. */
+.talloncino {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "weekend  azioni"
+    "prezzo   azioni"
+    "note     note";
+  align-items: center;
+  column-gap: 14px;
+}
+.talloncino__info { display: contents; }
+.talloncino__weekend { grid-area: weekend; }
+.talloncino__prezzo { grid-area: prezzo; }
+.talloncino__note { grid-area: note; }
+.talloncino > .matrice__bottoni { grid-area: azioni; }
+.talloncino__weekend { font-size: .875rem; color: var(--moro-chiaro); }
+.talloncino__prezzo {
+  margin-top: 2px;
+  font-family: var(--font-titolo);
+  font-weight: 900;
+  font-size: 2.25rem;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--ruggine);
+  white-space: nowrap;
+}
+.talloncino__note { margin-top: 4px; font-size: .8125rem; line-height: 1.4; color: var(--moro-chiaro); }
+.talloncino__visto { display: block; }
+.talloncino .matrice__bottoni { flex-direction: column; align-items: stretch; gap: 2px; }
+.talloncino .o-su { justify-content: center; }
+.matrice--aperta .talloncino { grid-template-areas: "weekend weekend" "prezzo prezzo" "note note" "azioni azioni"; }
+.matrice--aperta .talloncino .matrice__bottoni { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; }
+
 /* Parte aperta */
 .biglietto__aperto { display: flex; flex-direction: column; }
 
-.tappe {
-  display: grid;
-  gap: 10px;
-  margin: 0 20px;
-  padding: 16px 0;
-  border-top: 1px solid var(--linea-scura);
-}
-.tappa {
-  display: grid;
-  grid-template-columns: 4.75rem minmax(0, 1fr);
-  align-items: baseline;
-  gap: 12px;
-}
-.tappa dt { font-size: .875rem; color: var(--carta-tenue); }
-.tappa dd {
-  margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  column-gap: .75em;
-  font-size: .9375rem;
-}
-.tappa .dato:first-child { color: var(--foglia); }
-.tappa__cia { color: var(--carta-tenue); font-size: .875rem; }
-
 .da-sapere {
-  margin: 0 20px 18px;
+  margin: 2px 20px 18px;
   padding: 12px 14px;
   border: 1px solid rgb(255 221 69 / .4);
   border-radius: 12px;
@@ -1005,19 +1015,9 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
   box-shadow: 0 0 0 0 rgb(166 64 31 / .5);
 }
 .biglietto--giorno { box-shadow: var(--ombra-biglietto-su); }
-.biglietto--giorno .biglietto__corpo {
-  grid-template-areas:
-    "tratta  bollino"
-    "quando  bollino"
-    "resta   resta"
-    "note    note";
-  padding: 26px 24px 22px;
-  cursor: auto;
-}
-.biglietto--giorno .tratta { font-size: 1.375rem; }
-.biglietto--giorno .bollino { font-size: 1.5rem; }
-.biglietto--giorno .matrice { padding: 24px 24px 22px; border-radius: 0 0 var(--raggio) var(--raggio); }
-.del-giorno__dettagli { display: inline-flex; align-items: center; min-height: 44px; margin-left: auto; font-weight: 500; font-size: .9375rem; }
+.biglietto--giorno .biglietto__corpo { padding: 26px 24px 20px; cursor: auto; }
+.biglietto--giorno .matrice { padding: 24px 24px 18px; border-radius: 0 0 var(--raggio) var(--raggio); }
+.del-giorno__dettagli { align-self: flex-start; display: inline-flex; align-items: center; min-height: 44px; font-weight: 500; font-size: .9375rem; }
 
 /* Il momento dell'apertura: il biglietto arriva, la perforazione si disegna, il timbro batte il prezzo.
    Senza movimento il biglietto è già lì, timbrato. */
@@ -1035,27 +1035,17 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
   @keyframes giorno-arriva {
     from { opacity: 0; transform: translateY(36px) rotate(2.5deg); box-shadow: var(--ombra-biglietto); }
   }
+  .biglietto--giorno .linea__pieno { animation: linea-cresce .7s var(--arrivo) .5s both; }
+  @keyframes linea-cresce { from { clip-path: inset(0 100% 0 0); } }
   .biglietto--giorno .perforazione { animation: perforazione .7s var(--arrivo) .55s both; }
   @keyframes perforazione { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
 
-  .bollino--timbro { animation: timbro .55s ease-out .85s both; }
+  .biglietto--giorno .talloncino__prezzo { animation: timbro .55s ease-out .85s both; transform-origin: left center; }
   @keyframes timbro {
-    0% { opacity: 0; transform: rotate(-22deg) scale(1.9); }
-    55% { opacity: 1; transform: rotate(-4deg) scale(.92); }
-    100% { opacity: 1; transform: rotate(-6deg) scale(1); }
+    0% { opacity: 0; transform: rotate(-12deg) scale(1.8); }
+    55% { opacity: 1; transform: rotate(1deg) scale(.94); }
+    100% { opacity: 1; transform: none; }
   }
-  /* L'inchiostro che si allarga sotto il timbro, una volta sola. */
-  .bollino--timbro { position: relative; }
-  .bollino--timbro::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    border: 2px solid var(--limone);
-    opacity: 0;
-    animation: inchiostro .7s var(--arrivo) 1.12s both;
-  }
-  @keyframes inchiostro { from { opacity: .9; scale: 1; } to { opacity: 0; scale: 1.45; } }
 }
 
 .sezione { padding-block: clamp(20px, 4vw, 40px); }

@@ -46,6 +46,8 @@ Un solo momento d'autore, all'apertura: il testo sale, il biglietto del giorno a
 
 ## Il biglietto
 
+> **Prova del 25/11/2026** (ramo `prova/biglietto-chiaro`): impostazione presa dalla vecchia webapp, colori DoVai. Corpo moro: codici IATA grandi in mono (partenza in carta tenue), «**Città** Paese · da Bari · diretto», righe Andata/Ritorno sempre visibili («ven 8 gen · 22:55 → 23:45», giorno in foglia), linea del weekend ven→dom con in foglia il tempo a destinazione e «31 ore a Tirana». Talloncino panna: «Weekend 8–10 gen», prezzo grande ruggine, «andata e ritorno · solo zaino · compagnia · visto alle…», a destra «Vedi su Kiwi» e «o su {compagnia}». Niente bollino: il timbro dell'apertura batte il prezzo del talloncino. Se approvata, questa sezione va riscritta.
+
 - Corpo **moro** (si tocca per aprirlo: è il `<summary>` di un `<details>`, funziona senza JS): tratta in mono carta, date in mono foglia, permanenza, «solo zaino · compagnia», «visto alle…».
 - **Bollino** del prezzo: ovale limone, testo moro Gabarito 900, ruotato −6° come un timbro.
 - **Perforazione** oliva tratteggiata con due tagli tondi (colore `--fondo` del foglio sotto).

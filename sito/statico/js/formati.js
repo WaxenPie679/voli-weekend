@@ -17,6 +17,36 @@ export function giornoBreve(iso) {
 
 export const ora = iso => iso.slice(11, 16);
 
+// «16–17 gen», oppure «30 gen–1 feb» se il weekend scavalla il mese.
+export function giorniWeekend(andata, ritorno) {
+  const a = parti(andata);
+  const r = parti(ritorno);
+  if (a.mese === r.mese) return `${a.giorno}–${r.giorno} ${MESI[r.mese - 1]}`;
+  return `${a.giorno} ${MESI[a.mese - 1]}–${r.giorno} ${MESI[r.mese - 1]}`;
+}
+
+// Minuti dall'inizio del 1970 per un orario senza fuso: serve solo a misurare distanze sulla linea del weekend.
+const minuti = iso => Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10), +iso.slice(11, 13), +iso.slice(14, 16)) / 60000;
+
+// La linea del weekend: dal venerdì (o dal giorno di partenza, se prima) alla mezzanotte dopo il ritorno.
+// Ritorna i giorni (nome e posizione in %) e il tratto pieno = il tempo passato a destinazione.
+export function lineaWeekend(va, ri) {
+  const { anno, mese, giorno } = parti(va[0]);
+  const partenza = new Date(Date.UTC(anno, mese - 1, giorno));
+  const dow = partenza.getUTCDay();
+  const indietro = dow === 6 ? 1 : dow === 0 ? 2 : 0; // sabato o domenica: la linea parte dal venerdì
+  const inizio = partenza.getTime() / 60000 - indietro * 1440;
+  const { anno: ar, mese: mr, giorno: gr } = parti(ri[0]);
+  const fine = Date.UTC(ar, mr - 1, gr + 1) / 60000;
+  const tot = fine - inizio;
+  const pos = m => Math.min(100, Math.max(0, ((m - inizio) / tot) * 100));
+  const giorni = [];
+  for (let m = inizio; m < fine; m += 1440) {
+    giorni.push({ nome: GIORNI[new Date(m * 60000).getUTCDay()], da: pos(m) });
+  }
+  return { giorni, da: pos(minuti(va[1] ?? va[0])), a: pos(minuti(ri[0])) };
+}
+
 const plurale = (n, uno, molti) => `${n} ${n === 1 ? uno : molti}`;
 
 // Sotto le 24 ore si dice in ore; da un giorno in su «N giorni e M ore» (ore 0: solo giorni).

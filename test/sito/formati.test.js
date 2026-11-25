@@ -78,3 +78,19 @@ test('oraDiRoma: come gli orari dei voli, con ora solare e legale', () => {
   assert.equal(oraDiRoma(new Date('2026-07-10T22:05:00Z')), '2026-07-11T00:05');
   assert.equal(oraDiRoma(new Date('2027-01-01T08:03:00Z')), '2027-01-01T09:03');
 });
+
+test('giorniWeekend: stesso mese o a cavallo di due', async () => {
+  const { giorniWeekend } = await import('../../sito/statico/js/formati.js');
+  assert.equal(giorniWeekend('2027-01-16T08:30', '2027-01-17T10:15'), '16–17 gen');
+  assert.equal(giorniWeekend('2027-01-30T08:30', '2027-02-01T10:15'), '30 gen–1 feb');
+});
+
+test('lineaWeekend: da venerdì a mezzanotte dopo il ritorno, pieno il tempo a destinazione', async () => {
+  const { lineaWeekend } = await import('../../sito/statico/js/formati.js');
+  const l = lineaWeekend(['2027-01-08T22:55', '2027-01-08T23:45'], ['2027-01-10T06:25', '2027-01-10T07:15']);
+  assert.deepEqual(l.giorni.map(g => g.nome), ['ven', 'sab', 'dom']);
+  assert.ok(Math.abs(l.da - (23.75 / 72) * 100) < 0.01);
+  assert.ok(Math.abs(l.a - ((48 + 6 + 25 / 60) / 72) * 100) < 0.01);
+  const sabato = lineaWeekend(['2027-01-16T08:30', '2027-01-16T09:50'], ['2027-01-17T10:15']);
+  assert.equal(sabato.giorni[0].nome, 'ven', 'anche partendo sabato la linea parte dal venerdì');
+});
