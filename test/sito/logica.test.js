@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { leggiFiltri, scriviFiltri, filtra, riepilogo, mesiDeiVoli } from '../../sito/statico/js/logica.js';
+import { leggiFiltri, scriviFiltri, filtra, riepilogo, mesiDeiVoli, filtriPerVolo } from '../../sito/statico/js/logica.js';
 
 const BACINI = [
   { slug: 'puglia', nome: 'Puglia', aeroporti: ['BRI', 'BDS'] },
@@ -98,4 +98,18 @@ test('le costanti del browser coincidono con config.js', async () => {
   const config = await import('../../sito/config.js');
   const logica = await import('../../sito/statico/js/logica.js');
   for (const nome of ['PREZZO_MIN', 'PREZZO_MAX', 'PREZZO_INIZIALE', 'BLOCCO']) assert.equal(logica[nome], config[nome], nome);
+});
+
+test('filtriPerVolo: allarga solo quello che esclude il volo', () => {
+  const caro = VOLI[3]; // FCO, Parigi, 150 €, dicembre
+  assert.deepEqual(filtriPerVolo(INIZIALI, caro, { bacini: BACINI }), { ...INIZIALI, max: 150 });
+  assert.deepEqual(filtriPerVolo({ ...INIZIALI, max: 100.5 }, { ...caro, p: 120.2 }, { bacini: BACINI }).max, 121);
+  const stretti = { da: 'puglia', mese: '2027-01', max: 30, resta: 3, a: 'lisbona' };
+  assert.deepEqual(filtriPerVolo(stretti, caro, { bacini: BACINI }), { da: 'tutti', mese: 'tre', max: 150, resta: 0, a: '' });
+  assert.equal(filtriPerVolo({ ...INIZIALI, da: 'CIA' }, caro, { bacino: 'roma', bacini: BACINI }).da, 'roma');
+  assert.equal(filtriPerVolo({ ...INIZIALI, da: 'puglia' }, caro, { bacino: 'puglia', bacini: BACINI }).da, 'tutti');
+  const largo = { da: 'roma', mese: '2026-12', max: 200, resta: 1, a: 'par' };
+  assert.deepEqual(filtriPerVolo(largo, caro, { bacini: BACINI }), largo);
+  assert.equal(filtriPerVolo(INIZIALI, { ...caro, p: 999 }, { bacini: BACINI }).max, 400);
+  assert.deepEqual(filtra([caro], filtriPerVolo({ ...stretti, da: 'MXP' }, caro, { bacini: BACINI }), BACINI), [caro]);
 });

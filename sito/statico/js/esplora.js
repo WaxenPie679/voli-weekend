@@ -1,7 +1,7 @@
 // L'esploratore nel browser: legge i filtri dall'indirizzo e dal modulo, ridisegna la lista da /voli.json.
 // Senza JavaScript (o se voli.json non arriva) la pagina resta quella preparata e il modulo va col GET.
 import { biglietto, nessunVolo } from './biglietto-html.js';
-import { leggiFiltri, scriviFiltri, filtra, riepilogo, BLOCCO, PREZZO_MAX } from './logica.js';
+import { leggiFiltri, scriviFiltri, filtra, riepilogo, filtriPerVolo, BLOCCO, PREZZO_MAX } from './logica.js';
 
 const modulo = document.querySelector('form.filtri');
 const esploratore = document.querySelector('.esploratore');
@@ -91,12 +91,21 @@ async function avvia() {
     disegna();
   }
 
-  // Prima apertura: filtri dall'indirizzo; ?volo= apre quel biglietto se è nella lista.
+  // Prima apertura: filtri dall'indirizzo. ?volo= apre sempre quel biglietto se il volo esiste:
+  // se i filtri lo escludono, si allargano quanto basta e il modulo e l'indirizzo lo dicono.
   const params = new URLSearchParams(location.search);
   applica(leggiFiltri(params, opzioni));
-  riempiModulo(filtri, (params.get('a') ?? '').trim());
+  let testoMeta = (params.get('a') ?? '').trim();
   const chiave = params.get('volo');
-  const posto = voli.findIndex(v => v.k === chiave);
+  const cercato = dati.voli.find(v => v.k === chiave);
+  if (cercato && !voli.includes(cercato)) {
+    applica(filtriPerVolo(filtri, cercato, opzioni));
+    if (!filtri.a) testoMeta = '';
+    const query = [scriviFiltri(filtri, { bacino: p.bacino }), `volo=${encodeURIComponent(chiave)}`].filter(Boolean).join('&');
+    history.replaceState(null, '', `${location.pathname}?${query}`);
+  }
+  riempiModulo(filtri, testoMeta);
+  const posto = cercato ? voli.indexOf(cercato) : -1;
   if (posto >= 0) {
     mostrati = Math.ceil((posto + 1) / BLOCCO) * BLOCCO;
     disegna();
