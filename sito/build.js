@@ -3,9 +3,10 @@
 import { mkdir, writeFile, rm, cp, realpath, stat, readdir } from 'node:fs/promises';
 import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { BACINI, SITO } from './config.js';
+import { createHash } from 'node:crypto';
+import { BACINI, SITO, PRIVATO } from './config.js';
 import { scaricaDati, riduci } from './dati.js';
-import { TITOLARE, titolareCompleto } from './titolare.js';
+import { TITOLARE, puoPubblicare } from './titolare.js';
 import { pagina as home } from './pagine/home.js';
 import { pagine as bacini } from './pagine/bacino.js';
 import { pagina as premium } from './pagine/premium.js';
@@ -68,8 +69,53 @@ function intestazioni(pagine) {
   return blocchi.join('\n\n') + '\n';
 }
 
-export async function prepara({ cartella, out = join(QUI, 'dist'), adesso = new Date(), pubblica = false, titolare = TITOLARE } = {}) {
-  if (pubblica && !titolareCompleto(titolare)) throw new Error(MSG_TITOLARE);
+// Sito privato: _worker.js davanti a tutte le pagine chiede la password (accesso del browser, nome utente libero).
+// Nel worker finisce solo l'impronta SHA-256 della password; senza password il sito resta chiuso a tutti.
+export function workerPrivato(password = '') {
+  const impronta = password ? createHash('sha256').update(password, 'utf8').digest('hex') : '';
+  return `// Prodotto da sito/build.js: sito privato, si entra solo con la password.
+const IMPRONTA = ${JSON.stringify(impronta)};
+const NOINDEX = 'noindex, nofollow, noarchive';
+
+async function sha256(testo) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(testo));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function autorizzato(request) {
+  if (!IMPRONTA) return false;
+  const intestazione = request.headers.get('Authorization') || '';
+  if (!intestazione.startsWith('Basic ')) return false;
+  let chiaro;
+  try { chiaro = atob(intestazione.slice(6)); } catch { return false; }
+  const i = chiaro.indexOf(':');
+  if (i < 0) return false;
+  const prova = await sha256(chiaro.slice(i + 1));
+  let diff = 0;
+  for (let k = 0; k < IMPRONTA.length; k++) diff |= prova.charCodeAt(k) ^ IMPRONTA.charCodeAt(k);
+  return diff === 0 && prova.length === IMPRONTA.length;
+}
+
+export default {
+  async fetch(request, env) {
+    if (!(await autorizzato(request))) {
+      return new Response('<!doctype html><meta charset="utf-8"><title>Sito privato</title><p style="font-family:sans-serif;margin:3rem">Sito privato.</p>', {
+        status: 401,
+        headers: { 'Content-Type': 'text/html; charset=utf-8', 'WWW-Authenticate': 'Basic realm="DoVai", charset="UTF-8"', 'Cache-Control': 'no-store', 'X-Robots-Tag': NOINDEX },
+      });
+    }
+    const risposta = await env.ASSETS.fetch(request);
+    const r = new Response(risposta.body, risposta);
+    r.headers.set('X-Robots-Tag', NOINDEX);
+    r.headers.set('Cache-Control', 'private, no-store');
+    return r;
+  },
+};
+`;
+}
+
+export async function prepara({ cartella, out = join(QUI, 'dist'), adesso = new Date(), pubblica = false, titolare = TITOLARE, privato = PRIVATO, password = process.env.SITO_PASSWORD || '' } = {}) {
+  if (pubblica && !puoPubblicare(titolare, privato)) throw new Error(MSG_TITOLARE);
   const grezzi = await scaricaDati({ cartella });
   const { voli, bacini: stati, scartati } = riduci(grezzi, { adesso });
   const avvisi = [];
@@ -89,8 +135,9 @@ export async function prepara({ cartella, out = join(QUI, 'dist'), adesso = new 
   await scrivi(fuori, 'voli.json', JSON.stringify({ generato: adesso.toISOString(), bacini: elencoBacini, voli }));
   await scrivi(fuori, MARCATORE, 'Cartella prodotta da sito/build.js: si può svuotare e rifare.\n');
   await scrivi(fuori, 'sitemap.xml', sitemap(pagine));
-  await scrivi(fuori, 'robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${SITO}/sitemap.xml\n`);
+  await scrivi(fuori, 'robots.txt', privato ? 'User-agent: *\nDisallow: /\n' : `User-agent: *\nAllow: /\n\nSitemap: ${SITO}/sitemap.xml\n`);
   await scrivi(fuori, '_headers', intestazioni(pagine));
+  if (privato) await scrivi(fuori, '_worker.js', workerPrivato(password));
   return { pagine: pagine.length, voli: voli.length, avvisi };
 }
 

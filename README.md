@@ -44,9 +44,13 @@ npm run sito:vedi
 
 Prepara il sito e lo apre su http://127.0.0.1:5190 (da Claude Code la voce `dovai-sito` usa invece la porta 5197). La porta 5180 resta sempre libera per SMOT.
 
-**Nome e città del titolare**
+**Sito privato (dal 25/11/2026)**
 
-Apri `sito/titolare.js` e scrivi `nome` (nome e cognome) e `citta` tra gli apici. Finché uno dei due è vuoto, la pubblicazione si rifiuta di partire: su GitHub il giro finisce comunque verde (così non ricevi un'email di errore ogni ora), con l'avviso «Mancano nome e città del titolare» e senza pubblicare nulla. In locale `node sito/build.js --pubblica` si ferma con un errore. È voluto, serve a non mettere online le pagine legali con i segnaposto.
+In `sito/config.js` c'è `PRIVATO = true`. Così ogni pagina chiede una password, i motori di ricerca vengono tenuti fuori (`robots.txt` e intestazione `noindex`) e le pagine legali non nominano il titolare. La password si mette su GitHub come segreto `SITO_PASSWORD`, con un nome utente qualsiasi. Finché il segreto manca, il sito resta chiuso a tutti. Nel sito pubblicato finisce solo l'impronta della password, mai la password.
+
+**Nome e città del titolare (prima di aprire al pubblico)**
+
+Per aprire il sito: in `sito/config.js` metti `PRIVATO = false`, poi in `sito/titolare.js` scrivi `nome` (nome e cognome) e `citta` tra gli apici. Con il sito pubblico e uno dei due campi vuoto, la pubblicazione si rifiuta di partire: su GitHub il giro finisce comunque verde (così non ricevi un'email di errore ogni ora), con l'avviso «Mancano nome e città del titolare» e senza pubblicare nulla. In locale `node sito/build.js --pubblica` si ferma con un errore. È voluto: un sito pubblico deve dire chi lo gestisce.
 
 **Pubblicazione automatica**
 
