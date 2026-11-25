@@ -105,7 +105,9 @@ function privacy({ affiliato, titolare }) {
   );
   const corpo = [
     h`<h2>In breve</h2><ul><li>Per guardare i voli non serve darci niente: niente account, niente cookie.</li><li>Se ci scrivi a ${mail}, usiamo la tua email solo per risponderti, e non la vendiamo a nessuno.</li><li>Se prenoti tramite Kiwi, da quel momento sei sul sito di Kiwi e valgono le sue regole.</li></ul>`,
-    sezione('1. Chi tratta i tuoi dati', h`<p>${testoTitolare(titolare)}, che gestisce DoVai (dovaivoli.it) come persona fisica. Per qualsiasi domanda sui tuoi dati: <strong>${mail}</strong>.</p>`),
+    sezione('1. Chi tratta i tuoi dati', testoTitolare(titolare)
+      ? h`<p>${testoTitolare(titolare)}, che gestisce DoVai (dovaivoli.it) come persona fisica. Per qualsiasi domanda sui tuoi dati: <strong>${mail}</strong>.</p>`
+      : h`<p>DoVai (dovaivoli.it) è gestito da una persona fisica. Per qualsiasi domanda sui tuoi dati: <strong>${mail}</strong>.</p>`),
     sezione('2. Quali dati e perché', dati, h`<p>Non usiamo i tuoi dati per profilarti, non prendiamo decisioni automatiche su di te e <strong>non vendiamo né cediamo la tua email</strong> a nessuno, Kiwi compresa.</p>`),
     sezione('3. Cookie', h`<p>Il sito non usa cookie, né nostri né di altri, e non ti chiede di accettarne. Per questo non vedi il solito banner. Le statistiche che usiamo funzionano senza cookie e senza riconoscerti da una visita all'altra.</p>`),
     sezione('4. Link a Kiwi e alle compagnie aeree', kiwi),
@@ -128,7 +130,9 @@ function noteLegali({ affiliato, titolare }) {
     ? h`<p>Alcuni link a Kiwi sono link affiliati: se prenoti, Kiwi ci riconosce una piccola commissione e tu paghi il prezzo che vedi su Kiwi. Lo scriviamo vicino ai bottoni.</p>`
     : h`<p>I bottoni portano ai siti di Kiwi e delle compagnie aeree. Ciò che accade dopo il clic dipende da loro.</p>`;
   const corpo = [
-    sezione('Chi gestisce il sito', h`<p>DoVai (dovaivoli.it) è gestito da ${testoTitolare(titolare)}, come persona fisica. Contatti: <strong>${mail}</strong>.</p>`),
+    sezione('Chi gestisce il sito', testoTitolare(titolare)
+      ? h`<p>DoVai (dovaivoli.it) è gestito da ${testoTitolare(titolare)}, come persona fisica. Contatti: <strong>${mail}</strong>.</p>`
+      : h`<p>DoVai (dovaivoli.it) è gestito da una persona fisica. Contatti: <strong>${mail}</strong>.</p>`),
     sezione('Cosa facciamo', h`<p>DoVai mostra voli trovati sui siti delle compagnie aeree. Non vendiamo biglietti e non siamo parte del contratto tra te e la compagnia o Kiwi.</p>`),
     sezione('Prezzi indicativi', h`<p>I prezzi sono indicativi: sono quelli visti all'ora indicata, andata e ritorno per una persona, solo zaino. Possono cambiare in qualsiasi momento e la disponibilità non è garantita. Vale il prezzo che vedi sul sito dove prenoti.</p>`),
     sezione('Link a Kiwi e alle compagnie', link),
