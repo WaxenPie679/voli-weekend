@@ -501,3 +501,21 @@ test('domande: canale e riassunto email dicono solo che non ci sono ancora', () 
 test('privacy: i conteggi non nominano i clic sui bottoni', () => {
   assert.ok(!servizio(ctx)[2].html.includes('clic sui bottoni'));
 });
+
+test('mete: oltre il prezzo iniziale il link porta anche il prezzo massimo, così la lista non è vuota', () => {
+  const pochi = [altroVolo('BRI', 'Parigi', 40, 1), altroVolo('BRI', 'Cara', 250, 14), altroVolo('BDS', 'Giusta', 100, 2)];
+  const c = { ...ctx, voli: pochi, bacini: { puglia: stato(pochi), 'milano-bergamo': vuoto, roma: vuoto } };
+  const casa = home(c).html;
+  assert.ok(casa.includes('href="/?a=cara&amp;max=250"'));
+  assert.ok(casa.includes('href="/?a=parigi"'));
+  assert.ok(casa.includes('href="/?a=giusta"'), 'a 100 € basta il filtro iniziale');
+  const puglia = bacino(c, 'puglia').html;
+  assert.ok(puglia.includes('href="/puglia/?a=cara&amp;max=250"'));
+  assert.ok(puglia.includes('href="/puglia/?a=parigi"'));
+});
+
+test('servizio: i prezzi vengono dai siti delle compagnie, non dai motori di ricerca', () => {
+  for (const p of servizio(ctx)) assert.ok(!p.html.includes('motori di ricerca'), p.percorso);
+  assert.ok(servizio(ctx)[0].html.includes('Controlliamo i prezzi ogni giorno sui siti delle compagnie aeree.'));
+  assert.ok(servizio(ctx)[3].html.includes('DoVai mostra voli trovati sui siti delle compagnie aeree. Non vendiamo biglietti'));
+});
