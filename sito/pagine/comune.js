@@ -6,6 +6,7 @@ import { testa } from '../parti/testa.js';
 import { intestazione } from '../parti/intestazione.js';
 import { piede } from '../parti/piede.js';
 import { PREZZO_INIZIALE, BLOCCO } from '../config.js';
+import { versione } from '../parti/versione.js';
 
 // Il documento HTML intero: testa, intestazione, corpo, piede.
 export function documento({ titolo, descrizione, percorso, indicizza, corpo, affiliato = '', extra = '' }) {
@@ -46,7 +47,7 @@ const riepilogo = (n, da) => `${n} ${n === 1 ? 'volo' : 'voli'} ${da}, Weekend, 
 export { riepilogo };
 
 // Lo script dell'esploratore: lo caricano solo le pagine con la lista dei voli.
-export const SCRIPT_ESPLORA = '<script type="module" src="/js/esplora.js" defer></script>';
+export const SCRIPT_ESPLORA = `<script type="module" src="/js/esplora.js?v=${versione('js/esplora.js')}" defer></script>`;
 
 function biglietti({ voli, tutti, adesso, affiliato, riquadro, dopo }) {
   const primi = voli.slice(0, BLOCCO);
