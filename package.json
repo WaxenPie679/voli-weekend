@@ -10,6 +10,8 @@
   "scripts": {
     "test": "node --test \"test/**/*.test.js\"",
     "serve": "node scripts/serve.js",
+    "sito": "node sito/build.js",
+    "sito:vedi": "node sito/build.js && node scripts/serve.js sito/dist",
     "direct": "node src/run.js direct --data ./data",
     "history": "node src/history/run.js --dir ./history",
     "summary": "node src/history/summary.js --dir ./history --out ./summary",
