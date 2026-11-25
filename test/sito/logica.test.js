@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { leggiFiltri, scriviFiltri, filtra, riepilogo, mesiDeiVoli, filtriPerVolo, altriFiltriAttivi } from '../../sito/statico/js/logica.js';
+import { leggiFiltri, scriviFiltri, filtra, daPartire, riepilogo, mesiDeiVoli, filtriPerVolo, altriFiltriAttivi } from '../../sito/statico/js/logica.js';
 
 const BACINI = [
   { slug: 'puglia', nome: 'Puglia', aeroporti: ['BRI', 'BDS'] },
@@ -127,4 +127,13 @@ test('altriFiltriAttivi: solo quando, quanto resti e dove aprono «Altri filtri�
   assert.equal(altriFiltriAttivi({ ...INIZIALI, mese: '2026-12' }), true);
   assert.equal(altriFiltriAttivi({ ...INIZIALI, resta: 2 }), true);
   assert.equal(altriFiltriAttivi({ ...INIZIALI, a: 'parigi' }), true);
+});
+
+test('filtra con adesso: i voli già partiti (ora di Roma) restano fuori', () => {
+  // VOLI partono alle 18:00 locali. 27/11/2026 17:00 UTC = 18:00 a Roma: «b» (Lisbona, 27 nov) è appena partito.
+  const adesso = new Date('2026-11-27T17:00:00Z');
+  assert.deepEqual(filtra(VOLI, INIZIALI, BACINI, adesso).map(v => v.k), ['e', 'c', 'a']);
+  assert.deepEqual(daPartire(VOLI, new Date('2026-11-27T16:59:00Z')).map(v => v.k), ['a', 'b', 'c', 'd', 'e']);
+  // Senza adesso non si toglie niente (preparazione e test che non lo passano).
+  assert.deepEqual(filtra(VOLI, INIZIALI, BACINI).map(v => v.k), ['e', 'b', 'c', 'a']);
 });
