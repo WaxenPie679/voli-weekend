@@ -57,14 +57,14 @@ function biglietti({ voli, tutti, adesso, affiliato, riquadro, dopo }) {
 
 // La lista dei voli con il primo blocco di biglietti; il riquadro (se c'è) sta dopo il biglietto `dopo`.
 // Senza voli: «Con questi filtri non c'è niente.» e poi il riquadro.
-// «Mostra altri voli» compare solo se ce ne sono altri: lo accende il browser, a blocchi di BLOCCO.
+// «Mostra altri voli» c'è solo se ce ne sono altri, nascosto: senza JavaScript non servirebbe, lo accende esplora.js.
 // data-affiliato e data-dopo servono a esplora.js per ridisegnare la lista uguale.
 export function elencoBiglietti({ voli, tutti = voli, adesso, affiliato = '', riquadro = '', dopo, pagina = '/' }) {
   const pezzi = voli.length
     ? biglietti({ voli, tutti, adesso, affiliato, riquadro, dopo })
     : [grezzo(nessunVolo(pagina)), grezzo(riquadro)];
   const altri = voli.length > BLOCCO
-    ? h`<p class="altri"><button class="bottone bottone--contorno" type="button" data-altri>Mostra altri voli</button></p>`
+    ? h`<p class="altri" hidden><button class="bottone bottone--contorno" type="button" data-altri>Mostra altri voli</button></p>`
     : '';
   return h`<div class="esploratore" data-affiliato="${affiliato}" data-dopo="${dopo ?? ''}">
 <div class="biglietti">${pezzi}</div>

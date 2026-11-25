@@ -718,6 +718,9 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
 .intro { gap: 8px; max-width: 64ch; }
 .intro__locale { font-family: var(--font-titolo); font-weight: 700; font-size: 1.375rem; line-height: 1.2; }
 
+/* L'attributo hidden vince anche sulle regole con display (es. .altri). */
+[hidden] { display: none !important; }
+
 .altri, .azioni { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 0; }
 .altri { justify-content: center; margin-top: 8px; }
 .vuoto { display: grid; gap: 14px; padding: 24px; background: var(--panna); border: 1px solid var(--linea); border-radius: var(--raggio); }

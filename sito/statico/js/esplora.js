@@ -6,6 +6,18 @@ import { leggiFiltri, scriviFiltri, filtra, riepilogo, filtriPerVolo, BLOCCO, PR
 const modulo = document.querySelector('form.filtri');
 const esploratore = document.querySelector('.esploratore');
 
+const ATTESA_INDIRIZZO = 250;
+
+// Cambia la query dell'indirizzo senza ricaricare, tenendo l'eventuale #ancora.
+// Alcuni browser limitano o vietano replaceState: allora l'indirizzo resta com'è.
+function scriviIndirizzo(query) {
+  try {
+    history.replaceState(history.state, '', location.pathname + query + location.hash);
+  } catch {
+    // L'indirizzo non cambia; la lista è già giusta.
+  }
+}
+
 async function caricaVoli() {
   try {
     const risposta = await fetch('/voli.json');
@@ -44,7 +56,7 @@ function riempiModulo(filtri, testoMeta) {
 function bottoneAltri() {
   let bottone = esploratore.querySelector('[data-altri]');
   if (!bottone) {
-    esploratore.insertAdjacentHTML('beforeend', '<p class="altri"><button class="bottone bottone--contorno" type="button" data-altri>Mostra altri voli</button></p>');
+    esploratore.insertAdjacentHTML('beforeend', '<p class="altri" hidden><button class="bottone bottone--contorno" type="button" data-altri>Mostra altri voli</button></p>');
     bottone = esploratore.querySelector('[data-altri]');
   }
   return bottone;
@@ -102,7 +114,7 @@ async function avvia() {
     applica(filtriPerVolo(filtri, cercato, opzioni));
     if (!filtri.a) testoMeta = '';
     const query = [scriviFiltri(filtri, { bacino: p.bacino }), `volo=${encodeURIComponent(chiave)}`].filter(Boolean).join('&');
-    history.replaceState(null, '', `${location.pathname}?${query}`);
+    scriviIndirizzo(`?${query}`);
   }
   riempiModulo(filtri, testoMeta);
   const posto = cercato ? voli.indexOf(cercato) : -1;
@@ -121,15 +133,22 @@ async function avvia() {
     mete.replaceChildren(...[...new Set(tutte.map(v => v.citta))].sort((x, y) => x.localeCompare(y, 'it')).map(c => new Option(c)));
   }
 
-  const aggiorna = () => {
-    applica(leggiFiltri(new URLSearchParams(new FormData(modulo)), opzioni));
+  // La lista si ridisegna subito; l'indirizzo si aggiorna quando ci si ferma un attimo.
+  let attesa;
+  const indirizzoDeiFiltri = () => {
     const query = scriviFiltri(filtri, { bacino: p.bacino });
-    history.replaceState(null, '', location.pathname + (query ? `?${query}` : ''));
+    scriviIndirizzo(query ? `?${query}` : '');
   };
-  modulo.addEventListener('input', aggiorna);
+  modulo.addEventListener('input', () => {
+    applica(leggiFiltri(new URLSearchParams(new FormData(modulo)), opzioni));
+    clearTimeout(attesa);
+    attesa = setTimeout(indirizzoDeiFiltri, ATTESA_INDIRIZZO);
+  });
   modulo.addEventListener('submit', evento => {
     evento.preventDefault();
-    aggiorna();
+    applica(leggiFiltri(new URLSearchParams(new FormData(modulo)), opzioni));
+    clearTimeout(attesa);
+    indirizzoDeiFiltri();
   });
 
   altri.addEventListener('click', () => {
@@ -142,4 +161,4 @@ async function avvia() {
   });
 }
 
-if (modulo && esploratore) avvia().catch(() => {});
+if (modulo && esploratore) avvia().catch(e => console.warn('DoVai esplora:', e));
