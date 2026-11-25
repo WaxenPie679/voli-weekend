@@ -30,10 +30,11 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
-      # Senza nome e città in sito/titolare.js non si pubblica, ma il giro resta verde (niente email di errore ogni ora)
+      # Sito pubblico senza nome e città in sito/titolare.js: non si pubblica, ma il giro resta verde (niente email di errore ogni ora).
+      # Sito privato (PRIVATO in sito/config.js): si pubblica anche senza titolare.
       - name: Controllo titolare
         id: titolare
-        run: node --input-type=module -e "import('./sito/titolare.js').then(m => console.log('completo=' + m.titolareCompleto())).catch(e => { console.error(e); process.exit(1); })" >> "$GITHUB_OUTPUT"
+        run: node --input-type=module -e "import('./sito/titolare.js').then(m => console.log('completo=' + m.puoPubblicare())).catch(e => { console.error(e); process.exit(1); })" >> "$GITHUB_OUTPUT"
       - name: Avviso, titolare mancante
         if: steps.titolare.outputs.completo != 'true'
         run: |
@@ -45,6 +46,8 @@ jobs:
         env:
           # Le statistiche contano solo il sito vero, non le anteprime dei rami
           CF_BEACON: ${{ github.ref_name == 'main' && vars.CF_BEACON || '' }}
+          # Password del sito privato: senza, il sito resta chiuso a tutti
+          SITO_PASSWORD: ${{ secrets.SITO_PASSWORD }}
       # I segreti Cloudflare entrano solo nei passi che li usano, non in tutto il lavoro (npm ci e test compresi)
       - name: Controllo segreti Cloudflare
         id: segreti
