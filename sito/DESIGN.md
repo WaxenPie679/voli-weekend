@@ -63,7 +63,7 @@ Un linguaggio solo: biglietto, timbro, tabellone delle partenze, rotta. Mappa de
 
 ## Griglia
 
-Telefono prima: un biglietto per riga. `.biglietti` = `auto-fill, minmax(320px, 1fr)` → 2 colonne da tablet, 3 su computer; contenuto al massimo 1100 px, margine 16–40 px. I riquadri occupano tutta la riga.
+Telefono prima: un biglietto per riga. `.biglietti` = `auto-fill, minmax(320px, 1fr)` → 2 colonne da tablet, 3 su computer, 4 da circa 1830 px di schermo; contenuto largo 1100 px fino a 1486 px di schermo, poi 74vw fino a 1440 px (niente fasce vuote sui monitor grandi), margine 16–40 px. I riquadri occupano tutta la riga.
 
 ## Filtri e primo schermo
 

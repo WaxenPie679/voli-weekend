@@ -58,7 +58,7 @@
   --font-testo: 'DM Sans', system-ui, -apple-system, sans-serif;
 
   --margine: clamp(16px, 4vw, 40px);
-  --larghezza: 1100px;
+  --larghezza: clamp(1100px, 74vw, 1440px); /* 1100 fino a 1486 px di schermo, poi cresce: da 1830 px i biglietti vanno su 4 colonne */
   --raggio: 16px;
   --uscita: cubic-bezier(.22, 1, .36, 1);
   --arrivo: cubic-bezier(.16, 1, .3, 1); /* entrate decise che rallentano */
