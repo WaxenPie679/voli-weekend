@@ -51,3 +51,25 @@ test('percorsoPulito toglie query e #', () => {
   assert.equal(percorsoPulito('/roma/'), '/roma/');
   assert.equal(percorsoPulito('/roma/?volo=x#a'), '/roma/');
 });
+
+test('daInviare: «Te lo scriviamo noi» e i clic Premium contano una volta per pagina', async () => {
+  const { daInviare } = await import('../../sito/statico/js/conta.js');
+  for (const nome of ['canale', 'email', 'premium-passa', 'premium-lucchetto', 'premium-mensile', 'premium-annuale', 'premium-avvisami']) {
+    const gia = new Set();
+    assert.equal(daInviare(nome, { gia, percorso: '/' }), true, nome);
+    assert.equal(daInviare(nome, { gia, percorso: '/' }), false, nome);
+  }
+});
+
+test('daInviare: Kiwi e compagnia contano a ogni clic (ogni volo è un clic diverso)', async () => {
+  const { daInviare } = await import('../../sito/statico/js/conta.js');
+  const gia = new Set();
+  assert.equal(daInviare('kiwi', { gia, percorso: '/' }), true);
+  assert.equal(daInviare('kiwi', { gia, percorso: '/' }), true);
+});
+
+test('daInviare: il menù Premium non conta se sei già sulla pagina Premium', async () => {
+  const { daInviare } = await import('../../sito/statico/js/conta.js');
+  assert.equal(daInviare('premium-menu', { gia: new Set(), percorso: '/premium/' }), false);
+  assert.equal(daInviare('premium-menu', { gia: new Set(), percorso: '/roma/' }), true);
+});

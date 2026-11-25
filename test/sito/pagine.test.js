@@ -506,8 +506,8 @@ test('domande: canale e riassunto email dicono solo che non ci sono ancora', () 
   const html = leggibile(servizio(ctx)[1].html);
   assert.ok(html.includes('Il canale sta per aprire.'));
   assert.ok(html.includes('Non c\'è ancora: arriverà presto.'));
-  // Senza i disegni (il logo è in SVG dentro la pagina e i suoi tracciati hanno cifre qualsiasi).
-  assert.ok(!/martedì|22|clic in fondo|cancell/.test(html.replace(/<svg[\s\S]*?<\/svg>/g, '')));
+  // Senza i disegni (il logo è in SVG dentro la pagina e i suoi tracciati hanno cifre qualsiasi) né le versioni dei file (?v=).
+  assert.ok(!/martedì|22|clic in fondo|cancell/.test(html.replace(/<svg[\s\S]*?<\/svg>/g, '').replace(/\?v=[0-9a-f]+/g, '')));
 });
 
 test('privacy: i conteggi anonimi nominano i bottoni toccati, senza IP né dati del browser', () => {

@@ -25,6 +25,18 @@ export function daContare({ type, button, target }) {
   return el.dataset.conta || null;
 }
 
+// Clic di interesse: contano una volta per pagina, così chi tocca più volte non gonfia le soglie.
+// Kiwi e compagnia no: ogni clic è un volo diverso.
+const UNA_VOLTA = new Set(['canale', 'email', 'premium-passa', 'premium-lucchetto', 'premium-menu', 'premium-mensile', 'premium-annuale', 'premium-avvisami']);
+
+export function daInviare(nome, { gia, percorso }) {
+  if (nome === 'premium-menu' && percorso === '/premium/') return false;
+  if (!UNA_VOLTA.has(nome)) return true;
+  if (gia.has(nome)) return false;
+  gia.add(nome);
+  return true;
+}
+
 function invia(e) {
   try {
     const corpo = JSON.stringify({ e, p: percorsoPulito(location.pathname) });
@@ -38,9 +50,10 @@ function invia(e) {
 function avvia() {
   invia('pagina');
   if (eIngresso(document.referrer, location.hostname)) invia('ingresso');
+  const gia = new Set();
   const suClic = ev => {
     const nome = daContare(ev);
-    if (nome) invia(nome);
+    if (nome && daInviare(nome, { gia, percorso: percorsoPulito(location.pathname) })) invia(nome);
   };
   document.addEventListener('click', suClic, { capture: true, passive: true });
   document.addEventListener('auxclick', suClic, { capture: true, passive: true });
