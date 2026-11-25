@@ -57,7 +57,7 @@ function sitemap(pagine) {
 }
 
 // Le pagine (e i file dati) stanno 5 minuti in cache; css, js, caratteri e immagini un'ora.
-// Niente "immutable": i riferimenti nelle pagine non portano l'hash o la versione.
+// Niente "immutable": il foglio di stile e esplora.js hanno la versione nel link (parti/versione.js), gli altri file no.
 function intestazioni(pagine) {
   const breve = 'Cache-Control: public, max-age=300';
   const lungo = 'Cache-Control: public, max-age=3600';

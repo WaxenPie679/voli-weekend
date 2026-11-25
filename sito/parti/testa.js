@@ -1,6 +1,7 @@
 // Il <head> di ogni pagina: meta, anteprima del link, caratteri nostri e, se c'è il token, Cloudflare Web Analytics.
 import { h, grezzo } from '../statico/js/html.js';
 import { SITO } from '../config.js';
+import { versione } from './versione.js';
 
 // I caratteri da caricare subito (gli altri pesi stanno negli stessi file variabili).
 const CARATTERI = ['dm-sans.woff2', 'gabarito.woff2', 'jetbrains-mono.woff2'];
@@ -29,7 +30,7 @@ ${grezzo(indicizza ? '' : '<meta name="robots" content="noindex">\n')}<meta prop
 <meta name="theme-color" content="#FFDD45">
 <link rel="icon" href="/img/favicon.ico" sizes="any">
 <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
-${precarica}<link rel="stylesheet" href="/css/sito.css">
+${precarica}<link rel="stylesheet" href="/css/sito.css?v=${versione('css/sito.css')}">
 ${grezzo(beacon())}
 </head>`;
 }
