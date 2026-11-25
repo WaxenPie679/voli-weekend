@@ -69,9 +69,20 @@ export function chiaveVolo({ o, d, va }) {
   return `${o}-${d}-${dep.slice(0, 10)}-${dep.slice(11, 13)}${dep.slice(14, 16)}`.toLowerCase();
 }
 
+// Kiwi riempie «Da» e «A» solo con città e paese nell'indirizzo, non con i codici IATA.
+const CITTA_DI_PARTENZA = { BRI: 'Bari', BDS: 'Brindisi', MXP: 'Milano', BGY: 'Bergamo', FCO: 'Roma', CIA: 'Roma' };
+
+// «Reggio Calabria» → 'reggio-calabria', «Málaga» → 'malaga', «L'Aquila» → 'l-aquila'.
+const slug = testo =>
+  normalizza(testo).replace(/[\s'’]+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
+
+const luogo = (citta, paese) => [citta, paese].filter(Boolean).map(slug).join('-');
+
 export function linkKiwi(volo, affiliato = '') {
-  const { o, d, va, ri } = volo;
-  const base = `https://www.kiwi.com/it/search/results/${o}/${d}/${va[0].slice(0, 10)}/${ri[0].slice(0, 10)}?adults=1`;
+  const { o, citta, paese, va, ri } = volo;
+  const da = luogo(CITTA_DI_PARTENZA[o] ?? o, 'Italia');
+  const a = luogo(citta, paese);
+  const base = `https://www.kiwi.com/it/search/results/${da}/${a}/${va[0].slice(0, 10)}/${ri[0].slice(0, 10)}?adults=1`;
   return affiliato ? `${base}&affilid=${affiliato}` : base;
 }
 
