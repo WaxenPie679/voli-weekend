@@ -108,3 +108,13 @@ test('prepara rifiuta radice, home, repo, cwd, antenati, maiuscole diverse e lin
   for (const o of scelte) await assert.rejects(prepara({ cartella: dati, out: o, adesso: ADESSO }), RIFIUTO, o);
   assert.ok(existsSync(join(piena, 'a.txt')));
 });
+
+test('il contatore conosce tutte le pagine scritte da prepara', async () => {
+  const { PERCORSI } = await import('../../functions/_lib/regole.js');
+  const { dati, out } = cartelle();
+  await prepara({ cartella: dati, out, adesso: ADESSO });
+  const pagine = readFileSync(join(out, '_headers'), 'utf8').split('\n')
+    .filter(r => r.startsWith('/') && !r.includes('*') && !['/voli.json', '/sitemap.xml', '/robots.txt'].includes(r));
+  assert.equal(pagine.length, 10);
+  for (const p of pagine) assert.ok(PERCORSI.includes(p), p);
+});
