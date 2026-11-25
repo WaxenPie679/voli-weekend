@@ -20,7 +20,7 @@ function comeFunziona({ affiliato }) {
     : h`<p>Accanto a ogni volo ci sono due bottoni: <strong>la compagnia</strong> e <strong>Kiwi</strong>. Il prezzo che mostriamo è quello della compagnia. Su Kiwi il prezzo può essere di qualche euro diverso, e paghi quello che vedi lì; noi non aggiungiamo nulla. Preferisci la compagnia? Va benissimo lo stesso. Più avanti ci sarà anche <strong>Premium</strong>, a 3 € al mese, per chi vuole sapere quando comprare.</p>`;
   const corpo = [
     sezione('Cosa trovi qui', h`<p>Voli andata e ritorno per il weekend da Bari, Brindisi, Milano, Bergamo e Roma. <strong>Weekend</strong>: parti venerdì dopo le 18:00 o sabato, torni domenica. <strong>Weekend lungo</strong>: parti da giovedì, torni entro lunedì; arriverà con Premium.</p>`),
-    sezione('Da dove vengono i prezzi', h`<p>Controlliamo i prezzi ogni giorno sui siti delle compagnie aeree e dei motori di ricerca dei voli. Accanto a ogni prezzo scriviamo l'ora in cui l'abbiamo visto: <strong>visto alle 9:30</strong>. Dopo quell'ora il prezzo può cambiare, perché lo decide la compagnia.</p>`),
+    sezione('Da dove vengono i prezzi', h`<p>Controlliamo i prezzi ogni giorno sui siti delle compagnie aeree. Accanto a ogni prezzo scriviamo l'ora in cui l'abbiamo visto: <strong>visto alle 9:30</strong>. Dopo quell'ora il prezzo può cambiare, perché lo decide la compagnia.</p>`),
     sezione('Cosa è incluso nel prezzo', h`<p>Andata e ritorno per una persona, <strong>solo zaino</strong>. Se il bagaglio è incluso lo scriviamo. Non aggiungiamo niente di nostro.</p>`),
     sezione('Lo storico', h`<p>Ogni giorno segniamo il prezzo di ogni tratta e lo teniamo. Presto qui si vedrà come si muove nel tempo e quale weekend costa meno.</p>`),
     sezione(affiliato ? 'Come restiamo gratis' : 'Kiwi e la compagnia', gratis),
@@ -129,7 +129,7 @@ function noteLegali({ affiliato, titolare }) {
     : h`<p>I bottoni portano ai siti di Kiwi e delle compagnie aeree. Ciò che accade dopo il clic dipende da loro.</p>`;
   const corpo = [
     sezione('Chi gestisce il sito', h`<p>DoVai (dovaivoli.it) è gestito da ${testoTitolare(titolare)}, come persona fisica. Contatti: <strong>${mail}</strong>.</p>`),
-    sezione('Cosa facciamo', h`<p>DoVai mostra voli trovati sui siti delle compagnie aeree e dei motori di ricerca. Non vendiamo biglietti e non siamo parte del contratto tra te e la compagnia o Kiwi.</p>`),
+    sezione('Cosa facciamo', h`<p>DoVai mostra voli trovati sui siti delle compagnie aeree. Non vendiamo biglietti e non siamo parte del contratto tra te e la compagnia o Kiwi.</p>`),
     sezione('Prezzi indicativi', h`<p>I prezzi sono indicativi: sono quelli visti all'ora indicata, andata e ritorno per una persona, solo zaino. Possono cambiare in qualsiasi momento e la disponibilità non è garantita. Vale il prezzo che vedi sul sito dove prenoti.</p>`),
     sezione('Link a Kiwi e alle compagnie', link),
     sezione('Marchi', h`<p>I nomi e i marchi delle compagnie aeree e di Kiwi appartengono ai rispettivi proprietari.</p>`),
