@@ -610,6 +610,22 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
   .biglietto--arriva { animation: biglietto-arriva .5s var(--arrivo) both; animation-delay: calc(var(--i, 0) * 40ms); }
   @keyframes biglietto-arriva { from { opacity: 0; translate: 0 14px; } }
 }
+/* Quando cambia un filtro (esplora.js, View Transitions): chi resta scorre al nuovo posto, gli esclusi
+   escono svelti, i nuovi arrivano. Il resto della pagina non si dissolve (niente istantanea della radice)
+   e il cursore del prezzo resta trascinabile anche durante il movimento. */
+@media (prefers-reduced-motion: no-preference) {
+  html.vt-lista { view-transition-name: none; }
+  ::view-transition { pointer-events: none; }
+  .biglietti > article[data-k], .biglietti > .riquadro { view-transition-class: biglietto; }
+  ::view-transition-group(*.biglietto) { animation-duration: .38s; animation-timing-function: var(--arrivo); }
+  ::view-transition-old(*.biglietto):only-child { animation: vt-esce .16s ease-in both; }
+  ::view-transition-new(*.biglietto):only-child { animation: vt-entra .32s var(--arrivo) .06s both; }
+  @keyframes vt-esce { to { opacity: 0; scale: .96; } }
+  @keyframes vt-entra { from { opacity: 0; scale: .97; translate: 0 10px; } }
+  /* «Tutti i dettagli»: il biglietto del giorno vola al suo posto nella lista, la pagina sotto si dissolve. */
+  ::view-transition-group(volo-scelto) { animation-duration: .55s; animation-timing-function: var(--arrivo); }
+  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .3s; }
+}
 .biglietto :focus-visible { outline-color: var(--limone); }
 .biglietto .matrice :focus-visible { outline-color: var(--ruggine); }
 
@@ -1017,6 +1033,21 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
 .biglietto--giorno .tratta { font-size: 1.375rem; }
 .biglietto--giorno .bollino { font-size: 1.5rem; }
 .biglietto--giorno .matrice { padding: 24px 24px 22px; border-radius: 0 0 var(--raggio) var(--raggio); }
+/* Il tabellone del prezzo: ogni cifra è una finestra alta una riga sul suo rullo. La cifra ferma
+   (invisibile) dà la larghezza; fermo, il rullo mostra già la cifra giusta. */
+.tabellone { display: inline-flex; align-items: flex-start; line-height: 1; user-select: none; }
+.cifra { position: relative; display: inline-block; height: 1em; overflow: hidden; }
+.cifra__fine { visibility: hidden; }
+.cifra__rullo {
+  position: absolute;
+  inset: 0 auto auto 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-50%);
+  translate: 0 calc(-1em * (10 + var(--c)));
+}
+.cifra__rullo > span { height: 1em; }
 .del-giorno__dettagli { display: inline-flex; align-items: center; min-height: 44px; margin-left: auto; font-weight: 500; font-size: .9375rem; }
 
 /* Il momento dell'apertura: il biglietto arriva, la perforazione si disegna, il timbro batte il prezzo.
@@ -1038,11 +1069,20 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
   .biglietto--giorno .perforazione { animation: perforazione .7s var(--arrivo) .55s both; }
   @keyframes perforazione { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
 
-  .bollino--timbro { animation: timbro .55s ease-out .85s both; }
+  /* Il bollino compare col biglietto, le cifre girano come un tabellone (le unità si fermano per ultime),
+     poi il timbro batte il prezzo. */
+  .bollino--timbro { animation: bollino-compare .35s var(--arrivo) .35s both, timbro .4s ease-out 1.15s; }
+  @keyframes bollino-compare { from { opacity: 0; } }
   @keyframes timbro {
-    0% { opacity: 0; transform: rotate(-22deg) scale(1.9); }
-    55% { opacity: 1; transform: rotate(-4deg) scale(.92); }
-    100% { opacity: 1; transform: rotate(-6deg) scale(1); }
+    40% { transform: rotate(-10deg) scale(1.14); }
+    100% { transform: rotate(-6deg) scale(1); }
+  }
+  .bollino--timbro .cifra__rullo {
+    animation: rullo calc(.75s - var(--n, 0) * .12s) cubic-bezier(.25, .7, .2, 1) .4s both;
+  }
+  @keyframes rullo {
+    from { translate: 0 0; filter: blur(.5px); }
+    85% { filter: none; }
   }
   /* L'inchiostro che si allarga sotto il timbro, una volta sola. */
   .bollino--timbro { position: relative; }
@@ -1053,7 +1093,7 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
     border-radius: 50%;
     border: 2px solid var(--limone);
     opacity: 0;
-    animation: inchiostro .7s var(--arrivo) 1.12s both;
+    animation: inchiostro .7s var(--arrivo) 1.25s both;
   }
   @keyframes inchiostro { from { opacity: .9; scale: 1; } to { opacity: 0; scale: 1.45; } }
 }
@@ -1114,6 +1154,54 @@ a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
 .testo > * { max-width: 68ch; }
 .testo__grande { font-size: 1.25rem; }
 .testo__sezione { display: grid; gap: 10px; margin-bottom: 28px; }
+
+/* Come funziona: una rotta tratteggiata lega le sezioni, con una tappa (ovale limone, come il bollino)
+   su ogni titolo. Mentre leggi la rotta si disegna fino al punto a metà schermo e le tappe si timbrano.
+   Senza animazioni legate allo scorrimento, o col movimento ridotto, è già tutta disegnata. */
+.testo--rotta { position: relative; padding-left: 40px; view-timeline: --rotta block; view-timeline-inset: 50% 50%; }
+.testo--rotta::before, .testo--rotta::after {
+  content: "";
+  position: absolute;
+  left: 11px;
+  top: 14px;
+  bottom: 40px;
+  width: 2px;
+  background: repeating-linear-gradient(to bottom, var(--linea) 0 6px, transparent 6px 11px);
+}
+.testo--rotta::after {
+  background-image: repeating-linear-gradient(to bottom, var(--moro) 0 6px, transparent 6px 11px);
+  transform-origin: top;
+}
+.testo--rotta .testo__sezione > h2 { position: relative; view-timeline: --tappa block; view-timeline-inset: 50% 50%; }
+.testo--rotta .testo__sezione > h2::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  left: -40px;
+  top: .1em;
+  width: 24px;
+  height: 18px;
+  border: 2px solid var(--moro);
+  border-radius: 50%;
+  background: var(--limone);
+  rotate: -6deg;
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .testo--rotta::after { animation: rotta linear both; animation-timeline: --rotta; animation-range: cover 0% cover 100%; }
+    @keyframes rotta { from { scale: 1 0; } }
+    .testo--rotta .testo__sezione > h2::before {
+      animation: tappa linear both;
+      animation-timeline: --tappa;
+      animation-range: cover 0% cover 100%;
+    }
+    @keyframes tappa {
+      0% { background: var(--carta); border-color: var(--linea); scale: .8; rotate: -20deg; }
+      50% { background: var(--limone); border-color: var(--moro); scale: 1.15; rotate: -10deg; }
+      100% { background: var(--limone); border-color: var(--moro); scale: 1; rotate: -6deg; }
+    }
+  }
+}
 .testo__sezione h2, .testo h2 { font-size: clamp(1.25rem, 1.05rem + 1vw, 1.625rem); line-height: 1.15; }
 .testo ul { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; }
 .testo .tabella-scorri { max-width: none; }

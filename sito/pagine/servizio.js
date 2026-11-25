@@ -10,7 +10,7 @@ const AGGIORNATO = '25 novembre 2026';
 
 const mail = grezzo(h`<a href="mailto:${EMAIL}">${EMAIL}</a>`);
 const sezione = (titolo, ...righe) => h`<section class="testo__sezione"><h2>${titolo}</h2>${righe.map(r => grezzo(r))}</section>`;
-const pag = pagina => h`<section class="sezione"><div class="contenitore testo">${grezzo(pagina)}</div></section>`;
+const pag = (pagina, classe = '') => h`<section class="sezione"><div class="contenitore testo${classe}">${grezzo(pagina)}</div></section>`;
 
 // ---------- Come funziona ----------
 
@@ -38,7 +38,7 @@ function comeFunziona({ affiliato }) {
       sottotitolo: affiliato
         ? 'Cosa controlliamo, come lo controlliamo e come facciamo a restare gratis.'
         : 'Cosa controlliamo, come lo controlliamo e dove puoi prenotare.',
-    }))}${grezzo(pag(corpo.join('')))}`,
+    }))}${grezzo(pag(corpo.join(''), ' testo--rotta'))}`,
   };
 }
 
