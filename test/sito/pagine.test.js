@@ -8,6 +8,11 @@ import { piede } from '../../sito/parti/piede.js';
 import { filtri, mesiDeiVoli } from '../../sito/parti/filtri.js';
 import { riquadroCanale, riquadroPremium } from '../../sito/parti/riquadri.js';
 import { lucchetto } from '../../sito/parti/lucchetto.js';
+import { pagina as home } from '../../sito/pagine/home.js';
+import { pagina as bacino, pagine as bacini } from '../../sito/pagine/bacino.js';
+import { pagina as premium } from '../../sito/pagine/premium.js';
+import { pagine as servizio } from '../../sito/pagine/servizio.js';
+import { pagina as errore } from '../../sito/pagine/errore.js';
 
 const adesso = new Date('2026-11-25T12:00:00Z');
 
@@ -225,5 +230,226 @@ test('testa: canonical, noindex, caratteri e beacon solo col token', () => {
   } finally {
     if (prima === undefined) delete process.env.CF_BEACON;
     else process.env.CF_BEACON = prima;
+  }
+});
+
+// ---------- Pagine intere ----------
+
+// L'apostrofo nell'HTML esce come entità: per cercare le frasi lo si rimette.
+const leggibile = html => html.replaceAll('&#39;', "'");
+
+const altroVolo = (o, citta, p, n) => ({
+  ...volo,
+  k: `${o}-${citta}-${n}`.toLowerCase(),
+  o,
+  citta,
+  p,
+  va: [`2026-12-${String(10 + n).padStart(2, '0')}T18:40`, '2026-12-12T20:55'],
+  w: '2026-12-12',
+});
+
+const voliProva = [
+  altroVolo('BRI', 'Parigi', 40, 1), altroVolo('MXP', 'Lisbona', 55, 2), altroVolo('FCO', 'Parigi', 61, 3),
+  altroVolo('BGY', 'Madrid', 70, 4), altroVolo('BDS', 'Tirana', 80, 5), altroVolo('CIA', 'Atene', 90, 6),
+  altroVolo('BRI', 'Praga', 95, 7), altroVolo('MXP', 'Vienna', 99, 8), altroVolo('FCO', 'Berlino', 100, 9),
+  altroVolo('BRI', 'Malaga', 100, 10), altroVolo('MXP', 'Oslo', 100, 11), altroVolo('BGY', 'Riga', 100, 12),
+  altroVolo('FCO', 'Sofia', 100, 13), altroVolo('BRI', 'Cara', 250, 14),
+];
+
+const stato = (voliBacino, piuBasso = voliBacino[0]) => ({
+  pronto: true,
+  aggiornato: '2026-11-25T06:00:00Z',
+  numero: voliBacino.filter(v => v.p <= 100).length,
+  piuBasso,
+  mete: voliBacino.slice(0, 3).map(v => ({ citta: v.citta, d: v.d, p: v.p })),
+});
+const vuoto = { pronto: false, aggiornato: null, numero: 0, piuBasso: null, mete: [] };
+const di = aeroporti => voliProva.filter(v => aeroporti.includes(v.o));
+
+const ctx = {
+  voli: voliProva,
+  bacini: {
+    puglia: stato(di(['BRI', 'BDS'])),
+    'milano-bergamo': stato(di(['MXP', 'BGY'])),
+    roma: stato(di(['FCO', 'CIA'])),
+  },
+  adesso,
+  titolare: { nome: '', citta: '' },
+};
+
+test('home: indicizzata, H1 esatto, niente «Come cambiano i prezzi»', () => {
+  const p = home(ctx);
+  assert.equal(p.percorso, '/');
+  assert.equal(p.indicizza, true);
+  assert.ok(p.html.startsWith('<!doctype html>'));
+  assert.ok(p.html.includes('<h1>I voli economici del weekend, controllati ogni giorno</h1>'));
+  assert.ok(!p.html.includes('Come cambiano i prezzi'));
+  assert.ok(!p.html.includes('Guarda lo storico'));
+  assert.ok(!p.html.includes('noindex'));
+  assert.ok(!p.html.includes('Linate') && !p.html.includes('ciao@'));
+});
+
+test('home: 12 biglietti fino a 100 €, canale dopo il sesto, «Mostra altri voli»', () => {
+  const html = home(ctx).html;
+  assert.equal((html.match(/<article class="biglietto"/g) ?? []).length, 12);
+  assert.ok(!html.includes('Cara'), 'sopra i 100 € non si vede');
+  assert.ok(html.includes('Mostra altri voli'));
+  const posCanale = html.indexOf('id="te-lo-scriviamo"');
+  const biglietti = [...html.matchAll(/<article class="biglietto"/g)].map(m => m.index);
+  assert.ok(biglietti[5] < posCanale && posCanale < biglietti[6]);
+  assert.ok(html.includes('Premium · ti diciamo anche quando comprare'));
+  assert.ok(html.includes('Quando parti, DoVai?'));
+  assert.ok(html.includes('Da Bari, Brindisi, Milano, Bergamo e Roma. Prezzi andata e ritorno, dal più basso.'));
+});
+
+test('home: dove si va, mete uniche e più basse, link al filtro', () => {
+  const html = home(ctx).html;
+  assert.ok(html.includes('Dove si va nel weekend'));
+  assert.ok(html.includes('Le mete più economiche di questo mese dai nostri aeroporti.'));
+  assert.ok(html.includes('href="/?a=parigi"'));
+  assert.equal((html.match(/href="\/\?a=parigi"/g) ?? []).length, 1);
+  assert.ok(html.includes('40 € a/r') && !html.includes('da 40'));
+  assert.ok(!html.includes('ponti'));
+});
+
+test('home: senza voli dice che non c\'è niente, senza rompersi', () => {
+  const html = home({ ...ctx, voli: [], bacini: { puglia: vuoto, 'milano-bergamo': vuoto, roma: vuoto } }).html;
+  assert.ok(html.includes('Con questi filtri non c\'è niente.'));
+  assert.ok(!html.includes('Mostra altri voli'));
+});
+
+test('bacino milano-bergamo: «Malpensa e Orio al Serio», mai Linate', () => {
+  const p = bacino(ctx, 'milano-bergamo');
+  assert.equal(p.percorso, '/milano-bergamo/');
+  assert.equal(p.indicizza, true);
+  assert.ok(p.html.includes('Malpensa e Orio al Serio'));
+  assert.ok(!/Linate|LIN\b/.test(p.html));
+  assert.ok(p.html.includes('<h1>Voli economici per il weekend da Milano e Bergamo</h1>'));
+  assert.ok(leggibile(p.html).includes('Esci dall\'ufficio venerdì e in serata sei altrove.'));
+  assert.ok(p.html.includes('Voli da Malpensa') && p.html.includes('Voli da Orio al Serio'));
+  assert.ok(!/<a [^>]*>Voli da /.test(p.html), 'pagine per aeroporto non esistono: niente link');
+});
+
+test('bacino puglia: introduzione coi dati veri e la frase locale di Bruno', () => {
+  const html = leggibile(bacino(ctx, 'puglia').html);
+  assert.ok(html.includes('Meh, chiudi tutte cose che dobbiamo andare!'));
+  assert.match(html, /<strong>4 voli del weekend<\/strong> fino a 100 € a\/r/);
+  assert.ok(html.includes('<strong>Bari → Parigi a 40 € a/r</strong>'));
+  assert.ok(html.includes('Il più basso di questo mese: 40 € a/r.'));
+  assert.ok(!html.includes('Lisbona →') && !html.includes('→ Lisbona'), 'solo i voli del bacino');
+  assert.ok(html.includes('Le mete più economiche da Bari e Brindisi'));
+});
+
+test('bacino: il canale sta dopo il terzo biglietto, con il suo bacino', () => {
+  const html = bacino(ctx, 'roma').html;
+  const posCanale = html.indexOf('id="te-lo-scriviamo"');
+  const biglietti = [...html.matchAll(/<article class="biglietto"/g)].map(m => m.index);
+  assert.ok(biglietti[2] < posCanale && posCanale < biglietti[3]);
+  assert.ok(html.includes('Roma'));
+});
+
+test('bacino non pronto: noindex e la frase, niente biglietti', () => {
+  const p = bacino({ ...ctx, bacini: { ...ctx.bacini, roma: vuoto } }, 'roma');
+  assert.equal(p.indicizza, false);
+  assert.ok(p.html.includes('<meta name="robots" content="noindex">'));
+  assert.ok(p.html.includes('Stiamo iniziando a seguire i voli da qui. I primi prezzi arrivano a giorni.'));
+  assert.ok(!p.html.includes('<article'));
+  assert.ok(p.html.includes('href="/puglia/"'));
+  assert.ok(bacino({ ...ctx, bacini: {} }, 'roma').html.includes('Stiamo iniziando'));
+});
+
+test('bacini: una pagina per ciascuno', () => {
+  assert.deepEqual(bacini(ctx).map(p => p.percorso), ['/puglia/', '/milano-bergamo/', '/roma/']);
+});
+
+test('premium: «non c\'è ancora», avvisami per email, non indicizzata', () => {
+  const p = premium(ctx);
+  assert.equal(p.percorso, '/premium/');
+  assert.equal(p.indicizza, false);
+  assert.ok(leggibile(p.html).includes('Premium non c\'è ancora.'));
+  assert.ok(p.html.includes('mailto:info@dovaivoli.it?subject=Avvisami%20quando%20parte%20Premium'));
+  assert.ok(p.html.includes('data-conta="premium-avvisami"'));
+  assert.ok(p.html.includes('Nessun pagamento, nessun impegno.'));
+  assert.ok(p.html.includes('noindex'));
+});
+
+test('servizio: quattro pagine con i percorsi giusti', () => {
+  const l = servizio(ctx);
+  assert.deepEqual(l.map(p => p.percorso), ['/come-funziona/', '/domande/', '/privacy/', '/note-legali/']);
+  assert.deepEqual(l.map(p => p.indicizza), [true, true, true, true]);
+  for (const p of l) {
+    assert.ok(!p.html.includes('ciao@'), p.percorso);
+    assert.ok(!/Linate/.test(p.html), p.percorso);
+    assert.ok(p.html.includes('info@dovaivoli.it'), p.percorso);
+  }
+});
+
+test('servizio: senza codice affiliato nessuna frase sulla commissione', () => {
+  for (const p of servizio(ctx)) {
+    assert.ok(!/commission|sostieni|affiliat/i.test(p.html), `${p.percorso} parla di commissioni`);
+  }
+});
+
+test('servizio: col codice affiliato tornano commissione e link affiliato', () => {
+  const l = servizio({ ...ctx, affiliato: 'abc' });
+  assert.ok(l[0].html.includes('Kiwi ci dà una piccola commissione'));
+  assert.ok(l[1].html.includes('Guadagniamo una piccola commissione'));
+  assert.ok(l[2].html.includes('link affiliato'));
+  assert.ok(l[3].html.includes('link affiliati'));
+});
+
+test('domande: dati strutturati FAQ validi', () => {
+  const html = servizio(ctx)[1].html;
+  const json = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+  assert.ok(json, 'manca il JSON-LD');
+  const dati = JSON.parse(json[1]);
+  assert.equal(dati['@type'], 'FAQPage');
+  assert.ok(dati.mainEntity.length >= 10);
+  assert.ok(dati.mainEntity.every(d => d.name && d.acceptedAnswer.text));
+});
+
+test('privacy con titolare vuoto: segnaposto; compilato: nome e città', () => {
+  const vuota = servizio(ctx)[2].html;
+  assert.ok(vuota.includes('[Nome e cognome]'));
+  const piena = servizio({ ...ctx, titolare: { nome: 'Mario Rossi', citta: 'Bari' } })[2].html;
+  assert.ok(piena.includes('Mario Rossi, Bari'));
+  assert.ok(!piena.includes('[Nome e cognome]'));
+});
+
+test('privacy: niente lista email né fornitori di newsletter', () => {
+  const html = servizio(ctx)[2].html;
+  assert.ok(!/Brevo|MailerLite|riassunto|iscrizione|iscriv/i.test(html));
+  assert.ok(html.includes('Cloudflare'));
+  assert.ok(html.includes('Il sito non usa cookie'));
+});
+
+test('note legali: titolare e contatto', () => {
+  const html = servizio(ctx)[3].html;
+  assert.ok(html.includes('[Nome e cognome], [città]'));
+  assert.ok(html.includes('Prezzi indicativi'));
+});
+
+test('come funziona: niente promesse di cose che non ci sono ancora', () => {
+  const html = servizio(ctx)[0].html;
+  assert.ok(!html.includes('Weekend lungo</strong>: parti da giovedì, torni entro lunedì.'));
+  assert.ok(html.includes('Come funziona DoVai'));
+});
+
+test('404: «Questa pagina non c\'è», collegamenti ai bacini, non indicizzata', () => {
+  const p = errore(ctx);
+  assert.equal(p.percorso, '/404.html');
+  assert.equal(p.indicizza, false);
+  assert.ok(leggibile(p.html).includes('Questa pagina non c\'è.'));
+  for (const l of ['href="/"', 'href="/puglia/"', 'href="/milano-bergamo/"', 'href="/roma/"']) assert.ok(p.html.includes(l), l);
+  assert.ok(p.html.includes('noindex'));
+});
+
+test('tutte le pagine: solo collegamenti interni a pagine che esistono', () => {
+  const esistenti = new Set(['/', '/puglia/', '/milano-bergamo/', '/roma/', '/premium/', '/come-funziona/', '/domande/', '/privacy/', '/note-legali/']);
+  const tutte = [home(ctx), ...bacini(ctx), premium(ctx), ...servizio(ctx), errore(ctx)];
+  for (const p of tutte) {
+    for (const [, href] of p.html.matchAll(/<a [^>]*href="(\/[^"?#]*)/g)) {
+      assert.ok(esistenti.has(href), `${p.percorso} punta a ${href}`);
+    }
   }
 });

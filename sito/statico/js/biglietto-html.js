@@ -24,7 +24,7 @@ const AEROPORTI_LONTANI = {
 
 const ESTERNO = { target: '_blank', rel: 'noopener' };
 
-const tratta = v => `${CITTA_PARTENZA[v.o] ?? v.o} → ${v.citta}`;
+export const tratta = v => `${CITTA_PARTENZA[v.o] ?? v.o} → ${v.citta}`;
 
 // «sab 12 dic 18:40 → lun 14 dic 21:35»: partenza dell'andata → partenza del ritorno.
 // Le due metà restano intere: se la riga non basta, si va a capo dopo la freccia.
