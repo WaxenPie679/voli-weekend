@@ -4,7 +4,8 @@ const CACHE = 'voli-weekend-v8';
 const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'view.js', 'notify.js', 'config.js',
   'storico.html', 'storico.js', 'storico-view.js', 'weekend-trips.js', 'seguite.html', 'seguite.js', 'seguite-view.js', 'tracking-spec.js',
   'manifest.webmanifest',
-  'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png'];
+  'icons/favicon.svg', 'icons/favicon.ico', 'icons/apple-touch-icon.png',
+  'icons/icona-app-512.png', 'icons/icona-app-maskable-192.png', 'icons/icona-app-maskable-512.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -36,7 +37,7 @@ self.addEventListener('push', (e) => {
   let data = {};
   try { data = e.data.json(); } catch { data = { title: 'Voli Weekend', body: e.data?.text() ?? '' }; }
   e.waitUntil(self.registration.showNotification(data.title ?? 'Voli Weekend', {
-    body: data.body ?? '', icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', data: { url: data.url ?? './' },
+    body: data.body ?? '', icon: 'icons/icona-app-maskable-192.png', badge: 'icons/icona-app-maskable-192.png', data: { url: data.url ?? './' },
   }));
 });
 
