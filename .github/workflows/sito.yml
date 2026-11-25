@@ -43,7 +43,8 @@ jobs:
         if: steps.titolare.outputs.completo == 'true'
         run: node sito/build.js --pubblica
         env:
-          CF_BEACON: ${{ vars.CF_BEACON }}
+          # Le statistiche contano solo il sito vero, non le anteprime dei rami
+          CF_BEACON: ${{ github.ref_name == 'main' && vars.CF_BEACON || '' }}
       # I segreti Cloudflare entrano solo nei passi che li usano, non in tutto il lavoro (npm ci e test compresi)
       - name: Controllo segreti Cloudflare
         id: segreti
@@ -58,8 +59,10 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # Da main si pubblica dovaivoli.it; da un altro ramo (avvio a mano) solo l'anteprima prova.dovai.pages.dev
+          RAMO: ${{ github.ref_name == 'main' && 'main' || 'prova' }}
         # Versione esatta: una nuova wrangler non entra da sola nel giro che pubblica
-        run: npx --yes wrangler@3.114.0 pages deploy sito/dist --project-name dovai --branch main
+        run: npx --yes wrangler@3.114.0 pages deploy sito/dist --project-name dovai --branch "$RAMO"
       - name: Avviso, segreti Cloudflare mancanti
         if: steps.titolare.outputs.completo == 'true' && steps.segreti.outputs.presenti != 'true'
         run: |

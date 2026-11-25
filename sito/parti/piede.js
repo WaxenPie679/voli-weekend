@@ -9,6 +9,7 @@ const KIWI_SENZA_COMMISSIONE = "Su Kiwi paghi il prezzo che vedi su Kiwi, noi no
 export function piede({ affiliato = '' } = {}) {
   return h`<footer class="piede">
   <div class="contenitore">
+    <p class="piede__payoff">Più weekend, <span>quando conviene.</span></p>
     <p class="piede__marchio"><img src="/img/dovai-carta.svg" alt="DoVai" width="92" height="34"> <span>Quando parti, DoVai?</span></p>
     <nav class="piede__menu" aria-label="Pagine del sito">
       <a href="/come-funziona/">Come funziona</a>

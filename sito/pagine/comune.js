@@ -12,7 +12,7 @@ export function documento({ titolo, descrizione, percorso, indicizza, corpo, aff
   return '<!doctype html>\n' + h`<html lang="it">
 ${grezzo(testa({ titolo, descrizione, percorso, indicizza }))}
 <body>
-${grezzo(intestazione())}
+${grezzo(intestazione({ percorso }))}
 <main id="contenuto">
 ${grezzo(corpo)}
 </main>
@@ -23,13 +23,18 @@ ${grezzo(extra)}
 `;
 }
 
-// Apertura di una pagina: riga piccola (facoltativa), titolo H1 e sottotitolo.
-export function apertura({ riga = '', titolo, sottotitolo = '' }) {
-  return h`<section class="apertura">
-  <div class="contenitore">
-    ${grezzo(riga ? h`<p class="apertura__riga dato">${riga}</p>` : '')}
-    <h1>${titolo}</h1>
-    ${grezzo(sottotitolo ? h`<p class="apertura__sotto">${sottotitolo}</p>` : '')}
+// Apertura di una pagina: titolo H1, sottotitolo e, se c'è, un pezzo in più sotto (l'introduzione del bacino).
+// Con `giorno` (l'HTML del volo del giorno) l'apertura diventa a due colonne da computer: testo a sinistra, biglietto a destra.
+// Lo slogan non sta più sopra il titolo: apre la striscia delle partenze.
+export function apertura({ titolo, sottotitolo = '', extra = '', giorno = '' }) {
+  return h`<section class="apertura${grezzo(giorno ? ' apertura--giorno' : '')}">
+  <div class="contenitore apertura__griglia">
+    <div class="apertura__testo">
+      <h1>${titolo}</h1>
+      ${grezzo(sottotitolo ? h`<p class="apertura__sotto">${sottotitolo}</p>` : '')}
+      ${grezzo(extra)}
+    </div>
+    ${grezzo(giorno)}
   </div>
 </section>`;
 }
