@@ -1,21 +1,20 @@
 // I filtri della lista (HOME §2): un modulo GET, così l'indirizzo si può condividere.
-// Weekend lungo e i mesi oltre il terzo stanno dietro il lucchetto Premium.
+// Weekend lungo e i mesi dopo quelli coi dati stanno dietro il lucchetto Premium.
 import { h, grezzo, lucchetto } from '../statico/js/html.js';
 import { BACINI, AEROPORTI_NOMI, PREZZO_MIN, PREZZO_MAX, PREZZO_INIZIALE } from '../config.js';
 
 const MESI = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
 
-const ANNO_MESE_ROMA = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome', year: 'numeric', month: 'numeric' });
+const MESE = /^(\d{4})-(0[1-9]|1[0-2])$/;
 
-// I tre mesi dopo quello in corso (a Roma): a fine novembre → dicembre, gennaio, febbraio.
-function prossimiMesi(adesso) {
-  const p = Object.fromEntries(ANNO_MESE_ROMA.formatToParts(adesso).map(x => [x.type, +x.value]));
-  return [1, 2, 3].map(passo => {
-    const indice = p.month - 1 + passo;
-    const anno = p.year + Math.floor(indice / 12);
-    const mese = indice % 12;
-    return { valore: `${anno}-${String(mese + 1).padStart(2, '0')}`, nome: MESI[mese] };
-  });
+// I mesi di calendario che contengono i weekend dei voli (dal venerdì `w`), in ordine e senza doppioni.
+export function mesiDeiVoli(voli) {
+  return [...new Set(voli.map(v => String(v.w ?? '').slice(0, 7)).filter(m => MESE.test(m)))].sort();
+}
+
+function voceMese(valore) {
+  const [, , mese] = valore.match(MESE);
+  return { valore, nome: MESI[+mese - 1] };
 }
 
 const scelto = sì => grezzo(sì ? ' selected' : '');
@@ -29,10 +28,10 @@ function aeroporti(bacino) {
       ${gruppi}`;
 }
 
-// opzioni: bacino (slug della pagina), adesso (per i mesi), riepilogo (riga «42 voli da …»)
-export function filtri({ bacino, adesso = new Date(), riepilogo = '' } = {}) {
+// opzioni: bacino (slug della pagina), mesi (['2026-11', …] da mesiDeiVoli), riepilogo (riga «42 voli da …»)
+export function filtri({ bacino, mesi = [], riepilogo = '' } = {}) {
   const pagina = bacino ? `/${bacino}/` : '/';
-  const mesi = prossimiMesi(adesso).map(m => grezzo(h`<option value="${m.valore}">${m.nome}</option>`));
+  const voci = mesi.filter(m => MESE.test(m)).map(voceMese).map(m => grezzo(h`<option value="${m.valore}">${m.nome}</option>`));
   return h`<form class="filtri" method="get" action="${pagina}" role="search" aria-label="Filtri dei voli">
   <div class="filtri__campo">
     <label for="f-da">Da dove parti</label>
@@ -52,7 +51,7 @@ export function filtri({ bacino, adesso = new Date(), riepilogo = '' } = {}) {
     <label for="f-mese">Quando</label>
     <select id="f-mese" name="mese" data-conta="filtro">
       <option value="tre" selected>I prossimi 3 mesi</option>
-      ${mesi}
+      ${voci}
     </select>
     <a class="filtri__premium" href="/premium/" data-conta="premium-lucchetto">${grezzo(lucchetto('Fino a 12 mesi con Premium'))}</a>
   </div>

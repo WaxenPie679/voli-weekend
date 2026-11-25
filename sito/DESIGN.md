@@ -31,7 +31,7 @@ Copie locali in `statico/caratteri/` (OFL, vedi LEGGIMI): Gabarito (titoli, prez
 - Corpo **moro** (si tocca per aprirlo: è il `<summary>` di un `<details>`, funziona senza JS): tratta in mono carta, date in mono foglia, permanenza, «solo zaino · compagnia», «visto alle…».
 - **Bollino** del prezzo: ovale limone, testo moro Gabarito 900, ruotato −6° come un timbro.
 - **Perforazione** oliva tratteggiata con due tagli tondi (colore `--fondo` del foglio sotto).
-- **Matrice panna**: «Vedi su Kiwi» pieno ruggine, «o su {compagnia}» link, «Con Kiwi sostieni DoVai», «Compra o aspetta? [lucchetto] Premium» con lucchetto SVG disegnato (mai emoji).
+- **Matrice panna**: «Vedi su Kiwi» pieno ruggine, «o su {compagnia}» link, «Con Kiwi sostieni DoVai · link affiliato» (solo col codice affiliato), «Compra o aspetta? [lucchetto] Premium» con lucchetto SVG disegnato (mai emoji).
 - Aperto: andata e ritorno, «Da sapere» solo per aeroporti lontani, i due bottoni grandi, «Perché due bottoni?», «Altre date», «Ricevilo prima la prossima volta». La matrice chiusa si nasconde (`:has`).
 - Si srotola con `::details-content` dove il browser lo sa fare e il movimento non è ridotto.
 

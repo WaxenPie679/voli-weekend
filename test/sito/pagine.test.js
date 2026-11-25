@@ -5,7 +5,7 @@ import { biglietto } from '../../sito/parti/biglietto.js';
 import { testa } from '../../sito/parti/testa.js';
 import { intestazione } from '../../sito/parti/intestazione.js';
 import { piede } from '../../sito/parti/piede.js';
-import { filtri } from '../../sito/parti/filtri.js';
+import { filtri, mesiDeiVoli } from '../../sito/parti/filtri.js';
 import { riquadroCanale, riquadroPremium } from '../../sito/parti/riquadri.js';
 import { lucchetto } from '../../sito/parti/lucchetto.js';
 
@@ -55,7 +55,6 @@ test('biglietto: tutte le voci del biglietto chiuso', () => {
     'target="_blank"',
     'Compra o aspetta?',
     'data-conta="premium-lucchetto"',
-    'Con Kiwi sostieni DoVai',
     'data-k="bri-bva-2026-12-12-1840"',
   ]) {
     assert.ok(html.includes(atteso), `manca «${atteso}»`);
@@ -76,10 +75,19 @@ test('biglietto: la parte aperta sta in un <details>, chiusa salvo aperto:true',
   assert.match(biglietto(volo, { adesso, aperto: true }), /<details class="biglietto__dettagli" open>/);
 });
 
-test('biglietto: Kiwi col codice affiliato porta la nota, gli altri link restano', () => {
+test('biglietto senza codice affiliato: nessuna parola su commissioni o sostegno', () => {
+  const html = biglietto(volo, { adesso });
+  assert.ok(!html.includes('sostieni'));
+  assert.ok(!html.includes('commissione'));
+  assert.ok(!html.includes('affilid'));
+  assert.ok(html.includes('Il prezzo che vedi qui è quello della compagnia, visto alle 9:30. Su Kiwi può essere di qualche euro diverso: lì paghi il prezzo che vedi su Kiwi. Su Ryanair prenoti direttamente. Scegli tu.'));
+});
+
+test('biglietto col codice affiliato: tornano nota e testo completo', () => {
   const html = biglietto(volo, { adesso, affiliato: 'abc' });
   assert.ok(html.includes('affilid=abc'));
-  assert.ok(html.includes('link affiliato'));
+  assert.ok(html.includes('Con Kiwi sostieni DoVai · link affiliato'));
+  assert.ok(html.includes('Il prezzo che vedi qui è quello della compagnia, visto alle 9:30. Su Kiwi può essere di qualche euro diverso: lì paghi il prezzo che vedi su Kiwi, e DoVai riceve una piccola commissione che lo tiene gratis. Su Ryanair prenoti direttamente, e a noi va bene lo stesso. Scegli tu.'));
 });
 
 test('biglietto: «Da sapere» solo per gli aeroporti lontani, «Altre date» solo se ci sono', () => {
@@ -105,6 +113,15 @@ test('piede: email info@, niente cookie per seguirti', () => {
   assert.ok(!html.includes('ciao@'));
   assert.ok(html.includes('Questo sito non usa cookie per seguirti.'));
   assert.ok(html.includes('Quando parti, DoVai?'));
+  assert.ok(html.includes('Prezzi andata e ritorno per una persona, controllati all\'ora indicata: sul sito della compagnia possono cambiare.'));
+});
+
+test('piede: la commissione Kiwi si nomina solo col codice affiliato', () => {
+  const senza = piede();
+  assert.ok(!senza.includes('commissione'));
+  assert.ok(senza.includes('Su Kiwi paghi il prezzo che vedi su Kiwi, noi non aggiungiamo nulla. Se preferisci la compagnia, il bottone c\'è sempre.'));
+  const con = piede({ affiliato: 'abc' });
+  assert.ok(con.includes('Se prenoti su Kiwi dai nostri link riceviamo una piccola commissione: è quello che tiene DoVai gratis.'));
 });
 
 test('intestazione: logo che porta alla home', () => {
@@ -114,7 +131,7 @@ test('intestazione: logo che porta alla home', () => {
 });
 
 test('filtri: cursore 30–400 su 100 € a/r, lucchetti e tutti i controlli', () => {
-  const html = filtri({ adesso });
+  const html = filtri({ mesi: ['2026-11', '2026-12', '2027-01', '2027-02'] });
   assert.match(html, /<form [^>]*method="get"/);
   assert.match(html, /type="range"[^>]*name="max"[^>]*min="30" max="400" value="100"/);
   for (const atteso of ['Da dove parti', 'Weekend lungo', 'Quando', 'I prossimi 3 mesi', 'Fino a 12 mesi con Premium',
@@ -123,13 +140,22 @@ test('filtri: cursore 30–400 su 100 € a/r, lucchetti e tutti i controlli', (
     assert.ok(html.includes(atteso), `manca «${atteso}»`);
   }
   assert.ok(!html.includes('Linate'));
-  // i tre mesi dopo novembre 2026
-  assert.ok(html.includes('value="2026-12"') && html.includes('value="2027-01"') && html.includes('value="2027-02"'));
+  for (const [valore, nome] of [['2026-11', 'novembre'], ['2026-12', 'dicembre'], ['2027-01', 'gennaio'], ['2027-02', 'febbraio']]) {
+    assert.ok(html.includes(`<option value="${valore}">${nome}</option>`), `manca ${nome}`);
+  }
   assert.ok(!html.includes('value="2027-03"'));
+  assert.ok(html.indexOf('febbraio') < html.indexOf('Fino a 12 mesi con Premium'));
+});
+
+test('mesiDeiVoli: i mesi dei weekend coi voli, mese in corso compreso', () => {
+  const voli = ['2026-11-27', '2026-12-11', '2026-12-04', '2027-01-15', '2027-02-19', 'boh', undefined].map(w => ({ w }));
+  assert.deepEqual(mesiDeiVoli(voli), ['2026-11', '2026-12', '2027-01', '2027-02']);
+  assert.deepEqual(mesiDeiVoli([]), []);
+  assert.ok(!filtri({ mesi: ['2026-13', '<x>'] }).includes('2026-13'));
 });
 
 test('filtri: sulla pagina di un bacino quel bacino è già scelto', () => {
-  const html = filtri({ bacino: 'roma', adesso });
+  const html = filtri({ bacino: 'roma' });
   assert.match(html, /<option value="roma" selected>/);
   assert.match(html, /href="\/roma\/"[^>]*>Togli i filtri/);
 });
