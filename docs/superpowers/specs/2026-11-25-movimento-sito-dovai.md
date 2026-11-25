@@ -4,6 +4,8 @@
 
 **Decisione di Bruno (25/11/2026):** sì a 1 (riordino filtri) e 2 (tabellone del prezzo), sì al 5 (rotta in Come funziona). No al 4 per ora. Il 3 (biglietto che vola) è stato provato in anteprima e **tolto** su richiesta di Bruno (25/11). Sul telefono il tabellone gira sul primo biglietto della lista, perché lì il biglietto del giorno non c'è.
 
+**Aggiunta (25/11/2026):** l'aereo dell'icona app vola nella fascia sopra il titolo e atterra nel logo diventando la D. Scelte di Bruno: prima atterra l'aereo, poi gira il tabellone (A); niente scia tratteggiata. Una volta per visita.
+
 ## Cosa c'è oggi
 
 Un solo momento d'autore, all'apertura: il testo sale, il biglietto del giorno arriva, la perforazione si disegna e il timbro batte il prezzo. Il resto risponde al gesto: hover sui biglietti e sui bottoni, la striscia che scorre e la fila di «Mostra altri voli». Tutto rispetta il movimento ridotto.
