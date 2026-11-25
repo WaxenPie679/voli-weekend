@@ -43,7 +43,7 @@ export function filtri({ bacino, mesi = [], riepilogo = '' } = {}) {
     <span class="filtri__etichetta" id="f-tipo">Tipo di weekend</span>
     <div class="segmenti" role="group" aria-labelledby="f-tipo">
       <span class="segmento segmento--attivo" aria-current="true">Weekend</span>
-      <a class="segmento" href="/premium/" data-conta="premium-lucchetto">${grezzo(lucchetto('Weekend lungo'))}</a>
+      <a class="segmento" href="/premium/" data-conta="premium-lucchetto">${grezzo(lucchetto('Weekend lungo', { nascosto: ' (solo Premium)' }))}</a>
     </div>
     <p class="filtri__spiega">Parti venerdì dopo le 18:00 o sabato, torni domenica. Niente ferie.</p>
   </div>
