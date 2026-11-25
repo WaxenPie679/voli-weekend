@@ -63,6 +63,8 @@ function intestazioni(pagine) {
   const lungo = 'Cache-Control: public, max-age=3600';
   const blocchi = [...pagine.map(p => p.percorso), '/voli.json', '/sitemap.xml', '/robots.txt'].map(p => `${p}\n  ${breve}`);
   for (const d of ['css', 'js', 'caratteri', 'img']) blocchi.push(`/${d}/*\n  ${lungo}`);
+  // Per tutto il sito: il browser non indovina il tipo dei file e ai siti esterni va solo il dominio.
+  blocchi.push('/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin');
   return blocchi.join('\n\n') + '\n';
 }
 
