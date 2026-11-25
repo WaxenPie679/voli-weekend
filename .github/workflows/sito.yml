@@ -1,0 +1,66 @@
+name: Sito dovaivoli.it
+
+on:
+  schedule:
+    # Minuto non tondo: allo scoccare dell'ora GitHub accoda molte esecuzioni e le ritarda
+    - cron: '41 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['sito/**', '.github/workflows/sito.yml']
+
+permissions:
+  contents: read
+
+# Un solo giro alla volta: una pubblicazione in corso non va interrotta
+concurrency:
+  group: sito
+  cancel-in-progress: false
+
+jobs:
+  pubblica:
+    name: Prepara e pubblica
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      # Senza nome e città in sito/titolare.js non si pubblica, ma il giro resta verde (niente email di errore ogni ora)
+      - name: Controllo titolare
+        id: titolare
+        run: node --input-type=module -e "import('./sito/titolare.js').then(m => console.log('completo=' + m.titolareCompleto())).catch(e => { console.error(e); process.exit(1); })" >> "$GITHUB_OUTPUT"
+      - name: Avviso, titolare mancante
+        if: steps.titolare.outputs.completo != 'true'
+        run: |
+          echo "::notice::Mancano nome e città del titolare in sito/titolare.js: il sito non si pubblica."
+      # Anche in locale --pubblica rifiuta finché nome e città sono vuoti
+      - name: Prepara il sito
+        if: steps.titolare.outputs.completo == 'true'
+        run: node sito/build.js --pubblica
+        env:
+          CF_BEACON: ${{ vars.CF_BEACON }}
+      # I segreti Cloudflare entrano solo nei passi che li usano, non in tutto il lavoro (npm ci e test compresi)
+      - name: Controllo segreti Cloudflare
+        id: segreti
+        if: steps.titolare.outputs.completo == 'true'
+        env:
+          T: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          A: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -n "$T" ] && [ -n "$A" ]; then echo "presenti=true" >> "$GITHUB_OUTPUT"; else echo "presenti=false" >> "$GITHUB_OUTPUT"; fi
+      - name: Pubblica su Cloudflare Pages
+        if: steps.titolare.outputs.completo == 'true' && steps.segreti.outputs.presenti == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        # Versione esatta: una nuova wrangler non entra da sola nel giro che pubblica
+        run: npx --yes wrangler@3.114.0 pages deploy sito/dist --project-name dovai --branch main
+      - name: Avviso, segreti Cloudflare mancanti
+        if: steps.titolare.outputs.completo == 'true' && steps.segreti.outputs.presenti != 'true'
+        run: |
+          echo "::notice::Mancano i segreti CLOUDFLARE_API_TOKEN e CLOUDFLARE_ACCOUNT_ID, quindi non è stato pubblicato nulla."

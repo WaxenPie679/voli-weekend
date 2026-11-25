@@ -1,0 +1,386 @@
+{
+ "generatedAt": "2026-11-24T23:52:59.011Z",
+ "sources": {
+  "ryanair": {
+   "status": "ok",
+   "error": null,
+   "lastSuccessAt": "2026-11-24T23:52:59.011Z"
+  },
+  "wizz": {
+   "status": "ok",
+   "error": null,
+   "lastSuccessAt": "2026-11-24T23:52:59.011Z"
+  }
+ },
+ "itineraries": [
+  {
+   "id": "BRI|TIA|2027-01-16T06:45|2027-01-17T03:40|FR8558+FR8557",
+   "source": "ryanair",
+   "origin": "BRI",
+   "destination": {
+    "code": "TIA",
+    "city": "Tirana",
+    "country": "Albania"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "TIA",
+      "dep": "2027-01-16T06:45",
+      "arr": "2027-01-16T07:40",
+      "flight": "FR8558",
+      "airline": "Ryanair"
+     }
+    ],
+    "selfTransfer": false
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "TIA",
+      "to": "BRI",
+      "dep": "2027-01-17T03:40",
+      "arr": "2027-01-17T04:35",
+      "flight": "FR8557",
+      "airline": "Ryanair"
+     }
+    ],
+    "selfTransfer": false
+   },
+   "price": 45.2,
+   "currency": "EUR",
+   "bookingUrl": "https://www.ryanair.com/it/it/trip/flights/select?adults=1&dateOut=2027-01-16&dateIn=2027-01-17&originIata=BRI&destinationIata=TIA&isReturn=true",
+   "weekend": "2027-01-15",
+   "seenAt": "2026-11-24T23:52:59.054Z"
+  },
+  {
+   "id": "BRI|TIA|2027-01-16T06:45|2027-01-17T13:40|FR8558+FR8557",
+   "source": "ryanair",
+   "origin": "BRI",
+   "destination": {
+    "code": "TIA",
+    "city": "Tirana",
+    "country": "Albania"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "TIA",
+      "dep": "2027-01-16T06:45",
+      "arr": "2027-01-16T07:40",
+      "flight": "FR8558",
+      "airline": "Ryanair"
+     }
+    ],
+    "selfTransfer": false
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "TIA",
+      "to": "BRI",
+      "dep": "2027-01-17T13:40",
+      "arr": "2027-01-17T14:35",
+      "flight": "FR8557",
+      "airline": "Ryanair"
+     }
+    ],
+    "selfTransfer": false
+   },
+   "price": 39.98,
+   "currency": "EUR",
+   "bookingUrl": "https://www.ryanair.com/it/it/trip/flights/select?adults=1&dateOut=2027-01-16&dateIn=2027-01-17&originIata=BRI&destinationIata=TIA&isReturn=true",
+   "weekend": "2027-01-15",
+   "seenAt": "2026-11-24T23:52:59.054Z"
+  },
+  {
+   "id": "BRI|TIA|2027-01-15T22:55|2027-01-18T01:50|FR8558+FR8557",
+   "source": "ryanair",
+   "origin": "BRI",
+   "destination": {
+    "code": "TIA",
+    "city": "Tirana",
+    "country": "Albania"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "TIA",
+      "dep": "2027-01-15T22:55",
+      "arr": "2027-01-15T23:50",
+      "flight": "FR8558",
+      "airline": "Ryanair"
+     }
+    ],
+    "selfTransfer": false
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "TIA",
+      "to": "BRI",
+      "dep": "2027-01-18T01:50",
+      "arr": "2027-01-18T02:45",
+      "flight": "FR8557",
+      "airline": "Ryanair"
+     }
+    ],
+    "selfTransfer": false
+   },
+   "price": 52.4,
+   "currency": "EUR",
+   "bookingUrl": "https://www.ryanair.com/it/it/trip/flights/select?adults=1&dateOut=2027-01-16&dateIn=2027-01-17&originIata=BRI&destinationIata=TIA&isReturn=true",
+   "weekend": "2027-01-15",
+   "seenAt": "2026-11-24T23:52:59.054Z"
+  },
+  {
+   "id": "BRI|TIA|2027-01-15T22:55|2027-01-18T01:50|FR8558+FR8557",
+   "source": "ryanair",
+   "origin": "BRI",
+   "destination": {
+    "code": "TIA",
+    "city": "Tirana",
+    "country": "Albania"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "TIA",
+      "dep": "2027-01-15T22:55",
+      "arr": "2027-01-15T23:50",
+      "flight": "FR8558",
+      "airline": "Ryanair"
+     }
+    ],
+    "selfTransfer": false
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "TIA",
+      "to": "BRI",
+      "dep": "2027-01-18T01:50",
+      "arr": "2027-01-18T02:45",
+      "flight": "FR8557",
+      "airline": "Ryanair"
+     }
+    ],
+    "selfTransfer": false
+   },
+   "price": 61,
+   "currency": "EUR",
+   "bookingUrl": "https://www.ryanair.com/it/it/trip/flights/select?adults=1&dateOut=2027-01-16&dateIn=2027-01-17&originIata=BRI&destinationIata=TIA&isReturn=true",
+   "weekend": "2027-01-15",
+   "seenAt": "2026-11-24T23:52:59.054Z"
+  },
+  {
+   "id": "BRI|TIA|2027-01-15T22:55|2027-01-19T08:00|FR8558+FR8557",
+   "source": "ryanair",
+   "origin": "BRI",
+   "destination": {
+    "code": "TIA",
+    "city": "Tirana",
+    "country": "Albania"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "TIA",
+      "dep": "2027-01-15T22:55",
+      "arr": "2027-01-15T23:50",
+      "flight": "FR8558",
+      "airline": "Ryanair"
+     }
+    ],
+    "selfTransfer": false
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "TIA",
+      "to": "BRI",
+      "dep": "2027-01-19T08:00",
+      "arr": "2027-01-19T08:55",
+      "flight": "FR8557",
+      "airline": "Ryanair"
+     }
+    ],
+    "selfTransfer": false
+   },
+   "price": 75.5,
+   "currency": "EUR",
+   "bookingUrl": "https://www.ryanair.com/it/it/trip/flights/select?adults=1&dateOut=2027-01-16&dateIn=2027-01-17&originIata=BRI&destinationIata=TIA&isReturn=true",
+   "weekend": "2027-01-15",
+   "seenAt": "2026-11-24T23:52:59.054Z"
+  },
+  {
+   "id": "LIN|TIA|2027-01-16T06:45|2027-01-17T13:40|FR8558+FR8557",
+   "source": "ryanair",
+   "origin": "LIN",
+   "destination": {
+    "code": "TIA",
+    "city": "Tirana",
+    "country": "Albania"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "LIN",
+      "to": "TIA",
+      "dep": "2027-01-16T06:45",
+      "arr": "2027-01-16T07:40",
+      "flight": "FR8558",
+      "airline": "Ryanair"
+     }
+    ],
+    "selfTransfer": false
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "TIA",
+      "to": "LIN",
+      "dep": "2027-01-17T13:40",
+      "arr": "2027-01-17T14:35",
+      "flight": "FR8557",
+      "airline": "Ryanair"
+     }
+    ],
+    "selfTransfer": false
+   },
+   "price": 35,
+   "currency": "EUR",
+   "bookingUrl": "https://www.ryanair.com/it/it/trip/flights/select?adults=1&dateOut=2027-01-16&dateIn=2027-01-17&originIata=BRI&destinationIata=TIA&isReturn=true",
+   "weekend": "2027-01-15",
+   "seenAt": "2026-11-24T23:52:59.054Z"
+  },
+  {
+   "id": "BDS|PSA|2026-12-12T22:20|2026-12-13T06:20|FR6020+FR6019",
+   "source": "ryanair",
+   "origin": "BDS",
+   "destination": {
+    "code": "PSA",
+    "city": "Pisa",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BDS",
+      "to": "PSA",
+      "dep": "2026-12-12T22:20",
+      "arr": "2026-12-12T23:45",
+      "flight": "FR6020",
+      "airline": "Ryanair"
+     }
+    ],
+    "selfTransfer": false
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "PSA",
+      "to": "BDS",
+      "dep": "2026-12-13T06:20",
+      "arr": "2026-12-13T07:45",
+      "flight": "FR6019",
+      "airline": "Ryanair"
+     }
+    ],
+    "selfTransfer": false
+   },
+   "price": 401,
+   "currency": "EUR",
+   "bookingUrl": "https://www.ryanair.com/it/it/trip/flights/select?adults=1&dateOut=2026-12-12&dateIn=2026-12-13&originIata=BDS&destinationIata=PSA&isReturn=true",
+   "weekend": "2026-12-11",
+   "seenAt": "2026-11-24T23:52:59.054Z"
+  },
+  {
+   "id": "BDS|PSA|2026-12-12T22:20|2026-12-13T06:20|FR6020+FR6019",
+   "source": "ryanair",
+   "origin": "BDS",
+   "destination": {
+    "code": "PSA",
+    "city": "Pisa",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BDS",
+      "to": "PSA",
+      "dep": "2026-12-12T22:20",
+      "arr": "2026-12-12T23:45",
+      "flight": "FR6020",
+      "airline": "Ryanair"
+     }
+    ],
+    "selfTransfer": false
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "PSA",
+      "to": "BDS",
+      "dep": "2026-12-13T06:20",
+      "arr": "2026-12-13T07:45",
+      "flight": "FR6019",
+      "airline": "Ryanair"
+     }
+    ],
+    "selfTransfer": false
+   },
+   "price": 30.38,
+   "currency": "EUR",
+   "bookingUrl": "https://www.ryanair.com/it/it/trip/flights/select?adults=1&dateOut=2026-12-12&dateIn=2026-12-13&originIata=BDS&destinationIata=PSA&isReturn=true",
+   "weekend": "2026-12-11",
+   "seenAt": "2026-11-24T23:52:59.054Z"
+  },
+  {
+   "id": "BRI|TRS|2026-12-12T21:20|2026-12-13T06:45|FR7085+FR7086",
+   "source": "ryanair",
+   "origin": "BRI",
+   "destination": {
+    "code": "TRS",
+    "city": "Trieste",
+    "country": "Italia"
+   },
+   "outbound": {
+    "segments": [
+     {
+      "from": "BRI",
+      "to": "TRS",
+      "dep": "2026-12-12T21:20",
+      "arr": "2026-12-12T22:40",
+      "flight": "FR7085",
+      "airline": "Ryanair"
+     }
+    ],
+    "selfTransfer": false
+   },
+   "inbound": {
+    "segments": [
+     {
+      "from": "TRS",
+      "to": "BRI",
+      "dep": "2026-12-13T06:45",
+      "arr": "2026-12-13T08:05",
+      "flight": "FR7086",
+      "airline": "Ryanair"
+     }
+    ],
+    "selfTransfer": false
+   },
+   "price": 33.1,
+   "currency": "EUR",
+   "bookingUrl": "https://www.ryanair.com/it/it/trip/flights/select?adults=1&dateOut=2026-12-12&dateIn=2026-12-13&originIata=BRI&destinationIata=TRS&isReturn=true",
+   "weekend": "2026-12-11",
+   "seenAt": "2026-11-24T23:52:59.054Z"
+  }
+ ]
+}

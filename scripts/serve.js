@@ -6,10 +6,17 @@ import { fileURLToPath } from 'node:url';
 
 export const PORT = 5190;
 const RESERVED = 5180;
+
+// Porta da usare: env PORT se è un intero valido, altrimenti la predefinita.
+export function portaDa(env = process.env) {
+  const n = Number(env.PORT);
+  return Number.isInteger(n) && n > 0 && n < 65536 ? n : PORT;
+}
 const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
   '.json': 'application/json; charset=utf-8', '.webmanifest': 'application/manifest+json',
-  '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon',
+  '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.xml': 'application/xml; charset=utf-8', '.txt': 'text/plain; charset=utf-8',
+  '.png': 'image/png', '.ico': 'image/x-icon',
 };
 const ROOT = fileURLToPath(new URL('../web', import.meta.url));
 
@@ -40,11 +47,14 @@ export function createServer({ root = ROOT, port = PORT } = {}) {
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const server = createServer();
+  // Cartella da servire: primo argomento (es. sito/dist); senza, la webapp in web/.
+  const radice = process.argv[2] ? resolve(process.argv[2]) : undefined;
+  const porta = portaDa();
+  const server = createServer({ root: radice, port: porta });
   server.on('error', (err) => {
-    if (err.code === 'EADDRINUSE') console.error(`La porta ${PORT} è già occupata: Voli Weekend è forse già aperto su http://127.0.0.1:${PORT}`);
+    if (err.code === 'EADDRINUSE') console.error(`La porta ${porta} è già occupata: il server è forse già aperto su http://127.0.0.1:${porta}`);
     else console.error(err.message);
     process.exit(1);
   });
-  server.listen(PORT, '127.0.0.1', () => console.log(`Voli Weekend: http://127.0.0.1:${PORT}`));
+  server.listen(porta, '127.0.0.1', () => console.log(`Voli Weekend: http://127.0.0.1:${porta}`));
 }
