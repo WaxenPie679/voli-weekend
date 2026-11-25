@@ -554,3 +554,8 @@ test('intestazione: il primo link salta al contenuto, la pagina in cui sei è se
 test('piede: chiude col payoff', () => {
   assert.ok(piede().includes('Più weekend, <span>quando conviene.</span>'));
 });
+
+test('testa: il foglio di stile porta la versione del suo contenuto, così la cache non serve quello vecchio', () => {
+  const html = testa({ titolo: 'T', descrizione: 'D', percorso: '/', indicizza: true });
+  assert.match(html, /<link rel="stylesheet" href="\/css\/sito\.css\?v=[0-9a-f]{10}">/);
+});
