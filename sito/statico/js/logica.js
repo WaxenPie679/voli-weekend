@@ -33,6 +33,9 @@ function leggiMax(valore) {
   return Math.min(PREZZO_MAX, Math.max(PREZZO_MIN, Number(valore)));
 }
 
+// «Altri filtri» si apre da solo se dentro c'è qualcosa di diverso dal valore iniziale.
+export const altriFiltriAttivi = ({ mese, resta, a }) => mese !== 'tre' || Number(resta) > 0 || Boolean(a);
+
 // params: URLSearchParams. bacino: slug della pagina; bacini: da voli.json; mesi: i mesi liberi (mesiDeiVoli).
 // Ogni valore che non torna riprende quello iniziale.
 export function leggiFiltri(params, { bacino, bacini = [], mesi = [] } = {}) {
