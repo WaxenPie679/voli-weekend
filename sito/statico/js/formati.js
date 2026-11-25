@@ -46,6 +46,13 @@ function romano(data) {
   return { anno: +p.year, mese: +p.month, giorno: +p.day, ore: +p.hour, minuti: +p.minute };
 }
 
+// L'ora di Roma scritta come gli orari dei voli: '2026-12-12T18:40'.
+export function oraDiRoma(data) {
+  const r = romano(data);
+  const due = n => String(n).padStart(2, '0');
+  return `${r.anno}-${due(r.mese)}-${due(r.giorno)}T${due(r.ore)}:${due(r.minuti)}`;
+}
+
 // «visto alle 9:30» / «visto ieri alle 22:10» / «visto il 22 nov alle 9:30», in ora di Roma.
 export function visto(seenAtIso, adesso) {
   const quando = new Date(seenAtIso);
