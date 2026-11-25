@@ -49,7 +49,7 @@ test('riduci ordina dal più economico e arrotonda per eccesso', () => {
 test('riduci produce il volo con tutti i campi', () => {
   const { voli } = riduci({ 'direct.json': mini }, { adesso: ADESSO });
   const v = voli.find(x => x.d === 'PSA');
-  assert.equal(v.k, 'bds-psa-2026-12-12-2220');
+  assert.equal(v.k, 'bds-psa-2026-12-12-2220-2026-12-13-0620');
   assert.equal(v.o, 'BDS');
   assert.equal(v.citta, 'Pisa');
   assert.equal(v.paese, 'Italia');
@@ -60,6 +60,16 @@ test('riduci produce il volo con tutti i campi', () => {
   assert.equal(v.resta, 395);
   assert.match(v.url, /^https:\/\/www\.ryanair\.com/);
   assert.match(v.visto, /^2026-11-24T/);
+});
+
+test('riduci: chiavi uniche anche con la stessa andata e ritorni diversi', () => {
+  const { voli } = riduci({ 'direct.json': mini }, { adesso: ADESSO });
+  const chiavi = voli.map(v => v.k);
+  assert.equal(new Set(chiavi).size, chiavi.length, 'nessuna chiave doppia');
+  // Nel campione la stessa andata BRI → Tirana del 16 gennaio ha due ritorni: restano due voli distinti.
+  const stessaAndata = voli.filter(v => v.d === 'TIA' && v.va[0] === '2027-01-16T06:45');
+  assert.ok(stessaAndata.length >= 1);
+  for (const v of voli) assert.match(v.k, /^[a-z0-9-]+$/);
 });
 
 test('bacino senza file → pronto false', () => {

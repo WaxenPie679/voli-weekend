@@ -24,7 +24,7 @@ function aVolo(it) {
   const va = [andata[0].dep, andata.at(-1).arr];
   const ri = [ritorno[0].dep, ritorno.at(-1).arr];
   return {
-    k: chiaveVolo({ o: it.origin, d: it.destination.code, va }),
+    k: chiaveVolo({ o: it.origin, d: it.destination.code, va, ri }),
     o: it.origin,
     d: it.destination.code,
     citta: it.destination.city,

@@ -63,10 +63,12 @@ export function visto(seenAtIso, adesso) {
 
 export const prezzo = euro => `${euro} € a/r`;
 
-// Identificatore stabile di un volo, es. 'bri-cdg-2026-12-12-1840'.
-export function chiaveVolo({ o, d, va }) {
-  const dep = va[0];
-  return `${o}-${d}-${dep.slice(0, 10)}-${dep.slice(11, 13)}${dep.slice(14, 16)}`.toLowerCase();
+// Identificatore stabile di un volo: andata e ritorno insieme, es. 'bri-cdg-2026-12-12-1840-2026-12-14-2135'.
+// Con la sola andata, la stessa partenza con due ritorni diversi avrebbe la stessa chiave.
+const dataOra = iso => `${iso.slice(0, 10)}-${iso.slice(11, 13)}${iso.slice(14, 16)}`;
+
+export function chiaveVolo({ o, d, va, ri }) {
+  return `${o}-${d}-${dataOra(va[0])}-${dataOra(ri[0])}`.toLowerCase();
 }
 
 // Kiwi riempie «Da» e «A» solo con città e paese nell'indirizzo, non con i codici IATA.

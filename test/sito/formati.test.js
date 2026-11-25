@@ -44,8 +44,12 @@ test('prezzo', () => {
   assert.equal(prezzo(69), '69 € a/r');
 });
 
-test('chiaveVolo è minuscola e senza separatori nell\'ora', () => {
-  assert.equal(chiaveVolo(volo), 'bri-cdg-2026-12-12-1840');
+test('chiaveVolo: andata e ritorno, minuscola e senza separatori nell\'ora', () => {
+  assert.equal(chiaveVolo(volo), 'bri-cdg-2026-12-12-1840-2026-12-14-0700');
+  // Stessa andata, ritorno diverso: chiave diversa.
+  const altroRitorno = { ...volo, ri: ['2026-12-14T21:35', '2026-12-14T23:55'] };
+  assert.equal(chiaveVolo(altroRitorno), 'bri-cdg-2026-12-12-1840-2026-12-14-2135');
+  assert.match(chiaveVolo(altroRitorno), /^[a-z0-9-]+$/);
 });
 
 test('linkKiwi con e senza affiliato: città e paese, non i codici', () => {
