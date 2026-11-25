@@ -1,7 +1,7 @@
 // La chiave della pagina privata. Nel codice c'è solo la sua impronta sha256: dall'impronta non si risale alla chiave.
 // La chiave vera sta nel file ~/Documents/DoVai/numeri-chiave.txt sul Mac di Bruno.
 // NUMERI_IMPRONTA tra le variabili del progetto Pages, se c'è, prende il posto di questa (per cambiare chiave senza pubblicare).
-export const IMPRONTA = '0000000000000000000000000000000000000000000000000000000000000000';
+export const IMPRONTA = '0c1cab483f2081feeaeb12a341492fc6f0ecf4a7deb7cc2098f4ae41fba2a7be';
 
 const esadecimale = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
 
