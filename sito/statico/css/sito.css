@@ -1,0 +1,708 @@
+/* DoVai · aspetto del sito, palette «Limonaia» (brand/token/colori.css) e caratteri ufficiali.
+   Telefono prima: un biglietto per riga; dal tablet in su 2–3 colonne, contenuto al massimo 1100 px. */
+
+/* ---------- Caratteri (copie locali dei Google Fonts, licenza OFL: vedi caratteri/LEGGIMI.md) ---------- */
+@font-face {
+  font-family: 'Gabarito';
+  src: url('/caratteri/gabarito.woff2') format('woff2');
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'DM Sans';
+  src: url('/caratteri/dm-sans.woff2') format('woff2');
+  font-weight: 100 1000;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/caratteri/jetbrains-mono.woff2') format('woff2');
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* La freccia → non sta nel sottoinsieme latino: file a parte, solo per lei. */
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/caratteri/jetbrains-mono-freccia.woff2') format('woff2');
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+2192;
+}
+
+/* ---------- Token ---------- */
+:root {
+  --carta: #FBF5E9;
+  --moro: #2A1A14;
+  --limone: #FFDD45;
+  --ruggine: #A6401F;
+  --foglia: #B5D095;
+  --panna: #FFFCF5;
+  --fondo-foglia: #E3F1D3;
+  --moro-chiaro: #7F6156;   /* note piccole su carta e panna (5,2:1) */
+  --moro-medio: #5A4636;    /* note piccole su limone (6,6:1): il moro chiaro lì non basta */
+  --oliva: #637B44;         /* perforazioni su moro */
+  --carta-tenue: #C9BBAA;   /* testo secondario sul biglietto scuro (8,9:1) */
+  --ruggine-scura: #8E3519; /* bottone ruggine al passaggio */
+  --linea: rgb(42 26 20 / .14);
+  --linea-scura: rgb(251 245 233 / .14);
+
+  --font-titolo: 'Gabarito', system-ui, sans-serif;
+  --font-dati: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  --font-testo: 'DM Sans', system-ui, -apple-system, sans-serif;
+
+  --margine: clamp(16px, 4vw, 40px);
+  --larghezza: 1100px;
+  --raggio: 16px;
+  --uscita: cubic-bezier(.22, 1, .36, 1);
+  --fondo: var(--carta); /* il colore del foglio sotto: serve ai tagli della perforazione */
+
+  color-scheme: light;
+  interpolate-size: allow-keywords;
+}
+
+/* ---------- Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--carta);
+  color: var(--moro);
+  font-family: var(--font-testo);
+  font-size: 1.0625rem; /* 17 px */
+  line-height: 1.5;
+  caret-color: var(--ruggine);
+  accent-color: var(--ruggine);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--limone); color: var(--moro); }
+
+h1, h2, h3, h4 { margin: 0; text-wrap: balance; }
+
+h1 {
+  font-family: var(--font-titolo);
+  font-weight: 800;
+  font-size: clamp(2.25rem, 1.4rem + 4.2vw, 4.25rem);
+  line-height: .98;
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  font-family: var(--font-titolo);
+  font-weight: 800;
+  font-size: clamp(1.625rem, 1.2rem + 1.8vw, 2.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.005em;
+}
+
+p { margin: 0; text-wrap: pretty; }
+
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: .2em;
+}
+a:hover { text-decoration-thickness: 2px; }
+
+:focus-visible {
+  outline: 3px solid var(--ruggine);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+img, svg { display: block; max-width: 100%; }
+
+.dato {
+  font-family: var(--font-dati);
+  letter-spacing: .04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.intero { white-space: nowrap; }
+
+.nascosto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.contenitore {
+  width: 100%;
+  max-width: calc(var(--larghezza) + 2 * var(--margine));
+  margin-inline: auto;
+  padding-inline: var(--margine);
+}
+
+/* ---------- Bottoni ---------- */
+.bottone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 22px;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  font-family: var(--font-titolo);
+  font-weight: 700;
+  font-size: 1.125rem;
+  line-height: 1.1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color .2s var(--uscita), transform .2s var(--uscita);
+}
+.bottone:active { transform: translateY(1px); }
+.bottone--grande { min-height: 52px; padding-inline: 26px; font-size: 1.25rem; }
+
+.bottone--kiwi { background: var(--ruggine); color: var(--carta); }
+.bottone--kiwi:hover { background: var(--ruggine-scura); }
+
+.bottone--contorno { border-color: var(--moro); color: var(--moro); background: transparent; }
+.bottone--contorno:hover { background: rgb(42 26 20 / .06); }
+
+.bottone--scuro { background: var(--moro); color: var(--carta); }
+.bottone--scuro:hover { background: #3E2A21; }
+
+/* ---------- Lucchetto ---------- */
+.lucchetto {
+  display: inline-flex;
+  align-items: center;
+  gap: .35em;
+  white-space: nowrap;
+}
+.lucchetto__icona {
+  flex: none;
+  width: 1em;
+  height: 1em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------- Intestazione: la firma moro su limone ---------- */
+.intestazione { background: var(--limone); }
+.intestazione__riga {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 64px;
+}
+.intestazione__logo { display: block; padding-block: 12px; border-radius: 6px; }
+.intestazione__logo img { height: 34px; width: auto; }
+.intestazione__menu { display: flex; gap: clamp(14px, 3vw, 28px); }
+.intestazione__menu a {
+  font-weight: 500;
+  font-size: 1rem;
+  text-decoration: none;
+  padding-block: 10px;
+}
+.intestazione__menu a:hover { text-decoration: underline; text-decoration-thickness: 2px; }
+.intestazione :focus-visible { outline-color: var(--moro); }
+
+/* ---------- Filtri ---------- */
+.filtri {
+  display: grid;
+  gap: 20px 24px;
+  padding: 20px;
+  background: var(--panna);
+  border: 1px solid var(--linea);
+  border-radius: var(--raggio);
+}
+@media (min-width: 640px) { .filtri { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 24px; } }
+@media (min-width: 1000px) { .filtri { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+.filtri__campo { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.filtri__campo > label,
+.filtri__etichetta {
+  font-weight: 700;
+  font-size: .9375rem;
+}
+.filtri__campo output { font-family: var(--font-titolo); font-weight: 800; color: var(--ruggine); font-size: 1.125rem; }
+
+.filtri select,
+.filtri input[type="search"] {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--moro);
+  background-color: var(--carta);
+  border: 1px solid rgb(42 26 20 / .32);
+  border-radius: 12px;
+}
+.filtri select {
+  appearance: none;
+  padding-right: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='%232A1A14' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 16px;
+}
+.filtri select:hover,
+.filtri input[type="search"]:hover { border-color: var(--moro); }
+.filtri input::placeholder { color: var(--moro-chiaro); opacity: 1; }
+
+.filtri__spiega { font-size: .875rem; line-height: 1.45; color: var(--moro-chiaro); }
+
+.segmenti {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 4px;
+  gap: 4px;
+  background: var(--carta);
+  border: 1px solid rgb(42 26 20 / .32);
+  border-radius: 999px;
+}
+.segmento {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-weight: 500;
+  font-size: .9375rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.segmento--attivo { background: var(--moro); color: var(--carta); }
+a.segmento { color: var(--moro-chiaro); }
+a.segmento:hover { color: var(--moro); background: rgb(42 26 20 / .06); }
+
+.filtri__premium {
+  align-self: flex-start;
+  font-size: .875rem;
+  font-weight: 500;
+  color: var(--moro-chiaro);
+  text-decoration: none;
+  padding-block: 4px;
+}
+.filtri__premium:hover { color: var(--moro); text-decoration: underline; }
+
+/* Cursore del prezzo: binario moro, pomello ruggine (il prezzo) */
+.filtri input[type="range"] {
+  width: 100%;
+  height: 32px;
+  margin: 0;
+  background: transparent;
+  appearance: none;
+  cursor: pointer;
+}
+.filtri input[type="range"]::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: var(--moro); }
+.filtri input[type="range"]::-moz-range-track { height: 4px; border-radius: 2px; background: var(--moro); }
+.filtri input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 26px;
+  height: 26px;
+  margin-top: -11px;
+  border-radius: 50%;
+  background: var(--ruggine);
+  border: 3px solid var(--panna);
+  box-shadow: 0 1px 3px rgb(42 26 20 / .35);
+}
+.filtri input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--ruggine);
+  border: 3px solid var(--panna);
+  box-shadow: 0 1px 3px rgb(42 26 20 / .35);
+}
+.filtri__scala {
+  display: flex;
+  justify-content: space-between;
+  font-size: .8125rem;
+  color: var(--moro-chiaro);
+}
+
+.filtri__fondo {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--linea);
+}
+.filtri__riepilogo { flex: 1 1 16rem; font-weight: 500; }
+.filtri__riepilogo:empty { display: none; }
+.filtri__togli { font-weight: 500; padding-block: 8px; }
+.filtri__invia { margin-left: auto; }
+
+/* ---------- Lista dei biglietti ---------- */
+.biglietti {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  align-items: start;
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.biglietti > .riquadro { grid-column: 1 / -1; }
+
+/* ---------- Biglietto: corpo moro, matrice panna, perforazione oliva ---------- */
+.biglietto {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--moro);
+  color: var(--carta);
+  border-radius: var(--raggio);
+  box-shadow: 0 1px 2px rgb(42 26 20 / .14), 0 12px 28px -16px rgb(42 26 20 / .5);
+}
+.biglietto :focus-visible { outline-color: var(--limone); }
+.biglietto .matrice :focus-visible { outline-color: var(--ruggine); }
+
+.biglietto__corpo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "tratta  bollino"
+    "quando  bollino"
+    "resta   resta"
+    "note    apri";
+  gap: 6px 12px;
+  padding: 22px 20px 18px;
+  list-style: none;
+  cursor: pointer;
+  border-radius: var(--raggio) var(--raggio) 0 0;
+}
+.biglietto__corpo::-webkit-details-marker { display: none; }
+.biglietto__corpo:focus-visible { outline-offset: -5px; border-radius: calc(var(--raggio) - 2px); }
+
+.tratta {
+  grid-area: tratta;
+  align-self: end;
+  font-family: var(--font-dati);
+  font-weight: 700;
+  font-size: 1.1875rem;
+  line-height: 1.25;
+  letter-spacing: .01em;
+  overflow-wrap: anywhere;
+}
+
+/* Il bollino del prezzo: ovale limone (siamo su fondo scuro), ruotato come un timbro */
+.bollino {
+  grid-area: bollino;
+  align-self: start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: -6px -8px 0 0;
+  padding: .95em .85em;
+  border-radius: 50%;
+  background: var(--limone);
+  color: var(--moro);
+  font-family: var(--font-titolo);
+  font-weight: 900;
+  font-size: 1.25rem;
+  line-height: 1;
+  white-space: nowrap;
+  transform: rotate(-6deg);
+}
+
+.biglietto__quando {
+  grid-area: quando;
+  color: var(--foglia);
+  font-size: .875rem;
+  line-height: 1.4;
+}
+
+.biglietto__resta {
+  grid-area: resta;
+  margin-top: 6px;
+  font-size: 1rem;
+}
+
+.biglietto__note {
+  grid-area: note;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: .5em;
+  align-self: end;
+  font-size: .875rem;
+  color: var(--carta-tenue);
+}
+.biglietto__note > span + span::before { content: '·'; margin-right: .5em; }
+.biglietto__note > .biglietto__visto { flex-basis: 100%; }
+.biglietto__note > .biglietto__visto::before { content: none; }
+
+.biglietto__apri {
+  grid-area: apri;
+  align-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+  font-size: .875rem;
+  color: var(--limone);
+}
+.biglietto__apri svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform .3s var(--uscita);
+}
+.biglietto__corpo:hover .biglietto__apri-testo { text-decoration: underline; text-underline-offset: .2em; }
+.biglietto__dettagli[open] .biglietto__apri svg { transform: rotate(180deg); }
+
+/* Parte aperta */
+.biglietto__aperto { display: flex; flex-direction: column; }
+
+.tappe {
+  display: grid;
+  gap: 10px;
+  margin: 0 20px;
+  padding: 16px 0;
+  border-top: 1px solid var(--linea-scura);
+}
+.tappa {
+  display: grid;
+  grid-template-columns: 4.75rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: 12px;
+}
+.tappa dt { font-size: .875rem; color: var(--carta-tenue); }
+.tappa dd {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: .75em;
+  font-size: .9375rem;
+}
+.tappa .dato:first-child { color: var(--foglia); }
+.tappa__cia { color: var(--carta-tenue); font-size: .875rem; }
+
+.da-sapere {
+  margin: 0 20px 18px;
+  padding: 12px 14px;
+  border: 1px solid rgb(255 221 69 / .4);
+  border-radius: 12px;
+}
+.da-sapere h4 {
+  font-family: var(--font-titolo);
+  font-weight: 700;
+  font-size: .9375rem;
+  color: var(--limone);
+}
+.da-sapere p { font-size: .9375rem; }
+
+/* Matrice: la parte da staccare, con i bottoni */
+.matrice {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 22px 20px 20px;
+  background: var(--panna);
+  color: var(--moro);
+  border-radius: 0 0 var(--raggio) var(--raggio);
+}
+.perforazione {
+  position: absolute;
+  top: -9px;
+  left: -9px;
+  right: -9px;
+  height: 18px;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 9px 9px, var(--fondo) 8.5px, transparent 9px) left / 18px 18px no-repeat,
+    radial-gradient(circle at 9px 9px, var(--fondo) 8.5px, transparent 9px) right / 18px 18px no-repeat,
+    repeating-linear-gradient(90deg, var(--oliva) 0 7px, transparent 7px 13px) center / calc(100% - 52px) 2px no-repeat;
+}
+
+.matrice__bottoni {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+}
+.o-su {
+  font-weight: 500;
+  font-size: .9375rem;
+  padding-block: 8px;
+}
+.nota-kiwi { font-size: .8125rem; color: var(--moro-chiaro); }
+
+.premium-chiuso {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: .5em;
+  margin-top: 4px;
+  padding: 6px 12px 6px 14px;
+  border: 1px solid var(--linea);
+  border-radius: 999px;
+  font-weight: 500;
+  font-size: .9375rem;
+  text-decoration: none;
+}
+.premium-chiuso .lucchetto {
+  padding-left: .5em;
+  border-left: 1px solid var(--linea);
+  color: var(--moro-chiaro);
+  font-size: .875rem;
+}
+.premium-chiuso:hover { border-color: var(--moro); }
+.premium-chiuso:hover .lucchetto { color: var(--moro); }
+
+/* Aperto: la matrice aperta prende il posto di quella chiusa */
+.biglietto:has(> .biglietto__dettagli[open]) > .matrice--chiusa { display: none; }
+
+.perche summary {
+  display: inline-block;
+  font-size: .875rem;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: .2em;
+  cursor: pointer;
+  list-style: none;
+}
+.perche summary::-webkit-details-marker { display: none; }
+.perche p {
+  max-width: 62ch;
+  margin-top: 8px;
+  font-size: .9375rem;
+  line-height: 1.5;
+}
+
+.matrice__altro {
+  display: grid;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--linea);
+}
+.altre h4 { font-family: var(--font-titolo); font-weight: 700; font-size: 1rem; }
+.altre ul { margin: 6px 0 0; padding: 0; list-style: none; }
+.altre li + li { border-top: 1px solid var(--linea); }
+.altre a {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  font-size: .875rem;
+  text-decoration: none;
+}
+.altre a:hover .dato { text-decoration: underline; }
+.altre__prezzo { font-family: var(--font-titolo); font-weight: 800; color: var(--ruggine); white-space: nowrap; }
+.ricevilo { justify-self: start; font-weight: 500; font-size: .9375rem; padding-block: 4px; }
+
+/* Il biglietto si apre sul posto: si srotola, se il browser lo sa fare e se il movimento va bene */
+@media (prefers-reduced-motion: no-preference) {
+  .biglietto__dettagli::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition: block-size .4s var(--uscita), content-visibility .4s allow-discrete;
+  }
+  .biglietto__dettagli[open]::details-content { block-size: auto; }
+}
+
+/* ---------- Riquadri ---------- */
+.riquadro {
+  display: grid;
+  gap: 14px;
+  padding: clamp(24px, 4vw, 40px);
+  border-radius: var(--raggio);
+}
+.riquadro__sotto { font-size: 1.125rem; max-width: 40ch; }
+.riquadro__piccolo { font-size: .875rem; }
+
+.riquadro--canale { background: var(--limone); }
+.riquadro--canale .riquadro__piccolo { color: var(--moro-medio); }
+.presto {
+  display: grid;
+  gap: 12px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 720px) { .presto { grid-template-columns: 1fr 1fr; } }
+.presto__voce {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 18px;
+  border: 2px dashed rgb(42 26 20 / .45);
+  border-radius: 12px;
+}
+.presto__voce strong { font-family: var(--font-titolo); font-weight: 700; font-size: 1.1875rem; line-height: 1.2; }
+.presto__dettaglio { font-size: .9375rem; color: var(--moro-medio); }
+.presto__stato {
+  align-self: flex-start;
+  margin-top: 8px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: var(--moro);
+  color: var(--limone);
+  font-family: var(--font-dati);
+  font-size: .75rem;
+  letter-spacing: .04em;
+}
+
+.riquadro--premium { background: var(--fondo-foglia); }
+.premium__lista {
+  display: grid;
+  gap: 8px;
+  max-width: 62ch;
+  margin: 0;
+  padding-left: 1.1em;
+}
+.premium__lista li::marker { color: var(--ruggine); }
+.premium__azione {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  margin-top: 6px;
+}
+
+/* ---------- Piede: la chiusura in testa di moro ---------- */
+.piede {
+  margin-top: clamp(56px, 8vw, 96px);
+  padding-block: 40px 48px;
+  background: var(--moro);
+  color: var(--carta);
+  font-size: .9375rem;
+}
+.piede .contenitore { display: grid; gap: 16px; }
+.piede p { max-width: 70ch; color: var(--carta-tenue); }
+.piede :focus-visible { outline-color: var(--limone); }
+.piede__marchio { display: flex; align-items: center; gap: 14px; }
+.piede p.piede__marchio { color: var(--carta); font-family: var(--font-titolo); font-weight: 700; font-size: 1.125rem; }
+.piede__marchio img { height: 34px; width: auto; }
+.piede__menu { display: flex; flex-wrap: wrap; gap: 4px 20px; margin-bottom: 8px; }
+.piede__menu a { color: var(--carta); font-weight: 500; padding-block: 6px; }
+.piede__fondo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--linea-scura);
+}
+.piede__fondo a { color: var(--carta); }
