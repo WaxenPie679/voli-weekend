@@ -20,6 +20,7 @@ ${grezzo(corpo)}
 </main>
 ${grezzo(piede({ affiliato }))}
 ${grezzo(extra)}
+${grezzo(SCRIPT_CONTA)}
 </body>
 </html>
 `;
@@ -49,6 +50,8 @@ export { riepilogo };
 
 // Lo script dell'esploratore: lo caricano solo le pagine con la lista dei voli.
 export const SCRIPT_ESPLORA = `<script type="module" src="/js/esplora.js?v=${versione('js/esplora.js')}" defer></script>`;
+// Il contatore senza cookie: lo caricano tutte le pagine (vedi js/conta.js e functions/api/conta.js).
+export const SCRIPT_CONTA = `<script type="module" src="/js/conta.js?v=${versione('js/conta.js')}" defer></script>`;
 // L'aereo che atterra nel logo all'apertura (solo dove c'è anche il volo del giorno).
 export const SCRIPT_AEREO = `<script type="module" src="/js/aereo.js?v=${versione('js/aereo.js')}"></script>`;
 

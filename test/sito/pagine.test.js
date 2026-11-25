@@ -557,7 +557,7 @@ test('volo del giorno: dati e bottoni del biglietto, nota affiliato solo col cod
 test('intestazione: il primo link salta al contenuto, la pagina in cui sei è segnata', () => {
   const html = intestazione({ percorso: '/premium/' });
   assert.ok(html.indexOf('href="#contenuto"') < html.indexOf('<header'));
-  assert.match(html, /<a href="\/premium\/" aria-current="page">Premium<\/a>/);
+  assert.match(html, /<a href="\/premium\/" data-conta="premium-menu" aria-current="page">Premium<\/a>/);
   assert.ok(!html.includes('href="/come-funziona/" aria-current'));
 });
 
@@ -568,4 +568,14 @@ test('piede: chiude col payoff', () => {
 test('testa: il foglio di stile porta la versione del suo contenuto, così la cache non serve quello vecchio', () => {
   const html = testa({ titolo: 'T', descrizione: 'D', percorso: '/', indicizza: true });
   assert.match(html, /<link rel="stylesheet" href="\/css\/sito\.css\?v=[0-9a-f]{10}">/);
+});
+
+test('ogni pagina carica conta.js con la versione', () => {
+  const tutte = [home(ctx), ...bacini(ctx), premium(ctx), ...servizio(ctx), errore(ctx)];
+  for (const p of tutte) assert.match(p.html, /<script type="module" src="\/js\/conta\.js\?v=[0-9a-f]+" defer><\/script>/, p.percorso);
+});
+
+test('la voce Premium di menù e piede ha data-conta="premium-menu"', () => {
+  assert.match(intestazione({ percorso: '/' }), /<a href="\/premium\/" data-conta="premium-menu">Premium<\/a>/);
+  assert.match(piede({}), /<a href="\/premium\/" data-conta="premium-menu">Premium<\/a>/);
 });

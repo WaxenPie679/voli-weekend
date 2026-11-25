@@ -14,7 +14,7 @@ export function piede({ affiliato = '' } = {}) {
     <nav class="piede__menu" aria-label="Pagine del sito">
       <a href="/come-funziona/">Come funziona</a>
       <a href="/domande/">Domande frequenti</a>
-      <a href="/premium/">Premium</a>
+      <a href="/premium/" data-conta="premium-menu">Premium</a>
     </nav>
     <p>${grezzo(affiliato ? KIWI_CON_COMMISSIONE : KIWI_SENZA_COMMISSIONE)}</p>
     <p>Prezzi andata e ritorno per una persona, controllati all'ora indicata: sul sito della compagnia possono cambiare.</p>
