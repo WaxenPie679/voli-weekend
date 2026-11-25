@@ -57,8 +57,8 @@ function domande({ affiliato }) {
       : 'Noi mostriamo il prezzo della compagnia. Su Kiwi il prezzo può essere diverso, di solito di pochi euro. Su Kiwi paghi il prezzo che vedi su Kiwi, sulla compagnia paghi il suo. Ti lasciamo i due bottoni apposta: scegli tu.'],
     ['Che differenza c\'è tra Weekend e Weekend lungo?', 'Weekend: parti venerdì dopo le 18:00 o sabato e torni domenica, senza ferie. Weekend lungo: parti da giovedì e torni entro lunedì; arriverà con Premium.'],
     ['Da quali aeroporti partite?', 'Bari, Brindisi, Milano Malpensa, Bergamo Orio al Serio, Roma Fiumicino e Roma Ciampino. Ne aggiungeremo altri.'],
-    ['Come funzionerà il canale WhatsApp?', 'Il canale sta per aprire. Sarà un canale: ricevi i messaggi, ma nessuno vede il tuo numero e nessuno ti scrive in privato. 3–5 messaggi a settimana, mai dopo le 22. Esci quando vuoi dal canale stesso.'],
-    ['Quando arriva il riassunto email?', 'Il riassunto arriverà il martedì, una volta a settimana, appena sarà pronto. Ti cancellerai con un clic in fondo a ogni email.'],
+    ['Come funzionerà il canale WhatsApp?', 'Il canale sta per aprire.'],
+    ['Quando arriva il riassunto email?', 'Non c\'è ancora: arriverà presto.'],
     ["Cos'è Premium?", "Ti dice quando comprare: compra o aspetta per ogni volo, il grafico dei prezzi prima della partenza, le tratte seguite e 12 mesi di weekend. Non è ancora attivo: se vuoi, ti avvisiamo quando parte."],
     ['Usate cookie?', 'Nessun cookie per seguirti o per la pubblicità. Contiamo le visite in modo anonimo, senza sapere chi sei.'],
     ['Ho trovato un errore', `Grazie: scrivici a ${EMAIL} e lo correggiamo.`],
@@ -92,7 +92,7 @@ function privacy({ affiliato, titolare }) {
     ['Quando', 'Quali dati', 'Perché', 'Base legale', 'Per quanto tempo'],
     [
       ['Visiti il sito', 'Indirizzo IP e dati tecnici del browser, letti da Cloudflare per far funzionare e proteggere il sito', 'Mostrarti le pagine, difendere il sito da attacchi', 'Interesse legittimo (art. 6.1.f GDPR)', 'Il tempo dei registri tecnici di Cloudflare'],
-      ['Visiti il sito', 'Conteggi anonimi: pagine viste, da dove arrivi, telefono o computer, clic sui bottoni', 'Capire cosa funziona sul sito', 'Interesse legittimo (art. 6.1.f GDPR)', 'I conteggi non ti riconoscono: restano come numeri totali'],
+      ['Visiti il sito', 'Conteggi anonimi: pagine viste, da dove arrivi, telefono o computer', 'Capire cosa funziona sul sito', 'Interesse legittimo (art. 6.1.f GDPR)', 'I conteggi non ti riconoscono: restano come numeri totali'],
       ['Ci scrivi', `Email e quello che ci scrivi (anche se ci chiedi di avvisarti quando parte Premium)`, 'Risponderti e, se lo chiedi, scriverti una volta quando Premium parte', 'Rispondere a una tua richiesta (art. 6.1.b GDPR); il tuo consenso (art. 6.1.a GDPR) per l\'avviso su Premium', 'Il tempo che serve, al massimo 12 mesi'],
     ],
   );
@@ -104,7 +104,7 @@ function privacy({ affiliato, titolare }) {
     ],
   );
   const corpo = [
-    h`<h2>In breve</h2><ul><li>Per guardare i voli non serve darci niente: niente account, niente cookie.</li><li>Se ci scrivi a ${grezzo(mail)}, usiamo la tua email solo per risponderti, e non la vendiamo a nessuno.</li><li>Se prenoti tramite Kiwi, da quel momento sei sul sito di Kiwi e valgono le sue regole.</li></ul>`,
+    h`<h2>In breve</h2><ul><li>Per guardare i voli non serve darci niente: niente account, niente cookie.</li><li>Se ci scrivi a ${mail}, usiamo la tua email solo per risponderti, e non la vendiamo a nessuno.</li><li>Se prenoti tramite Kiwi, da quel momento sei sul sito di Kiwi e valgono le sue regole.</li></ul>`,
     sezione('1. Chi tratta i tuoi dati', h`<p>${testoTitolare(titolare)}, che gestisce DoVai (dovaivoli.it) come persona fisica. Per qualsiasi domanda sui tuoi dati: <strong>${mail}</strong>.</p>`),
     sezione('2. Quali dati e perché', dati, h`<p>Non usiamo i tuoi dati per profilarti, non prendiamo decisioni automatiche su di te e <strong>non vendiamo né cediamo la tua email</strong> a nessuno, Kiwi compresa.</p>`),
     sezione('3. Cookie', h`<p>Il sito non usa cookie, né nostri né di altri, e non ti chiede di accettarne. Per questo non vedi il solito banner. Le statistiche che usiamo funzionano senza cookie e senza riconoscerti da una visita all'altra.</p>`),
