@@ -450,12 +450,12 @@ test('domande: dati strutturati FAQ validi', () => {
   assert.ok(dati.mainEntity.every(d => d.name && d.acceptedAnswer.text));
 });
 
-test('privacy con titolare vuoto: segnaposto; compilato: nome e città', () => {
+test('privacy con titolare vuoto: nessun nome; compilato: nome e città', () => {
   const vuota = servizio(ctx)[2].html;
-  assert.ok(vuota.includes('[Nome e cognome]'));
+  assert.ok(vuota.includes('è gestito da una persona fisica'));
   const piena = servizio({ ...ctx, titolare: { nome: 'Mario Rossi', citta: 'Bari' } })[2].html;
   assert.ok(piena.includes('Mario Rossi, Bari'));
-  assert.ok(!piena.includes('[Nome e cognome]'));
+  assert.ok(!piena.includes('una persona fisica'));
 });
 
 test('privacy: niente lista email né fornitori di newsletter', () => {
@@ -467,7 +467,7 @@ test('privacy: niente lista email né fornitori di newsletter', () => {
 
 test('note legali: titolare e contatto', () => {
   const html = servizio(ctx)[3].html;
-  assert.ok(html.includes('[Nome e cognome], [città]'));
+  assert.ok(html.includes('è gestito da una persona fisica'));
   assert.ok(html.includes('Prezzi indicativi'));
 });
 
