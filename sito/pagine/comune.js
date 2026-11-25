@@ -72,7 +72,14 @@ ${grezzo(altri)}
 </div>`;
 }
 
+// L'indirizzo di una meta: la lista cercata su quella città. Se la meta costa più del prezzo
+// iniziale, anche il prezzo massimo sale fino al suo, altrimenti la lista si aprirebbe vuota.
+function indirizzoMeta(m, base) {
+  const max = m.p > PREZZO_INIZIALE ? `&max=${Math.ceil(m.p)}` : '';
+  return `${base}?a=${encodeURIComponent(normalizza(m.citta))}${max}`;
+}
+
 // Elenco di mete: ognuna porta alla lista già cercata su quella città.
 export function elencoMete(mete, base = '/') {
-  return h`<ul class="mete">${mete.map(m => grezzo(h`<li><a href="${base}?a=${encodeURIComponent(normalizza(m.citta))}"><span class="mete__nome">${m.citta}</span> <span class="dato">${m.p} € a/r</span></a></li>`))}</ul>`;
+  return h`<ul class="mete">${mete.map(m => grezzo(h`<li><a href="${indirizzoMeta(m, base)}"><span class="mete__nome">${m.citta}</span> <span class="dato">${m.p} € a/r</span></a></li>`))}</ul>`;
 }
