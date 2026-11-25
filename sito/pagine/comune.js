@@ -9,11 +9,12 @@ import { PREZZO_INIZIALE, BLOCCO } from '../config.js';
 import { versione } from '../parti/versione.js';
 
 // Il documento HTML intero: testa, intestazione, corpo, piede.
-export function documento({ titolo, descrizione, percorso, indicizza, corpo, affiliato = '', extra = '' }) {
+// Con `aereo` (home e bacini) l'aereo dell'apertura atterra nel logo: vedi intestazione.js e aereo.js.
+export function documento({ titolo, descrizione, percorso, indicizza, corpo, affiliato = '', extra = '', aereo = false }) {
   return '<!doctype html>\n' + h`<html lang="it">
 ${grezzo(testa({ titolo, descrizione, percorso, indicizza }))}
 <body>
-${grezzo(intestazione({ percorso }))}
+${grezzo(intestazione({ percorso, aereo }))}
 <main id="contenuto">
 ${grezzo(corpo)}
 </main>
@@ -48,6 +49,8 @@ export { riepilogo };
 
 // Lo script dell'esploratore: lo caricano solo le pagine con la lista dei voli.
 export const SCRIPT_ESPLORA = `<script type="module" src="/js/esplora.js?v=${versione('js/esplora.js')}" defer></script>`;
+// L'aereo che atterra nel logo all'apertura (solo dove c'è anche il volo del giorno).
+export const SCRIPT_AEREO = `<script type="module" src="/js/aereo.js?v=${versione('js/aereo.js')}"></script>`;
 
 function biglietti({ voli, tutti, adesso, affiliato, riquadro, dopo }) {
   const primi = voli.slice(0, BLOCCO);

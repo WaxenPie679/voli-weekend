@@ -134,7 +134,16 @@ test('piede: la commissione Kiwi si nomina solo col codice affiliato', () => {
 test('intestazione: logo che porta alla home', () => {
   const html = intestazione();
   assert.match(html, /<a [^>]*href="\/"/);
-  assert.ok(html.includes('/img/dovai-moro.svg'));
+  assert.match(html, /aria-label="DoVai, alla pagina iniziale"/);
+  assert.match(html, /<g class="logo__d">(<path d="[^"]+"\/>){3}<\/g>/);
+  assert.ok(!html.includes('aereo'), "senza aereo niente pezzo d'avvio");
+});
+
+test("intestazione: con l'aereo, il pezzo d'avvio controlla movimento, visita e posizione", () => {
+  const html = intestazione({ aereo: true });
+  for (const atteso of ["sessionStorage.getItem('dovai-aereo')", 'prefers-reduced-motion: reduce', 'scrollY<10', 'aereo-in-volo']) {
+    assert.ok(html.includes(atteso), atteso);
+  }
 });
 
 test('filtri: cursore 30–400 su 100 € a/r, lucchetti e tutti i controlli', () => {
@@ -497,7 +506,8 @@ test('domande: canale e riassunto email dicono solo che non ci sono ancora', () 
   const html = leggibile(servizio(ctx)[1].html);
   assert.ok(html.includes('Il canale sta per aprire.'));
   assert.ok(html.includes('Non c\'è ancora: arriverà presto.'));
-  assert.ok(!/martedì|22|clic in fondo|cancell/.test(html));
+  // Senza i disegni (il logo è in SVG dentro la pagina e i suoi tracciati hanno cifre qualsiasi).
+  assert.ok(!/martedì|22|clic in fondo|cancell/.test(html.replace(/<svg[\s\S]*?<\/svg>/g, '')));
 });
 
 test('privacy: i conteggi non nominano i clic sui bottoni', () => {

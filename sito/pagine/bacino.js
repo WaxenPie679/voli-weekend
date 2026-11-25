@@ -7,7 +7,7 @@ import { riquadroCanale } from '../parti/riquadri.js';
 import { striscia } from '../parti/striscia.js';
 import { delGiorno } from '../parti/del-giorno.js';
 import { BACINI, KIWI_AFFILIATO, PREZZO_INIZIALE } from '../config.js';
-import { documento, apertura, voliIniziali, riepilogo, elencoBiglietti, elencoMete, SCRIPT_ESPLORA } from './comune.js';
+import { documento, apertura, voliIniziali, riepilogo, elencoBiglietti, elencoMete, SCRIPT_ESPLORA, SCRIPT_AEREO } from './comune.js';
 
 const CANALE_DOPO = 3;
 const NON_PRONTO = 'Stiamo iniziando a seguire i voli da qui. I primi prezzi arrivano a giorni.';
@@ -134,7 +134,8 @@ ${grezzo(stato.mete.length ? inFondo(t, stato, slug) : '')}`;
       indicizza: true,
       corpo,
       affiliato,
-      extra: SCRIPT_ESPLORA,
+      extra: SCRIPT_AEREO + SCRIPT_ESPLORA,
+      aereo: true,
     }),
   };
 }
