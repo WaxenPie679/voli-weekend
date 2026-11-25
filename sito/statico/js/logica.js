@@ -79,3 +79,20 @@ export function riepilogo(n, filtri, nomi = {}) {
   const da = filtri.da === 'tutti' ? 'tutti gli aeroporti' : (nomi[filtri.da] ?? filtri.da);
   return `${n} ${n === 1 ? 'volo' : 'voli'} da ${da}, Weekend, fino a ${filtri.max} € a/r`;
 }
+
+// ?volo= deve aprire sempre il suo biglietto: se i filtri lo escludono, si allarga solo quello che lo esclude.
+// Prezzo fino al suo (tra 30 e 400), resta e destinazione azzerati, mese ai prossimi 3 mesi,
+// partenza al bacino della pagina se lo contiene, altrimenti 'tutti'.
+export function filtriPerVolo(filtri, volo, { bacino, bacini = [] } = {}) {
+  const nuovi = { ...filtri };
+  const aeroporti = partenze(filtri.da, bacini);
+  if (aeroporti && !aeroporti.includes(volo.o)) {
+    const suo = bacini.find(b => b.slug === bacino)?.aeroporti.includes(volo.o);
+    nuovi.da = suo ? bacino : 'tutti';
+  }
+  if (filtri.mese !== 'tre' && !String(volo.w ?? '').startsWith(filtri.mese)) nuovi.mese = 'tre';
+  if (volo.p > filtri.max) nuovi.max = Math.min(PREZZO_MAX, Math.max(PREZZO_MIN, Math.ceil(volo.p)));
+  if (volo.resta < filtri.resta * GIORNO_MIN) nuovi.resta = 0;
+  if (filtri.a && !normalizza(volo.citta ?? '').includes(filtri.a)) nuovi.a = '';
+  return nuovi;
+}
