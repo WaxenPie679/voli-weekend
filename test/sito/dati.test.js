@@ -78,7 +78,15 @@ test('bacino con generatedAt di 25 ore prima di adesso → pronto false', () => 
   const vecchio = file([itinerario('FCO', 'Parigi', 50)], new Date(ADESSO.getTime() - 25 * 3600e3).toISOString());
   const { bacini } = riduci({ 'direct-roma.json': vecchio }, { adesso: ADESSO });
   assert.equal(bacini.roma.pronto, false);
-  assert.equal(bacini.roma.aggiornato, vecchio.generatedAt);
+  assert.equal(bacini.roma.aggiornato, null);
+  assert.equal(bacini.roma.numero, 0);
+});
+
+test('un file vecchio non contribuisce ai voli', () => {
+  const vecchio = file([itinerario('FCO', 'Parigi', 50)], new Date(ADESSO.getTime() - 25 * 3600e3).toISOString());
+  const { voli } = riduci({ 'direct.json': mini, 'direct-roma.json': vecchio }, { adesso: ADESSO });
+  assert.ok(!voli.some(v => v.o === 'FCO'));
+  assert.ok(voli.some(v => v.o === 'BDS'), 'i file freschi restano');
 });
 
 test('bacino aggiornato → numero e piuBasso corretti', () => {
@@ -97,17 +105,29 @@ test('bacino aggiornato → numero e piuBasso corretti', () => {
   assert.equal(roma.piuBasso.p, 63);
 });
 
-test('bacino con due file: pronto solo se ci sono entrambi, aggiornato è il più vecchio', () => {
-  const a = file([itinerario('MXP', 'Parigi', 80)], new Date(ADESSO.getTime() - OTTO_ORE).toISOString());
-  const b = file([itinerario('BGY', 'Londra', 40)], new Date(ADESSO.getTime() - 2 * OTTO_ORE).toISOString());
-  const solo = riduci({ 'direct-milano.json': a }, { adesso: ADESSO }).bacini['milano-bergamo'];
-  assert.equal(solo.pronto, false);
-  const { bacini } = riduci({ 'direct-milano.json': a, 'direct-bergamo.json': b }, { adesso: ADESSO });
+test('bacino con due file: basta un file valido, voli solo da quello presente', () => {
+  const a = file([itinerario('MXP', 'Parigi', 80), itinerario('BGY', 'Fantasma', 10)], new Date(ADESSO.getTime() - OTTO_ORE).toISOString());
+  const { voli, bacini } = riduci({ 'direct-milano.json': a }, { adesso: ADESSO });
   const mb = bacini['milano-bergamo'];
   assert.equal(mb.pronto, true);
-  assert.equal(mb.aggiornato, b.generatedAt);
-  assert.equal(mb.numero, 2);
-  assert.equal(mb.piuBasso.citta, 'Londra');
+  assert.equal(mb.aggiornato, a.generatedAt);
+  assert.ok(voli.some(v => v.o === 'MXP'));
+  // il file mancante non inventa nulla: qui BGY compare solo perché è dentro il file presente
+  const b = file([itinerario('BGY', 'Londra', 40)], new Date(ADESSO.getTime() - 2 * OTTO_ORE).toISOString());
+  const due = riduci({ 'direct-milano.json': a, 'direct-bergamo.json': b }, { adesso: ADESSO }).bacini['milano-bergamo'];
+  assert.equal(due.aggiornato, a.generatedAt, 'aggiornato è il più recente tra i file validi');
+  assert.equal(due.piuBasso.citta, 'Fantasma');
+});
+
+test('bacino con un file valido e uno vecchio: i voli del vecchio non compaiono', () => {
+  const fresco = file([itinerario('MXP', 'Parigi', 80)], new Date(ADESSO.getTime() - OTTO_ORE).toISOString());
+  const vecchio = file([itinerario('BGY', 'Londra', 40)], new Date(ADESSO.getTime() - 30 * 3600e3).toISOString());
+  const { voli, bacini } = riduci({ 'direct-milano.json': fresco, 'direct-bergamo.json': vecchio }, { adesso: ADESSO });
+  const mb = bacini['milano-bergamo'];
+  assert.equal(mb.pronto, true);
+  assert.equal(mb.aggiornato, fresco.generatedAt);
+  assert.ok(!voli.some(v => v.citta === 'Londra'));
+  assert.equal(mb.piuBasso.citta, 'Parigi');
 });
 
 test('mete: una sola volta per città, max 8, dalla più economica', () => {
