@@ -5,7 +5,7 @@ import { riquadroCanale, riquadroPremium } from '../parti/riquadri.js';
 import { striscia } from '../parti/striscia.js';
 import { delGiorno } from '../parti/del-giorno.js';
 import { KIWI_AFFILIATO } from '../config.js';
-import { documento, apertura, voliIniziali, riepilogo, elencoBiglietti, elencoMete, SCRIPT_ESPLORA } from './comune.js';
+import { documento, apertura, voliIniziali, riepilogo, elencoBiglietti, elencoMete, SCRIPT_ESPLORA, SCRIPT_AEREO } from './comune.js';
 
 const METE_IN_HOME = 12;
 const CANALE_DOPO = 6;
@@ -60,7 +60,8 @@ ${grezzo(mete.length ? h`<section class="sezione" aria-labelledby="titolo-mete">
       indicizza: true,
       corpo,
       affiliato,
-      extra: SCRIPT_ESPLORA,
+      extra: SCRIPT_AEREO + SCRIPT_ESPLORA,
+      aereo: true,
     }),
   };
 }
