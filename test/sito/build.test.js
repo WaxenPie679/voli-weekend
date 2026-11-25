@@ -46,7 +46,7 @@ test('la sitemap ha solo pagine indicizzate, non i bacini senza dati', async () 
 
 test('con titolare vuoto, --pubblica rigetta', async () => {
   const { dati, out } = cartelle();
-  await assert.rejects(prepara({ cartella: dati, out, adesso: ADESSO, pubblica: true }), { message: MSG_TITOLARE });
+  await assert.rejects(prepara({ cartella: dati, out, adesso: ADESSO, pubblica: true, titolare: { nome: '', citta: '' } }), { message: MSG_TITOLARE });
   assert.equal(MSG_TITOLARE, 'Mancano nome e città del titolare in sito/titolare.js: il sito non si pubblica.');
 });
 
