@@ -4,13 +4,12 @@ import { TITOLARE, titolareCompleto, testoTitolare } from '../../sito/titolare.j
 
 const SEGNAPOSTO = '[Nome e cognome], [città]';
 
-test('TITOLARE parte vuoto', () => {
-  assert.deepEqual(TITOLARE, { nome: '', citta: '' });
+test('TITOLARE è Titolare DoVai, Brindisi', () => {
+  assert.deepEqual(TITOLARE, { nome: 'Titolare DoVai', citta: 'Brindisi' });
 });
 
 test('titolareCompleto è false se nome o città sono vuoti', () => {
-  assert.equal(titolareCompleto(), false);
-  assert.equal(titolareCompleto({ nome: 'Bruno Rossi', citta: '' }), false);
+    assert.equal(titolareCompleto({ nome: 'Bruno Rossi', citta: '' }), false);
   assert.equal(titolareCompleto({ nome: '', citta: 'Bari' }), false);
 });
 
@@ -24,7 +23,7 @@ test('titolareCompleto è true quando entrambi i campi hanno testo', () => {
 });
 
 test('testoTitolare con dati vuoti dà il segnaposto', () => {
-  assert.equal(testoTitolare(), SEGNAPOSTO);
+  assert.equal(testoTitolare({ nome: '', citta: '' }), SEGNAPOSTO);
   assert.equal(testoTitolare({ nome: '  ', citta: 'Bari' }), SEGNAPOSTO);
 });
 

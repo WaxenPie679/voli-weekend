@@ -5,7 +5,7 @@ import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BACINI, SITO } from './config.js';
 import { scaricaDati, riduci } from './dati.js';
-import { titolareCompleto } from './titolare.js';
+import { TITOLARE, titolareCompleto } from './titolare.js';
 import { pagina as home } from './pagine/home.js';
 import { pagine as bacini } from './pagine/bacino.js';
 import { pagina as premium } from './pagine/premium.js';
@@ -68,8 +68,8 @@ function intestazioni(pagine) {
   return blocchi.join('\n\n') + '\n';
 }
 
-export async function prepara({ cartella, out = join(QUI, 'dist'), adesso = new Date(), pubblica = false } = {}) {
-  if (pubblica && !titolareCompleto()) throw new Error(MSG_TITOLARE);
+export async function prepara({ cartella, out = join(QUI, 'dist'), adesso = new Date(), pubblica = false, titolare = TITOLARE } = {}) {
+  if (pubblica && !titolareCompleto(titolare)) throw new Error(MSG_TITOLARE);
   const grezzi = await scaricaDati({ cartella });
   const { voli, bacini: stati, scartati } = riduci(grezzi, { adesso });
   const avvisi = [];

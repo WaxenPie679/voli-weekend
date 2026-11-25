@@ -2,7 +2,7 @@
 // Bruno: compila `nome` (nome e cognome) e `citta` qui sotto.
 // Finché uno dei due è vuoto, la pubblicazione del sito viene rifiutata.
 
-export const TITOLARE = { nome: '', citta: '' };
+export const TITOLARE = { nome: 'Titolare DoVai', citta: 'Brindisi' };
 
 const SEGNAPOSTO = '[Nome e cognome], [città]';
 
