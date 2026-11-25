@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, copyFileSync, readFileSync, existsSync, writeFileSync, symlinkSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { tmpdir, homedir } from 'node:os';
-import { prepara, MSG_TITOLARE } from '../../sito/build.js';
+import { prepara, MSG_TITOLARE, workerPrivato } from '../../sito/build.js';
+import { createHash } from 'node:crypto';
 import { riduci } from '../../sito/dati.js';
 
 const mini = JSON.parse(readFileSync(new URL('./fixtures/direct-mini.json', import.meta.url), 'utf8'));
@@ -19,8 +20,9 @@ function cartelle() {
 
 test('prepara scrive pagine, voli.json, sitemap, robots e _headers', async () => {
   const { dati, out } = cartelle();
-  const r = await prepara({ cartella: dati, out, adesso: ADESSO });
+  const r = await prepara({ cartella: dati, out, adesso: ADESSO, privato: false });
   assert.equal(r.pagine, 10);
+  assert.ok(!existsSync(join(out, '_worker.js')));
   for (const f of ['index.html', 'puglia/index.html', 'premium/index.html', 'privacy/index.html', '404.html', 'css/sito.css', 'js/formati.js', 'caratteri/gabarito.woff2', 'img/favicon.svg'])
     assert.ok(existsSync(join(out, f)), f);
   const dati2 = JSON.parse(readFileSync(join(out, 'voli.json'), 'utf8'));
@@ -46,7 +48,7 @@ test('la sitemap ha solo pagine indicizzate, non i bacini senza dati', async () 
 
 test('con titolare vuoto, --pubblica rigetta', async () => {
   const { dati, out } = cartelle();
-  await assert.rejects(prepara({ cartella: dati, out, adesso: ADESSO, pubblica: true, titolare: { nome: '', citta: '' } }), { message: MSG_TITOLARE });
+  await assert.rejects(prepara({ cartella: dati, out, adesso: ADESSO, pubblica: true, privato: false, titolare: { nome: '', citta: '' } }), { message: MSG_TITOLARE });
   assert.equal(MSG_TITOLARE, 'Mancano nome e città del titolare in sito/titolare.js: il sito non si pubblica.');
 });
 
@@ -107,4 +109,33 @@ test('prepara rifiuta radice, home, repo, cwd, antenati, maiuscole diverse e lin
   if (existsSync('/users')) scelte.push('/users');
   for (const o of scelte) await assert.rejects(prepara({ cartella: dati, out: o, adesso: ADESSO }), RIFIUTO, o);
   assert.ok(existsSync(join(piena, 'a.txt')));
+});
+
+test('sito privato: si pubblica senza titolare, robots chiude tutto, _worker.js chiede la password', async () => {
+  const { dati, out } = cartelle();
+  await prepara({ cartella: dati, out, adesso: ADESSO, pubblica: true, privato: true, titolare: { nome: '', citta: '' }, password: 'prova-segreta' });
+  assert.equal(readFileSync(join(out, 'robots.txt'), 'utf8'), 'User-agent: *\nDisallow: /\n');
+  const w = readFileSync(join(out, '_worker.js'), 'utf8');
+  assert.ok(!w.includes('prova-segreta'));
+  assert.ok(w.includes(createHash('sha256').update('prova-segreta').digest('hex')));
+  for (const f of ['privacy/index.html', 'note-legali/index.html'].filter(f => existsSync(join(out, f))))
+    assert.doesNotMatch(readFileSync(join(out, f), 'utf8'), /titolare|\[Nome e cognome\]/);
+});
+
+test('worker privato: senza password giusta 401, con password giusta passa', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'worker-'));
+  const file = join(dir, 'w.mjs');
+  writeFileSync(file, workerPrivato('segreto'));
+  const w = (await import(file)).default;
+  const env = { ASSETS: { fetch: async () => new Response('ok', { headers: { 'Content-Type': 'text/plain' } }) } };
+  const chiedi = (auth) => w.fetch(new Request('https://dovaivoli.it/', auth ? { headers: { Authorization: 'Basic ' + btoa(auth) } } : {}), env);
+  assert.equal((await chiedi()).status, 401);
+  assert.equal((await chiedi('x:sbagliata')).status, 401);
+  const ok = await chiedi('bruno:segreto');
+  assert.equal(ok.status, 200);
+  assert.equal(await ok.text(), 'ok');
+  assert.match(ok.headers.get('X-Robots-Tag'), /noindex/);
+  writeFileSync(join(dir, 'v.mjs'), workerPrivato(''));
+  const v = (await import(join(dir, 'v.mjs'))).default;
+  assert.equal((await v.fetch(new Request('https://dovaivoli.it/', { headers: { Authorization: 'Basic ' + btoa('a:') } }), env)).status, 401);
 });
