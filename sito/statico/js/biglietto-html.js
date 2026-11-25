@@ -35,8 +35,10 @@ function bottoneKiwi(v, affiliato, classe = '') {
   return h`<a class="bottone bottone--kiwi ${classe}" href="${linkKiwi(v, affiliato)}" target="${ESTERNO.target}" rel="${ESTERNO.rel}" data-conta="kiwi">Vedi su Kiwi</a>`;
 }
 
+// Finché non c'è il codice affiliato, DoVai non guadagna da Kiwi: niente nota.
 function notaKiwi(affiliato) {
-  return h`<p class="nota-kiwi">Con Kiwi sostieni DoVai${affiliato ? ' · link affiliato' : ''}</p>`;
+  if (!affiliato) return '';
+  return h`<p class="nota-kiwi">Con Kiwi sostieni DoVai · link affiliato</p>`;
 }
 
 function compraOAspetta() {
@@ -59,11 +61,15 @@ function daSapere(v) {
   </div>`;
 }
 
-function perche(v, vistoTesto) {
+// Senza codice affiliato si tolgono le parti sulla commissione: oggi non sarebbero vere.
+function perche(v, vistoTesto, affiliato) {
   const quale = vistoTesto ? `quello della compagnia, ${vistoTesto}` : 'quello della compagnia';
+  const testo = affiliato
+    ? `Il prezzo che vedi qui è ${quale}. Su Kiwi può essere di qualche euro diverso: lì paghi il prezzo che vedi su Kiwi, e DoVai riceve una piccola commissione che lo tiene gratis. Su ${v.cia} prenoti direttamente, e a noi va bene lo stesso. Scegli tu.`
+    : `Il prezzo che vedi qui è ${quale}. Su Kiwi può essere di qualche euro diverso: lì paghi il prezzo che vedi su Kiwi. Su ${v.cia} prenoti direttamente. Scegli tu.`;
   return h`<details class="perche">
     <summary>Perché due bottoni?</summary>
-    <p>Il prezzo che vedi qui è ${quale}. Su Kiwi può essere di qualche euro diverso: lì paghi il prezzo che vedi su Kiwi, e DoVai riceve una piccola commissione che lo tiene gratis. Su ${v.cia} prenoti direttamente, e a noi va bene lo stesso. Scegli tu.</p>
+    <p>${testo}</p>
   </details>`;
 }
 
@@ -110,7 +116,7 @@ export function biglietto(volo, { adesso, aperto = false, affiliato = '', altre 
           ${grezzo(compagnia(v, 'bottone bottone--contorno', `Vedi su ${v.cia}`))}
         </div>
         ${grezzo(notaKiwi(affiliato))}
-        ${grezzo(perche(v, vistoTesto))}
+        ${grezzo(perche(v, vistoTesto, affiliato))}
         ${grezzo(compraOAspetta())}
         <div class="matrice__altro">
           ${grezzo(altreDate(v, altre))}
