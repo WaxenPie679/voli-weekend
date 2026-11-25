@@ -453,3 +453,20 @@ test('tutte le pagine: solo collegamenti interni a pagine che esistono', () => {
     }
   }
 });
+
+test('nessuna pagina mostra [object Object]', () => {
+  for (const p of [home(ctx), ...bacini(ctx), premium(ctx), ...servizio(ctx), errore(ctx)]) {
+    assert.ok(!p.html.includes('[object'), p.percorso);
+  }
+});
+
+test('domande: canale e riassunto email dicono solo che non ci sono ancora', () => {
+  const html = leggibile(servizio(ctx)[1].html);
+  assert.ok(html.includes('Il canale sta per aprire.'));
+  assert.ok(html.includes('Non c\'è ancora: arriverà presto.'));
+  assert.ok(!/martedì|22|clic in fondo|cancell/.test(html));
+});
+
+test('privacy: i conteggi non nominano i clic sui bottoni', () => {
+  assert.ok(!servizio(ctx)[2].html.includes('clic sui bottoni'));
+});
