@@ -1,7 +1,7 @@
 // L'esploratore nel browser: legge i filtri dall'indirizzo e dal modulo, ridisegna la lista da /voli.json.
 // Senza JavaScript (o se voli.json non arriva) la pagina resta quella preparata e il modulo va col GET.
 import { biglietto, nessunVolo } from './biglietto-html.js';
-import { leggiFiltri, scriviFiltri, filtra, riepilogo, filtriPerVolo, altriFiltriAttivi, BLOCCO, PREZZO_MAX } from './logica.js';
+import { leggiFiltri, scriviFiltri, filtra, daPartire, riepilogo, filtriPerVolo, altriFiltriAttivi, BLOCCO, PREZZO_MAX } from './logica.js';
 
 const modulo = document.querySelector('form.filtri');
 const esploratore = document.querySelector('.esploratore');
@@ -77,6 +77,8 @@ async function avvia() {
   const riga = modulo.querySelector('.filtri__riepilogo');
   const valoreMax = modulo.querySelector('#f-max-valore');
   const adesso = new Date();
+  // voli.json può avere qualche ora: i voli partiti nel frattempo non si mostrano, nemmeno tra le altre date.
+  const futuri = daPartire(dati.voli, adesso);
   let filtri;
   let voli = [];
   let mostrati = 0;
@@ -84,7 +86,7 @@ async function avvia() {
   const scheda = v => biglietto(v, {
     adesso,
     affiliato: p.affiliato,
-    altre: dati.voli.filter(a => a.k !== v.k && a.o === v.o && a.citta === v.citta),
+    altre: futuri.filter(a => a.k !== v.k && a.o === v.o && a.citta === v.citta),
   });
 
   // Il riquadro canale sta dopo il biglietto `dopo`; se i biglietti sono meno, chiude la lista.
@@ -102,7 +104,7 @@ async function avvia() {
 
   function applica(nuovi) {
     filtri = nuovi;
-    voli = filtra(dati.voli, filtri, dati.bacini);
+    voli = filtra(dati.voli, filtri, dati.bacini, adesso);
     mostrati = BLOCCO;
     disegna();
   }
@@ -113,7 +115,7 @@ async function avvia() {
   applica(leggiFiltri(params, opzioni));
   let testoMeta = (params.get('a') ?? '').trim();
   const chiave = params.get('volo');
-  const cercato = dati.voli.find(v => v.k === chiave);
+  const cercato = futuri.find(v => v.k === chiave);
   if (cercato && !voli.includes(cercato)) {
     applica(filtriPerVolo(filtri, cercato, opzioni));
     if (!filtri.a) testoMeta = '';
@@ -133,7 +135,7 @@ async function avvia() {
   // Le mete suggerite nel campo «Dove vuoi andare».
   const mete = modulo.querySelector('#f-a-mete');
   if (mete) {
-    const tutte = filtra(dati.voli, { da: p.bacino ?? 'tutti', mese: 'tre', max: PREZZO_MAX, resta: 0, a: '' }, dati.bacini);
+    const tutte = filtra(dati.voli, { da: p.bacino ?? 'tutti', mese: 'tre', max: PREZZO_MAX, resta: 0, a: '' }, dati.bacini, adesso);
     mete.replaceChildren(...[...new Set(tutte.map(v => v.citta))].sort((x, y) => x.localeCompare(y, 'it')).map(c => new Option(c)));
   }
 

@@ -1,6 +1,6 @@
 // I filtri dell'esploratore: leggere e scrivere l'indirizzo, scegliere i voli, dire quanti sono.
 // Funzioni pure: lo stesso file gira in Node (test e preparazione) e nel browser.
-import { normalizza } from './formati.js';
+import { normalizza, oraDiRoma } from './formati.js';
 
 // Stessi valori di config.js (che il browser non può importare): un test controlla che coincidano.
 export const PREZZO_MIN = 30;
@@ -65,10 +65,18 @@ function partenze(da, bacini) {
   return bacini.find(b => b.slug === da)?.aeroporti ?? [da];
 }
 
+// I voli con l'andata non ancora partita. Gli orari sono locali dell'aeroporto di partenza:
+// si confrontano con l'ora di Roma, che per i nostri aeroporti (tutti italiani) è quella giusta.
+export function daPartire(voli, adesso) {
+  const ora = oraDiRoma(adesso);
+  return voli.filter(v => String(v.va?.[0] ?? '') > ora);
+}
+
 // I voli che passano i filtri, dal più economico (a parità di prezzo, dal primo che parte).
-export function filtra(voli, filtri, bacini = []) {
+// Con `adesso` (Date) restano fuori anche i voli già partiti: voli.json può avere qualche ora.
+export function filtra(voli, filtri, bacini = [], adesso) {
   const aeroporti = partenze(filtri.da, bacini);
-  return voli
+  return (adesso ? daPartire(voli, adesso) : voli)
     .filter(v => !aeroporti || aeroporti.includes(v.o))
     .filter(v => filtri.mese === 'tre' || String(v.w ?? '').startsWith(filtri.mese))
     .filter(v => v.p <= filtri.max)
